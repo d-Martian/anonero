@@ -1,17 +1,20 @@
-import 'package:anon_wallet/screens/onboard/polyseed_widget.dart';
-import 'package:anon_wallet/screens/onboard/remote_node_setup.dart';
+
+import 'package:anon_wallet/screens/onboard/restore/poly_seed_entry.dart';
 import 'package:anon_wallet/screens/onboard/wallet_passphrase.dart';
-import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:flutter/material.dart';
 
-class OnboardScreen extends StatefulWidget {
-  const OnboardScreen({Key? key}) : super(key: key);
+import '../../set_pin_screen.dart';
+import '../polyseed_widget.dart';
+import '../remote_node_setup.dart';
+
+class RestoreScreen extends StatefulWidget {
+  const RestoreScreen({Key? key}) : super(key: key);
 
   @override
-  State<OnboardScreen> createState() => _OnboardScreenState();
+  State<RestoreScreen> createState() => _RestoreScreenState();
 }
 
-class _OnboardScreenState extends State<OnboardScreen> {
+class _RestoreScreenState extends State<RestoreScreen> {
   PageController pageController = PageController();
   int currentPage = 0;
   String page = "NODE CONNECTION";
@@ -38,7 +41,7 @@ class _OnboardScreenState extends State<OnboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double topSegment = MediaQuery.of(context).size.height / 2.8;
+    double topSegment = 280;
     double mainPager = MediaQuery.of(context).size.height - (topSegment) - 60;
 
     return Scaffold(
@@ -46,25 +49,25 @@ class _OnboardScreenState extends State<OnboardScreen> {
         slivers: [
           SliverToBoxAdapter(
               child: SizedBox(
-            height: topSegment,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Padding(padding: EdgeInsets.all(34)),
-                Hero(
-                  tag: "anon_logo",
-                  child: SizedBox(
-                      width: MediaQuery.of(context).size.width / 1.7, child: Image.asset("assets/anon_logo.png")),
+                height: topSegment,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Padding(padding: EdgeInsets.all(34)),
+                    Hero(
+                      tag: "anon_logo",
+                      child: SizedBox(
+                          width: 180, child: Image.asset("assets/anon_logo.png")),
+                    ),
+                    Text(
+                      page,
+                      style: Theme.of(context).textTheme.headline5,
+                    )
+                  ],
                 ),
-                Text(
-                  page,
-                  style: Theme.of(context).textTheme.headline5,
-                )
-              ],
-            ),
-          )),
+              )),
           SliverToBoxAdapter(
             child: SizedBox(
               height: mainPager,
@@ -76,9 +79,9 @@ class _OnboardScreenState extends State<OnboardScreen> {
                   Container(
                       alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 26),
-                      child: const PolySeedWidget(
+                      child: const PolySeedEntry(
                         seedWords:
-                            "tortoise science attend hero device normal wheel dry slender tooth cup dash certain estate rice morning",
+                        "tortoise science attend hero device normal wheel dry slender tooth cup dash certain estate rice morning",
                       )),
                   WalletPassphraseWidget(),
                 ],

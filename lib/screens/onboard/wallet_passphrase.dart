@@ -1,3 +1,4 @@
+import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 class WalletPassphraseWidget extends StatelessWidget {
@@ -11,12 +12,12 @@ class WalletPassphraseWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: [
-          const ListTile(
+          ListTile(
             title: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text("Enter passphrase"),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text("Enter passphrase", style: TextStyle(color: colorScheme.primary)),
             ),
-            subtitle: TextField(
+            subtitle: const TextField(
               enableIMEPersonalizedLearning: false,
               obscureText: true,
               textInputAction: TextInputAction.next,
@@ -26,12 +27,12 @@ class WalletPassphraseWidget extends StatelessWidget {
               ),
             ),
           ),
-          const ListTile(
+          ListTile(
             title: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text("Confirm passphrase"),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text("Confirm passphrase", style: TextStyle(color: colorScheme.primary)),
             ),
-            subtitle: TextField(
+            subtitle: const TextField(
               enableIMEPersonalizedLearning: false,
               enableSuggestions: false,
               autocorrect: false,
@@ -56,8 +57,7 @@ class WalletPassphraseWidget extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 Text("NOTE: Passphrase is required\nto restore from\nseed or backup file",
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall)
+                    textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall)
               ],
             ),
           )

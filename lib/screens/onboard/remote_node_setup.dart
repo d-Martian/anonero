@@ -1,3 +1,4 @@
+import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 class RemoteNodeWidget extends StatelessWidget {
@@ -11,10 +12,12 @@ class RemoteNodeWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: [
-          const ListTile(
-            title: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text("Node"),
+          ListTile(
+            title:   Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text("Node",style: TextStyle(
+                color: colorScheme.primary
+              )),
             ),
             subtitle: TextField(
               textInputAction: TextInputAction.next,
@@ -24,10 +27,12 @@ class RemoteNodeWidget extends StatelessWidget {
               ),
             ),
           ),
-          const ListTile(
+            ListTile(
             title: Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text("Username"),
+              child: Text("Username",style: TextStyle(
+                  color: colorScheme.primary
+              )),
             ),
             subtitle: TextField(
               textInputAction: TextInputAction.next,
@@ -37,10 +42,12 @@ class RemoteNodeWidget extends StatelessWidget {
               ),
             ),
           ),
-          const ListTile(
+            ListTile(
             title: Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text("Password"),
+              child: Text("Password",style: TextStyle(
+                  color: colorScheme.primary
+              )),
             ),
             subtitle: TextField(
               textInputAction: TextInputAction.done,
