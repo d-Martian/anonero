@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 const ColorScheme colorScheme = ColorScheme(
   brightness: Brightness.dark,
-  primary: Color(0xffffffff),
+  primary: Color(0xffFF6600),
   onPrimary: Color(0xff000000),
   primaryContainer: Color(0xff297ea0),
   onPrimaryContainer: Color(0xffd9edf5),
@@ -35,6 +35,7 @@ class ThemeProvider extends ChangeNotifier {
   ThemeData getTheme() {
     return ThemeData(
         colorScheme: colorScheme,
+        primaryColor: colorScheme.primary,
         scaffoldBackgroundColor: Colors.black,
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
@@ -49,7 +50,7 @@ class ThemeProvider extends ChangeNotifier {
           }),
         )),
         buttonTheme: ButtonThemeData(
-            padding: const EdgeInsets.all(12), colorScheme: colorScheme.copyWith(primary: Colors.white)),
+            padding: const EdgeInsets.all(12), colorScheme: colorScheme.copyWith(primary: Colors.white,background: Colors.white)),
         useMaterial3: false);
   }
 }
