@@ -1,4 +1,5 @@
 import 'package:anon_wallet/screens/onboard/onboard_screen.dart';
+import 'package:anon_wallet/screens/onboard/restore/restore_screen.dart';
 import 'package:flutter/material.dart';
 
 class LandingScreen extends StatefulWidget {
@@ -36,6 +37,9 @@ class _LandingScreenState extends State<LandingScreen> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      primary: Colors.white
+                  ),
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (c) => const OnboardScreen()));
                   },
@@ -47,7 +51,12 @@ class _LandingScreenState extends State<LandingScreen> {
                 ),
                 const Padding(padding: EdgeInsets.all(12)),
                 ElevatedButton(
-                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.white
+                  ),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (c) => const RestoreScreen()));
+                  },
                   child: Text("RESTORE WALLET",
                       style: Theme.of(context)
                           .textTheme
