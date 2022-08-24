@@ -66,14 +66,9 @@ class NumberPad extends StatelessWidget {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onLongPress: ()=>onDeleteLongPress(),
-                        highlightColor: Theme
-                            .of(context)
-                            .scaffoldBackgroundColor,
-                        splashColor: Theme
-                            .of(context)
-                            .scaffoldBackgroundColor
-                            .withOpacity(0.4),
+                        onLongPress: () => onDeleteLongPress(),
+                        highlightColor: Theme.of(context).scaffoldBackgroundColor,
+                        splashColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
                         onTap: onDeleteCancelTap,
                         child: const Center(
                           child: Icon(Icons.backspace),
@@ -87,9 +82,9 @@ class NumberPad extends StatelessWidget {
             Center(child: _buildKeyboardDigit('0', context)),
             Align(
               alignment: Alignment.topRight,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 400),
-                opacity: showDoneButton ? 1 : 0,
+              child: AnimatedScale(
+                duration: const Duration(milliseconds: 120),
+                scale: showDoneButton ? 1 : 0,
                 child: Container(
                   margin: const EdgeInsets.only(top: 15),
                   width: 80,
@@ -98,17 +93,10 @@ class NumberPad extends StatelessWidget {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        highlightColor: Theme
-                            .of(context)
-                            .primaryColor
-                            .withOpacity(0.5),
-                        splashColor: Theme
-                            .of(context)
-                            .primaryColor,
-                        onTap: ()=>onDoneCallback(),
-                        child: Center(
-                            child:  doneIcon
-                        ),
+                        highlightColor: Theme.of(context).primaryColor.withOpacity(0.5),
+                        splashColor: Theme.of(context).primaryColor,
+                        onTap: () => onDoneCallback(),
+                        child: Center(child: doneIcon),
                       ),
                     ),
                   ),
@@ -132,27 +120,18 @@ class NumberPad extends StatelessWidget {
       ),
       child: ClipOval(
         child: Material(
+          color: Theme.of(context).scaffoldBackgroundColor,
           child: InkWell(
-            highlightColor: Theme
-                .of(context)
-                .primaryColor
-                .withOpacity(0.3),
-            splashColor: Theme
-                .of(context)
-                .primaryColor,
+            highlightColor: Theme.of(context).primaryColor.withOpacity(0.8),
+            splashColor: Theme.of(context).primaryColor,
             onTap: () {
               onTap(text);
             },
             child: Center(
               child: Text(
                 text,
-                style: TextStyle(fontSize: 32,
-                    fontWeight: FontWeight.w400,
-                    color: Theme
-                        .of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.color),
+                style: TextStyle(
+                    fontSize: 32, fontWeight: FontWeight.w400, color: Theme.of(context).textTheme.titleMedium?.color),
               ),
             ),
           ),
