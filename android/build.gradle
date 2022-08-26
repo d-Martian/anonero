@@ -11,6 +11,10 @@ buildscript {
     }
 }
 
+ext {
+    apkName = 'anon_xmr'
+}
+
 allprojects {
     repositories {
         google()
