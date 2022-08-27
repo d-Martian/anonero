@@ -60,8 +60,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
             jenv->FindClass("com/m2049r/xmrwallet/model/Transfer")));
     class_WalletListener = static_cast<jclass>(jenv->NewGlobalRef(
             jenv->FindClass("com/m2049r/xmrwallet/model/WalletListener")));
-    class_Ledger = static_cast<jclass>(jenv->NewGlobalRef(
-            jenv->FindClass("com/m2049r/xmrwallet/ledger/Ledger")));
+//    class_Ledger = static_cast<jclass>(jenv->NewGlobalRef(
+//            jenv->FindClass("com/m2049r/xmrwallet/ledger/Ledger")));
     class_WalletStatus = static_cast<jclass>(jenv->NewGlobalRef(
             jenv->FindClass("com/m2049r/xmrwallet/model/Wallet$Status")));
     return JNI_VERSION_1_6;
