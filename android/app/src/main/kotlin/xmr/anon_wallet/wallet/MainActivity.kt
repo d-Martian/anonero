@@ -7,6 +7,10 @@ import io.flutter.plugin.common.BinaryMessenger
 import xmr.anon_wallet.wallet.channels.WalletMethodChannel
 
 class MainActivity : FlutterActivity() {
+    override fun onStart() {
+        AnonWallet.setApplication(this.application)
+        super.onStart()
+    }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

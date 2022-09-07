@@ -42,5 +42,9 @@ abstract class AnonMethodChannel(messenger: BinaryMessenger, name: String, lifec
     fun onClear() {
         _mainScope.cancel()
     }
-
+    companion object{
+        const val INVALID_ARG = "er_arg"
+        const val ERRORS = "er_process"
+        const val WALLET_EXIST = "wallet_exist"
+    }
 }
