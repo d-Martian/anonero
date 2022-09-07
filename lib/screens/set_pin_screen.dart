@@ -64,7 +64,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                             setState(() {
                               confirmKey = pin;
                               if(confirmKey == key){
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>WalletHome()));
+                                Navigator.pop(context,confirmKey);
                               }
                             });
                           }),
@@ -113,7 +113,7 @@ class _NumberPadWidgetState extends State<NumberPadWidget> {
     return Column(
       children: [
         Container(
-          height: 24,
+          height: 22,
           alignment: Alignment.center,
           child: Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PolySeedWidget extends StatefulWidget {
-  final String seedWords;
+  final List<String> seedWords;
 
   const PolySeedWidget({Key? key, required this.seedWords}) : super(key: key);
 
@@ -16,7 +16,7 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
   void initState() {
     super.initState();
     setState(() {
-      seeds = widget.seedWords.split(' ');
+      seeds = widget.seedWords;
     });
   }
 
@@ -26,6 +26,18 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              height: 300,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Hero(tag: "anon_logo", child: SizedBox(width: 180, child: Image.asset("assets/anon_logo.png"))),
+                ],
+              ),
+            ),
+          ),
           SliverGrid(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -40,10 +52,10 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
                     children: [
                       Text('${index + 1}.'),
                       Container(
-                        width: 120,
+                        width: 80,
                         child: Text(
                           seeds[index],
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 18),
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 14),
                           textAlign: TextAlign.start,
                         ),
                       )
@@ -54,10 +66,10 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
               childCount: seeds.length,
             ),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: 3,
               mainAxisSpacing: 15,
-              crossAxisSpacing: 15,
-              childAspectRatio: 4.0,
+              crossAxisSpacing: 8,
+              childAspectRatio: 2.8,
             ),
           )
         ],

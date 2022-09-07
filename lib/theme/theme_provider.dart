@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 const ColorScheme colorScheme = ColorScheme(
   brightness: Brightness.dark,
@@ -36,6 +37,7 @@ class ThemeProvider extends ChangeNotifier {
     return ThemeData(
         colorScheme: colorScheme,
         primaryColor: colorScheme.primary,
+        fontFamily: GoogleFonts.robotoMono().fontFamily,
         scaffoldBackgroundColor: Colors.black,
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(

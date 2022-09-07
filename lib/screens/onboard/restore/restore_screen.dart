@@ -83,7 +83,9 @@ class _RestoreScreenState extends State<RestoreScreen> {
                         seedWords:
                         "tortoise science attend hero device normal wheel dry slender tooth cup dash certain estate rice morning",
                       )),
-                  WalletPassphraseWidget(),
+                  WalletPassphraseWidget(onPassSeedPhraseAdded: (v){
+
+                  }),
                 ],
               ),
             ),
