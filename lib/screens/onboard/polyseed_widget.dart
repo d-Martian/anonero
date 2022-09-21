@@ -18,6 +18,7 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
     setState(() {
       seeds = widget.seedWords;
     });
+    print("seeds ${seeds.join(" ")}");
   }
 
   @override

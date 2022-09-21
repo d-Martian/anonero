@@ -1,3 +1,4 @@
+import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/screens/onboard/onboard_screen.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_screen.dart';
@@ -75,6 +76,7 @@ class _LandingScreenState extends State<LandingScreen> {
                       // Navigator.pop(context);
                       // wallet.seed = "scorpion enough attitude image mountain off stem head this quick vivid defy exotic reveal type monitor crash mosquito universe oxygen clap wedding vocal labor".split(" ");
                       // await Future.delayed(Duration(milliseconds: 120));
+                      // NodeChannel().testRPC();
                       Navigator.push(
                           context,
                           MaterialPageRoute(

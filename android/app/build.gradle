@@ -119,6 +119,7 @@ dependencies {
 
     implementation 'dnsjava:dnsjava:2.1.9'
     implementation 'org.jitsi:dnssecjava:1.2.0'
+    implementation 'androidx.work:work-runtime-ktx:2.7.1'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 

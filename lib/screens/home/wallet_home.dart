@@ -1,3 +1,4 @@
+import 'package:anon_wallet/screens/home/receive_screen.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/widgets/bottom_bar.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ class WalletHome extends StatefulWidget {
 
 class _WalletHomeState extends State<WalletHome> {
   int _currentView = 0;
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class _WalletHomeState extends State<WalletHome> {
         controller: _pageController,
         children: [
           const TransactionsList(),
-          Container(color: Colors.grey[800]),
+          ReceiveWidget(),
           Container(color: Colors.grey.shade700),
           Container(color: Colors.grey.shade900),
         ],
@@ -39,22 +40,30 @@ class _WalletHomeState extends State<WalletHome> {
           BottomBarItem(
             icon: const Icon(Icons.home),
             title: const Text('Home'),
-            activeColor: Theme.of(context).primaryColor,
+            activeColor: Theme
+                .of(context)
+                .primaryColor,
           ),
           BottomBarItem(
             icon: const Icon(Icons.qr_code),
             title: const Text('Receive'),
-            activeColor: Theme.of(context).primaryColor,
+            activeColor: Theme
+                .of(context)
+                .primaryColor,
           ),
           BottomBarItem(
             icon: const Icon(Icons.send_outlined),
             title: const Text('Send'),
-            activeColor: Theme.of(context).primaryColor,
+            activeColor: Theme
+                .of(context)
+                .primaryColor,
           ),
           BottomBarItem(
             icon: const Icon(Icons.settings),
             title: const Text('Settings'),
-            activeColor: Theme.of(context).primaryColor,
+            activeColor: Theme
+                .of(context)
+                .primaryColor,
           ),
         ],
       ),
