@@ -16,8 +16,10 @@
 
 package com.m2049r.xmrwallet.model;
 
-import com.m2049r.utils.RestoreHeight;
 import com.m2049r.xmrwallet.data.Node;
+import com.m2049r.xmrwallet.utils.RestoreHeight;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -25,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
 import lombok.Getter;
 import timber.log.Timber;
 import xmr.anon_wallet.wallet.AnonWallet;
@@ -45,6 +49,12 @@ public class WalletManager {
         }
 
         return WalletManager.Instance;
+    }
+
+    private Function0<Unit> onManageCallback;
+
+    public void onManageCallBack(@NotNull Function0<Unit> function) {
+        this.onManageCallback = function;
     }
 
     public String addressPrefix() {
@@ -73,6 +83,9 @@ public class WalletManager {
     private void manageWallet(Wallet wallet) {
         Timber.d("Managing %s", wallet.getName());
         managedWallet = wallet;
+        if(onManageCallback != null){
+            onManageCallback.invoke();
+        }
     }
 
     private void unmanageWallet(Wallet wallet) {

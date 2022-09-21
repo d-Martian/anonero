@@ -28,8 +28,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 
-import lombok.Getter;
-import lombok.Setter;
 import timber.log.Timber;
 
 public class Node {
@@ -89,37 +87,22 @@ public class Node {
         }
     }
 
-    @Getter
     private String name = null;
-    @Getter
     final private NetworkType networkType;
     Address hostAddress;
-    @Getter
     private String host;
-    @Getter
-    @Setter
     int rpcPort = 0;
     private int levinPort = 0;
-    @Getter
-    @Setter
     private String username = "";
-    @Getter
-    @Setter
     private String password = "";
-    @Getter
-    @Setter
     private boolean favourite = false;
-    @Getter
-    @Setter
     private boolean selected = false;
 
-    @Override
     public int hashCode() {
         return hostAddress.hashCode();
     }
 
     // Nodes are equal if they are the same host address:port & are on the same network
-    @Override
     public boolean equals(Object other) {
         if (!(other instanceof Node)) return false;
         final Node anotherNode = (Node) other;
@@ -139,6 +122,14 @@ public class Node {
             Timber.w(ex);
             return null;
         }
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     Node(String nodeString) {
@@ -275,6 +266,10 @@ public class Node {
         return getHostAddress() + ":" + rpcPort;
     }
 
+    public NetworkType getNetworkType() {
+        return networkType;
+    }
+
     public String getHostAddress() {
         return hostAddress.getHostAddress();
     }
@@ -369,4 +364,54 @@ public class Node {
         }
         return DEFAULT_RPC_PORT;
     }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getRpcPort() {
+        return rpcPort;
+    }
+
+    public void setRpcPort(int rpcPort) {
+        this.rpcPort = rpcPort;
+    }
+
+    public int getLevinPort() {
+        return levinPort;
+    }
+
+    public void setLevinPort(int levinPort) {
+        this.levinPort = levinPort;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean isFavourite() {
+        return favourite;
+    }
+
+    public void setFavourite(boolean favourite) {
+        this.favourite = favourite;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
 }

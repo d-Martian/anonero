@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.m2049r.utils;
+package com.m2049r.xmrwallet.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

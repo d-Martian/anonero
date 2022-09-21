@@ -105,7 +105,7 @@ public class TransactionInfo implements Parcelable, Comparable<TransactionInfo> 
     }
 
     public String getDisplayLabel() {
-        if (subaddressLabel.isEmpty() || (Subaddress.DEFAULT_LABEL_FORMATTER.matcher(subaddressLabel).matches()))
+        if (subaddressLabel.isEmpty() || (Subaddress.Companion.getDEFAULT_LABEL_FORMATTER().matcher(subaddressLabel).matches()))
             return ("#" + addressIndex);
         else
             return subaddressLabel;

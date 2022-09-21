@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.Locale;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import timber.log.Timber;
 
 public class Wallet {
@@ -107,7 +106,6 @@ public class Wallet {
         this.accountIndex = accountIndex;
     }
 
-    @RequiredArgsConstructor
     @Getter
     public enum Device {
         Device_Undefined(0, 0),
@@ -115,6 +113,10 @@ public class Wallet {
         Device_Ledger(5, 20);
         private final int accountLookahead;
         private final int subaddressLookahead;
+        Device(int accountLookahead,int subaddressLookahead){
+            this.accountLookahead = accountLookahead;
+            this.subaddressLookahead = subaddressLookahead;
+        }
     }
 
     public enum StatusEnum {
