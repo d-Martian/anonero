@@ -237,7 +237,7 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         "height" to this.restoreHeight,
         "seedLanguage" to this.seedLanguage,
         "restoreHeight" to this.restoreHeight,
-        "transactions" to this.history.all.map { it.toHashMap() }.toList(),
+        "transactions" to this.history.all.map { it.toHashMap() }.reversed().toList(),
         "EVENT_TYPE" to "WALLET",
     )
     if (this.status.isOk) {

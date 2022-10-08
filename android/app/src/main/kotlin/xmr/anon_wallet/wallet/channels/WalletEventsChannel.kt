@@ -82,12 +82,21 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     }
 
     override fun moneyReceived(txId: String?, amount: Long) {
-        Log.i(TAG, "moneyReceived:")
+        Log.i(TAG, "moneyReceived: $txId $amount")
+        val wallet = WalletManager.getInstance().wallet;
+        if (wallet != null) {
+            sendEvent(wallet.walletToHashMap())
+        }
     }
 
     override fun unconfirmedMoneyReceived(txId: String?, amount: Long) {
-        Log.i(TAG, "unconfirmedMoneyReceived:")
-
+        WalletManager.getInstance().wallet.let {
+        }
+        val wallet = WalletManager.getInstance().wallet;
+        if (wallet != null) {
+            sendEvent(wallet.walletToHashMap())
+        }
+        Log.i(TAG, "unconfirmedMoneyReceived: $txId ${amount}")
     }
 
     override fun newBlock(height: Long) {
