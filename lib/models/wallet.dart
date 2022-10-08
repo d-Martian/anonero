@@ -22,6 +22,7 @@ class Wallet {
   Wallet();
 
   Wallet.fromJson(dynamic json) {
+    print("wallet:sync ${json}");
     name = json['name'] ?? "";
     seedLanguage = json['seedLanguage'] ?? "";
     address = json['address'] ?? "";
