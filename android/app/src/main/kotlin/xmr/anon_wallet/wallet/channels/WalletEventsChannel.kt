@@ -66,6 +66,7 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     }
 
     private fun checkWalletState() {
+        Log.i(TAG, "checkWalletState:")
         val cacheFile = File(AnonWallet.walletDir, "default")
         val keysFile = File(AnonWallet.walletDir, "default.keys")
         val addressFile = File(AnonWallet.walletDir, "default.address.txt")
@@ -81,9 +82,11 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     }
 
     override fun moneyReceived(txId: String?, amount: Long) {
+        Log.i(TAG, "moneyReceived:")
     }
 
     override fun unconfirmedMoneyReceived(txId: String?, amount: Long) {
+        Log.i(TAG, "unconfirmedMoneyReceived:")
 
     }
 
@@ -111,6 +114,8 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     }
 
     override fun updated() {
+        Log.i(TAG, "updated:")
+
         val wallet = WalletManager.getInstance().wallet
         if (wallet != null) {
             sendEvent(wallet.walletToHashMap())
@@ -122,8 +127,7 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
         wallet.setSynchronized()
         wallet.store()
         val currentNode = NodeManager.getNode()
-        if(currentNode != null){
-            sendEvent(currentNode.toHashMap().apply {
+        if(currentNode != null){ sendEvent(currentNode.toHashMap().apply {
                 put("syncBlock", wallet.blockChainHeight)
             })
         }

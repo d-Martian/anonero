@@ -74,8 +74,14 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         }
                         WalletEventsChannel.sendEvent(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletRefresh()
-                        if (!wallet.isSynchronized) {
+                        wallet.startRefresh()
+                        wallet.refreshHistory()
+                        wallet.refresh()
+                        if (wallet.isSynchronized) {
+                            wallet.refreshHistory()
                             wallet.startRefresh()
+                        }else{
+                            wallet.refresh()
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
