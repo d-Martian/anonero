@@ -147,7 +147,7 @@ class NodeInfo : Node {
     private fun rpcServiceRequest(port: Int): Request {
         val url: HttpUrl = HttpUrl.Builder()
             .scheme("http")
-            .host(this.getHostAddress())
+            .host(this.host)
             .port(port)
             .addPathSegment("json_rpc")
             .build()
@@ -172,6 +172,7 @@ class NodeInfo : Node {
 //        }
         try {
             val ta = System.nanoTime()
+
             rpcServiceRequest(port).execute().use { response ->
                 Timber.d("%s: %s", response.code, response.request.url)
                 responseTime = (System.nanoTime() - ta) / 1000000.0

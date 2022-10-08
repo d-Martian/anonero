@@ -27,7 +27,6 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
         }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     private fun setNode(call: MethodCall, result: Result) {
         val port = call.argument<Int>("port")
         var host = call.argument<String>("host")

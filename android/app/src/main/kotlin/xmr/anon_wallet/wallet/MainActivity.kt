@@ -7,10 +7,13 @@ import io.flutter.plugin.common.BinaryMessenger
 import xmr.anon_wallet.wallet.channels.NodeMethodChannel
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel
 import xmr.anon_wallet.wallet.channels.WalletMethodChannel
+import xmr.anon_wallet.wallet.utils.AnonPreferences
 
 class MainActivity : FlutterActivity() {
     override fun onStart() {
+
         AnonWallet.setApplication(this)
+        AnonPreferences(this).serverUrl = "testnet.community.rino.io";
         super.onStart()
     }
 
@@ -26,7 +29,7 @@ class MainActivity : FlutterActivity() {
          */
         WalletEventsChannel.init(binaryMessenger,lifecycle)
         /**
-         * Wallet specific Methods
+         * Wallet specific Methods28089
          */
         WalletMethodChannel(binaryMessenger, lifecycle)
         /**

@@ -1,19 +1,15 @@
 package xmr.anon_wallet.wallet.channels
 
-import android.util.Log
 import androidx.lifecycle.Lifecycle
-import com.m2049r.xmrwallet.data.NodeInfo
+import com.m2049r.xmrwallet.model.TransactionInfo
 import com.m2049r.xmrwallet.model.Wallet
-import com.m2049r.xmrwallet.model.WalletListener
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.utils.RestoreHeight
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.services.NodeManager
 import java.io.File
@@ -70,9 +66,12 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     try {
                         val wallet =
                             WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
-                        wallet.restoreHeight = 2013018L
                         result.success(wallet.walletToHashMap())
-                        NodeManager.setNode()
+                        try {
+                            NodeManager.setNode()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                         WalletEventsChannel.sendEvent(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletRefresh()
                         if (!wallet.isSynchronized) {
@@ -143,7 +142,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     val wallet = WalletManager.getInstance()
                         .createWallet(newWalletFile, password, default, restoreHeight)
                     if (wallet.status.isOk) {
-                        AnonWallet.setWallet(wallet)
+                        wallet.refreshHistory()
                         val map = wallet.walletToHashMap()
                         map["seed"] = wallet.getSeed(seedPhrase ?: "")
                         wallet.store()
@@ -200,8 +199,27 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
 
 
 }
-
+fun TransactionInfo.toHashMap():HashMap<String,Any>{
+    return  hashMapOf(
+        "address" to this.address,
+        "addressIndex" to this.addressIndex,
+        "amount" to this.amount,
+        "accountIndex" to this.accountIndex,
+        "blockheight" to this.blockheight,
+        "confirmations" to this.confirmations,
+        "isPending" to this.isPending,
+        "timestamp" to this.timestamp,
+        "isConfirmed" to this.isConfirmed,
+        "paymentId" to this.paymentId,
+        "hash" to this.hash,
+        "notes" to this.notes,
+        "displayLabel" to this.displayLabel,
+        "subaddressLabel" to this.subaddressLabel,
+        "fee" to this.fee,
+    )
+}
 fun Wallet.walletToHashMap(): HashMap<String, Any> {
+
     val data: HashMap<String, Any> = hashMapOf(
         "name" to this.name,
         "address" to this.address,
@@ -213,6 +231,7 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         "height" to this.restoreHeight,
         "seedLanguage" to this.seedLanguage,
         "restoreHeight" to this.restoreHeight,
+        "transactions" to this.history.all.map { it.toHashMap() }.toList(),
         "EVENT_TYPE" to "WALLET",
     )
     if (this.status.isOk) {

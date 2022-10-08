@@ -63,7 +63,6 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     }
 
     override fun onCancel(arguments: Any?) {
-        Log.i(TAG, "onCancel: CANCELED")
     }
 
     private fun checkWalletState() {

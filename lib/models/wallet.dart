@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:anon_wallet/models/transaction.dart';
+
 class Wallet {
   String name = "";
   String seedLanguage = "";
@@ -13,6 +17,7 @@ class Wallet {
   num numSubaddresses = 0;
   num restoreHeight = 0;
   List<String> seed = [];
+  List<Transaction> transactions = [];
 
   Wallet();
 
@@ -31,6 +36,11 @@ class Wallet {
     height = json['height'] ?? 0;
     if (json.containsKey("seed")) {
       seed = (json['seed'] as String).split(" ");
+    }
+    if (json.containsKey("transactions")) {
+      json['transactions'].forEach((v) {
+        transactions.add(Transaction.fromJson(v));
+      });
     }
   }
 

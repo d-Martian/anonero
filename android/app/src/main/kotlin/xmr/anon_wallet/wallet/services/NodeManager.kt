@@ -1,5 +1,6 @@
 package xmr.anon_wallet.wallet.services
 
+import android.util.Log
 import com.m2049r.xmrwallet.data.NodeInfo
 import com.m2049r.xmrwallet.model.WalletManager
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +40,9 @@ object NodeManager {
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {
                     put("status", "connecting")
                 })
+                Log.i("TAG", "setNode: ${node.toHashMap()}")
                 node.testRpcService()
+                Log.i("TAG", "setNode: ${node.toHashMap()}")
                 WalletManager.getInstance().setDaemon(node)
                 WalletManager.getInstance().wallet.init(0)
                 currentNode = node
@@ -48,6 +51,7 @@ object NodeManager {
                     put("status", "connected")
                 })
             } catch (e: Exception) {
+                e.printStackTrace()
                 WalletEventsChannel.sendEvent(
                     hashMapOf(
                         "EVENT_TYPE" to "NODE",

@@ -1,11 +1,15 @@
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:anon_wallet/channel/node_channel.dart';
+import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
+import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class TransactionsList extends StatefulWidget {
   const TransactionsList({Key? key}) : super(key: key);
@@ -26,9 +30,9 @@ class _TransactionsListState extends State<TransactionsList> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           expandedHeight: 180,
           actions: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.lock)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.lock)),
             IconButton(onPressed: () {}, icon: const Icon(Icons.crop_free)),
-            IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
           ],
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: true,
@@ -40,16 +44,15 @@ class _TransactionsListState extends State<TransactionsList> {
                 builder: (context, ref, c) {
                   var amount = ref.watch(walletBalanceProvider);
                   return Text(
-                    "$amount XMR",
+                    "${formatMonero(amount)} XMR",
                     style: Theme.of(context).textTheme.headline4,
                   );
                 },
               ),
             ),
           ),
-          title: Text("ANON"),
+          title: const Text("ANON"),
         ),
-
         Consumer(builder: (context, ref, c) {
           bool isConnecting = ref.watch(connectingToNodeStateProvider);
           Map<String, num>? sync = ref.watch(syncProgressStateProvider);
@@ -89,7 +92,15 @@ class _TransactionsListState extends State<TransactionsList> {
             return const SliverToBoxAdapter();
           }
         }),
-        SliverList(delegate: SliverChildListDelegate(_fakeData().map((e) => _buildTxItem(e)).toList()))
+        Consumer(
+          builder: (context, ref, child) {
+            List<Transaction> transactions = ref.watch(walletTransactions);
+            return SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+              return _buildTxItem(transactions[index]);
+            }, childCount: transactions.length));
+          },
+        )
       ],
     );
   }
@@ -98,7 +109,7 @@ class _TransactionsListState extends State<TransactionsList> {
     return List.generate(50, (index) => 1 + Random().nextInt(50 - 1) - (index * .2));
   }
 
-  Widget _buildTxItem(num index) {
+  Widget _buildTxItem(Transaction transaction) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
@@ -111,21 +122,29 @@ class _TransactionsListState extends State<TransactionsList> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          index > 1
+          (transaction.amount ?? 0) < 0
               ? Icon(
                   CupertinoIcons.arrow_turn_left_up,
                   color: Theme.of(context).primaryColor,
                 )
               : const Icon(CupertinoIcons.arrow_turn_left_down),
           Text(
-            "13.12054",
+            formatMonero(transaction.amount),
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           Column(
-            children: [Text("19:08\n18/07", style: Theme.of(context).textTheme.caption)],
+            children: [Text(formatTime(transaction.timeStamp), style: Theme.of(context).textTheme.caption)],
           )
         ],
       ),
     );
   }
+}
+
+String formatTime(int? timestamp) {
+  if (timestamp == null) {
+    return "";
+  }
+  var dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+  return DateFormat("H:m\ndd/M").format(dateTime);
 }
