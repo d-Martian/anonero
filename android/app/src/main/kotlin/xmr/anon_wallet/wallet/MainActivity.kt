@@ -13,7 +13,6 @@ class MainActivity : FlutterActivity() {
     override fun onStart() {
 
         AnonWallet.setApplication(this)
-        AnonPreferences(this).serverUrl = "testnet.community.rino.io";
         super.onStart()
     }
 
