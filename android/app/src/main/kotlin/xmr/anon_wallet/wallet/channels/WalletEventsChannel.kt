@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import com.m2049r.xmrwallet.model.Wallet
+import com.m2049r.xmrwallet.model.Wallet.ConnectionStatus
 import com.m2049r.xmrwallet.model.WalletListener
 import com.m2049r.xmrwallet.model.WalletManager
 import io.flutter.plugin.common.BinaryMessenger
@@ -21,6 +23,14 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     private var lastTxCount = 0
     private val scope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
     private const val TAG = "WalletEventsChannel"
+
+
+    private var lastDaemonStatusUpdate: Long = 0
+    private var daemonHeight: Long = 0
+    private var connectionStatus = ConnectionStatus.ConnectionStatus_Disconnected
+    private const val STATUS_UPDATE_INTERVAL: Long = 120000 // 120s (blocktime)
+    var updated = true
+
 
     fun init(binaryMessenger: BinaryMessenger, lifecycle: Lifecycle) {
         EventChannel(binaryMessenger, WALLET_EVENTS)
@@ -94,9 +104,9 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
         }
         val wallet = WalletManager.getInstance().wallet;
         if (wallet != null) {
+            wallet.refreshHistory()
             sendEvent(wallet.walletToHashMap())
         }
-        Log.i(TAG, "unconfirmedMoneyReceived: $txId ${amount}")
     }
 
     override fun newBlock(height: Long) {
@@ -104,12 +114,19 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
         if (wallet != null) {
             Log.i(TAG, "newBlock: ${height}")
             // we want to see our transactions as they come in
+            updateDaemonState(wallet, if (wallet.isSynchronized) height else 0)
             if (lastBlockTime < System.currentTimeMillis() - 2000) {
                 lastBlockTime = System.currentTimeMillis()
                 val currentNode = NodeManager.getNode()
                 if (!wallet.isSynchronized) {
                     // we want to see our transactions as they come in
+                    // we want to see our transactions as they come in
                     wallet.refreshHistory()
+                    val txCount = wallet.history.count
+                    if (txCount > lastTxCount) {
+                        // update the transaction list only if we have more than before
+                        lastTxCount = txCount
+                    }
                 }
                 if (currentNode != null) {
                     sendEvent(currentNode.toHashMap().apply {
@@ -129,6 +146,8 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
         if (wallet != null) {
             sendEvent(wallet.walletToHashMap())
         }
+        updated = true
+
     }
 
     override fun refreshed() {
@@ -136,11 +155,34 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
         wallet.setSynchronized()
         wallet.store()
         val currentNode = NodeManager.getNode()
-        if(currentNode != null){ sendEvent(currentNode.toHashMap().apply {
+        if (currentNode != null) {
+            sendEvent(currentNode.toHashMap().apply {
                 put("syncBlock", wallet.blockChainHeight)
             })
         }
+        wallet.refreshHistory()
         sendEvent(wallet.walletToHashMap())
+        updateDaemonState(wallet, wallet.blockChainHeight)
     }
 
+    private fun updateDaemonState(wallet: Wallet, height: Long) {
+        val t = System.currentTimeMillis()
+        if (height > 0) { // if we get a height, we are connected
+            daemonHeight = height
+            connectionStatus = Wallet.ConnectionStatus.ConnectionStatus_Connected
+            lastDaemonStatusUpdate = t
+        } else {
+            if (t - lastDaemonStatusUpdate > STATUS_UPDATE_INTERVAL) {
+                lastDaemonStatusUpdate = t
+                // these calls really connect to the daemon - wasting time
+                daemonHeight = wallet.daemonBlockChainHeight
+                if (daemonHeight > 0) {
+                    // if we get a valid height, then obviously we are connected
+                    connectionStatus = Wallet.ConnectionStatus.ConnectionStatus_Connected
+                } else {
+                    connectionStatus = Wallet.ConnectionStatus.ConnectionStatus_Disconnected
+                }
+            }
+        }
+    }
 }

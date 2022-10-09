@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:math';
 
+import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/state/node_state.dart';
@@ -27,7 +28,9 @@ class _TransactionsListState extends State<TransactionsList> {
           automaticallyImplyLeading: false,
           pinned: false,
           floating: true,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          backgroundColor: Theme
+              .of(context)
+              .scaffoldBackgroundColor,
           expandedHeight: 180,
           actions: [
             IconButton(onPressed: () {}, icon: const Icon(Icons.lock)),
@@ -45,7 +48,10 @@ class _TransactionsListState extends State<TransactionsList> {
                   var amount = ref.watch(walletBalanceProvider);
                   return Text(
                     "${formatMonero(amount)} XMR",
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .headline4,
                   );
                 },
               ),
@@ -64,7 +70,9 @@ class _TransactionsListState extends State<TransactionsList> {
                 toolbarHeight: 8,
                 collapsedHeight: 8,
                 floating: true,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                backgroundColor: Theme
+                    .of(context)
+                    .scaffoldBackgroundColor,
                 flexibleSpace: const LinearProgressIndicator(
                   minHeight: 1,
                 ));
@@ -75,7 +83,9 @@ class _TransactionsListState extends State<TransactionsList> {
                   pinned: true,
                   toolbarHeight: 10,
                   collapsedHeight: 10,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  backgroundColor: Theme
+                      .of(context)
+                      .scaffoldBackgroundColor,
                   flexibleSpace: Column(
                     children: [
                       LinearProgressIndicator(
@@ -84,7 +94,10 @@ class _TransactionsListState extends State<TransactionsList> {
                       const Padding(padding: EdgeInsets.all(6)),
                       Text(
                         "Syncing blocks : ${sync['remaining']} blocks remaining",
-                        style: Theme.of(context).textTheme.caption,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .caption,
                       )
                     ],
                   ));
@@ -97,16 +110,12 @@ class _TransactionsListState extends State<TransactionsList> {
             List<Transaction> transactions = ref.watch(walletTransactions);
             return SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
-              return _buildTxItem(transactions[index]);
-            }, childCount: transactions.length));
+                  return _buildTxItem(transactions[index]);
+                }, childCount: transactions.length));
           },
         )
       ],
     );
-  }
-
-  List<num> _fakeData() {
-    return List.generate(50, (index) => 1 + Random().nextInt(50 - 1) - (index * .2));
   }
 
   Widget _buildTxItem(Transaction transaction) {
@@ -115,29 +124,65 @@ class _TransactionsListState extends State<TransactionsList> {
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
       decoration: BoxDecoration(
           border: Border.all(width: 1, color: Colors.grey.shade600),
-          borderRadius: BorderRadius.all(Radius.circular(8))),
+          borderRadius: const BorderRadius.all(Radius.circular(8))),
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          (transaction.amount ?? 0) < 0
-              ? Icon(
-                  CupertinoIcons.arrow_turn_left_up,
-                  color: Theme.of(context).primaryColor,
-                )
-              : const Icon(CupertinoIcons.arrow_turn_left_down),
+          getStats(transaction),
           Text(
             formatMonero(transaction.amount),
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme
+                .of(context)
+                .textTheme
+                .headlineSmall,
           ),
           Column(
-            children: [Text(formatTime(transaction.timeStamp), style: Theme.of(context).textTheme.caption)],
+            children: [Text(formatTime(transaction.timeStamp), style: Theme
+                .of(context)
+                .textTheme
+                .caption)
+            ],
           )
         ],
       ),
     );
+  }
+
+  getStats(Transaction transaction) {
+    print("transaction ${transaction.isPending} ${transaction.isConfirmed} ${transaction.confirmations}");
+    if (!(transaction.isConfirmed ?? false)) {
+      int confirms = transaction.confirmations ?? 0;
+      double progress = confirms / maxConfirms;
+      return SizedBox(
+        height: 30,
+        width:30,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CircularProgressIndicator(color: Colors.green,
+              strokeWidth: 1,
+              value: progress,),
+            Text("$confirms", textAlign: TextAlign.center,
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Colors.green,fontSize: 12),)
+          ],
+        ),
+      );
+    }
+    return (transaction.amount ?? 0) < 0
+        ? Icon(
+      CupertinoIcons.arrow_turn_left_up,
+      color: Theme
+          .of(context)
+          .primaryColor,
+    )
+        : const Icon(CupertinoIcons.arrow_turn_left_down);
   }
 }
 

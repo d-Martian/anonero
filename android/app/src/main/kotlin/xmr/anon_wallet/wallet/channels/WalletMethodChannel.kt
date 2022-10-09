@@ -1,6 +1,8 @@
 package xmr.anon_wallet.wallet.channels
 
+import android.util.Log
 import androidx.lifecycle.Lifecycle
+import com.m2049r.xmrwallet.model.NetworkType
 import com.m2049r.xmrwallet.model.TransactionInfo
 import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
@@ -14,6 +16,7 @@ import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.services.NodeManager
 import java.io.File
 import java.util.*
+import kotlin.math.log
 
 
 class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
@@ -80,7 +83,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         if (wallet.isSynchronized) {
                             wallet.refreshHistory()
                             wallet.startRefresh()
-                        }else{
+                        } else {
                             wallet.refresh()
                         }
                     } catch (e: Exception) {
@@ -212,8 +215,9 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
 
 
 }
-fun TransactionInfo.toHashMap():HashMap<String,Any>{
-    return  hashMapOf(
+
+fun TransactionInfo.toHashMap(): HashMap<String, Any> {
+    return hashMapOf(
         "address" to this.address,
         "addressIndex" to this.addressIndex,
         "amount" to this.amount,
@@ -231,6 +235,7 @@ fun TransactionInfo.toHashMap():HashMap<String,Any>{
         "fee" to this.fee,
     )
 }
+
 fun Wallet.walletToHashMap(): HashMap<String, Any> {
 
     val data: HashMap<String, Any> = hashMapOf(
