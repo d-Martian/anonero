@@ -118,10 +118,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             if (password == null || password.isEmpty()) {
                 return result.error(INVALID_ARG, "invalid password parameter", null);
             }
-            // Go back 4 days if we don't have a precise restore height
-            val restoreDate = Calendar.getInstance()
-            restoreDate.add(Calendar.DAY_OF_MONTH, -4)
-            val restoreHeight: Long = RestoreHeight.getInstance().getHeight(restoreDate.time)
+            var restoreHeight = 1L
             scope.launch {
                 withContext(Dispatchers.IO) {
                     val cacheFile = File(AnonWallet.walletDir, walletName)
@@ -145,6 +142,16 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
 //                    }
                     val newWalletFile = File(AnonWallet.walletDir, walletName)
                     val default = "English"
+                    if (AnonWallet.getNetworkType() == NetworkType.NetworkType_Mainnet) {
+                        if (NodeManager.getNode() != null && NodeManager.getNode()?.getHeight() != null) {
+                            restoreHeight = NodeManager.getNode()?.getHeight()!!
+                        }
+                        val restoreDate = Calendar.getInstance()
+                        restoreDate.add(Calendar.DAY_OF_MONTH, -4)
+                        RestoreHeight.getInstance().getHeight(restoreDate.time)
+                    } else {
+                        restoreHeight = NodeManager.getNode()?.getHeight() ?: 1L
+                    }
                     val wallet = WalletManager.getInstance()
                         .createWallet(newWalletFile, password, default, restoreHeight)
                     if (wallet.status.isOk) {

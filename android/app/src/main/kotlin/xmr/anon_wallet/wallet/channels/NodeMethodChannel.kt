@@ -1,11 +1,13 @@
 package xmr.anon_wallet.wallet.channels
 
 import androidx.lifecycle.Lifecycle
+import com.m2049r.xmrwallet.data.Node
 import com.m2049r.xmrwallet.data.NodeInfo
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.AnonWallet
+import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 
 class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
@@ -69,6 +71,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         if (!node.password.isNullOrEmpty()) {
                             AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.password
                         }
+                        NodeManager.setCurrentNode(node)
                         result.success(node.toHashMap())
                     } else {
                         WalletEventsChannel.sendEvent(node.toHashMap().apply {

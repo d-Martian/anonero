@@ -68,4 +68,8 @@ object NodeManager {
         return currentNode;
     }
 
+    fun setCurrentNode(node: NodeInfo) {
+        currentNode = node
+    }
+
 }
