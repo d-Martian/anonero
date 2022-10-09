@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/transaction.dart';
 
 class Wallet {
@@ -17,6 +18,7 @@ class Wallet {
   num numSubaddresses = 0;
   num restoreHeight = 0;
   List<String> seed = [];
+  SubAddress? currentAddress;
   List<Transaction> transactions = [];
 
   Wallet();
@@ -28,6 +30,7 @@ class Wallet {
     address = json['address'] ?? "";
     secretViewKey = json['secretViewKey'] ?? "";
     restoreHeight = json['restoreHeight'] ?? "";
+    currentAddress = SubAddress.fromJson(json['currentAddress']);
     connectionStatus = json['connectionStatus'] ?? "";
     status = json['status'] ?? "";
     blockChainHeight = json['blockChainHeight'] ?? 0;

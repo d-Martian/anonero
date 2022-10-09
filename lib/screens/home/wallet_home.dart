@@ -21,7 +21,9 @@ class _WalletHomeState extends State<WalletHome> {
         controller: _pageController,
         children: [
           const TransactionsList(),
-          ReceiveWidget(),
+          ReceiveWidget(() {
+            _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
+          }),
           Container(color: Colors.grey.shade700),
           Container(color: Colors.grey.shade900),
         ],

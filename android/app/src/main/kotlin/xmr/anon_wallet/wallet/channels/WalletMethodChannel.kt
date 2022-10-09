@@ -1,6 +1,8 @@
 package xmr.anon_wallet.wallet.channels
 
+import android.util.Log
 import androidx.lifecycle.Lifecycle
+import com.m2049r.xmrwallet.data.Subaddress
 import com.m2049r.xmrwallet.model.NetworkType
 import com.m2049r.xmrwallet.model.TransactionInfo
 import com.m2049r.xmrwallet.model.Wallet
@@ -15,6 +17,7 @@ import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.services.NodeManager
 import java.io.File
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
@@ -242,13 +245,42 @@ fun TransactionInfo.toHashMap(): HashMap<String, Any> {
     )
 }
 
-fun Wallet.walletToHashMap(): HashMap<String, Any> {
+fun Wallet.getLastUsedAccount(): Int {
+    var lastUsedAccount = 0
+    for (info in this.history.all) {
+        if (info.accountIndex > lastUsedAccount) lastUsedAccount = info.accountIndex
+    }
+    return lastUsedAccount
+}
 
-    val data: HashMap<String, Any> = hashMapOf(
+fun Wallet.getLatestSubaddress(): Subaddress? {
+    var lastUsedSubaddress = 1
+    for (info in this.history.all) {
+        if (info.addressIndex > lastUsedSubaddress) lastUsedSubaddress = info.addressIndex
+    }
+    lastUsedSubaddress++
+    return this.getSubaddressObject(lastUsedSubaddress)
+}
+
+fun Subaddress.toHashMap(): HashMap<String, Any> {
+    return hashMapOf<String, Any>(
+        "address" to (this.address ?: ""),
+        "addressIndex" to this.addressIndex,
+        "addressIndex" to this.addressIndex,
+        "accountIndex" to this.accountIndex,
+        "label" to (this.label ?: ""),
+        "squashedAddress" to this.squashedAddress,
+    );
+}
+
+fun Wallet.walletToHashMap(): HashMap<String, Any> {
+    val nextAddress =  if(this.getLatestSubaddress() != null) this.getLatestSubaddress()?.toHashMap()!! else   hashMapOf<String,String>()
+    return  hashMapOf(
         "name" to this.name,
         "address" to this.address,
         "secretViewKey" to this.secretViewKey,
         "balance" to this.balance,
+        "currentAddress" to nextAddress,
         "isSynchronized" to this.isSynchronized,
         "blockChainHeight" to this.blockChainHeight,
         "numSubaddresses" to this.numSubaddresses,
@@ -257,8 +289,4 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         "transactions" to this.history.all.map { it.toHashMap() }.reversed().toList(),
         "EVENT_TYPE" to "WALLET",
     )
-    if (this.status.isOk) {
-        return data
-    }
-    return data
 }
