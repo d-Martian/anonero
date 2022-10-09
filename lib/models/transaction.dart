@@ -34,7 +34,6 @@ class Transaction {
       this.hash});
 
   Transaction.fromJson(Map json) {
-    print("Wallet State '$json'");
     try {
       displayLabel = json['displayLabel'];
       subaddressLabel = json['subaddressLabel'];

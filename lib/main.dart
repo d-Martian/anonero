@@ -6,6 +6,7 @@ import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/screens/landing_screen.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
+import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -97,11 +98,15 @@ class LockScreen extends StatelessWidget {
           Expanded(
             child: Container(
               alignment: Alignment.bottomCenter,
-              child: NumberPadWidget(
-                maxPinSize: maxPinSize,
-                minPinSize: minPinSize,
-                onSubmit: (String pin) {
-                  onSubmit(pin, context);
+              child: Consumer(
+                builder: (context,ref,c){
+                  return NumberPadWidget(
+                    maxPinSize: maxPinSize,
+                    minPinSize: minPinSize,
+                    onSubmit: (String pin) {
+                      onSubmit(pin, context,ref);
+                    },
+                  );
                 },
               ),
             ),
@@ -111,7 +116,7 @@ class LockScreen extends StatelessWidget {
     );
   }
 
-  void onSubmit(String pin, BuildContext context) async {
+  void onSubmit(String pin, BuildContext context,WidgetRef ref) async {
     try {
       Wallet? wallet = await WalletChannel().openWallet(pin);
       WalletChannel().startSync();

@@ -4,12 +4,16 @@ import 'package:anon_wallet/models/wallet.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final walletStateStreamProvider = StreamProvider<Wallet?>((ref) => WalletEventsChannel().walletStream());
+final walletLoadingStreamProvider = StreamProvider<bool>((ref) => WalletEventsChannel().walletOpenStream());
+
+final walletLoadingProvider = Provider<bool?>((ref) =>ref.watch(walletLoadingStreamProvider).value);
 
 final walletAddressProvider = Provider((ref) {
   var walletAsync = ref.watch(walletStateStreamProvider);
   Wallet? wallet = walletAsync.value;
   return wallet != null ? wallet.address :  "";
 });
+
 
 final walletTransactions = Provider<List<Transaction>>((ref) {
   var walletAsync = ref.watch(walletStateStreamProvider);

@@ -1,6 +1,5 @@
 package xmr.anon_wallet.wallet.channels
 
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.model.NetworkType
 import com.m2049r.xmrwallet.model.TransactionInfo
@@ -16,7 +15,6 @@ import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.services.NodeManager
 import java.io.File
 import java.util.*
-import kotlin.math.log
 
 
 class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
@@ -67,6 +65,12 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             withContext(Dispatchers.IO) {
                 if (walletFile.exists()) {
                     try {
+                        WalletEventsChannel.sendEvent(
+                            hashMapOf(
+                                "EVENT_TYPE" to "OPEN_WALLET",
+                                "state" to true
+                            )
+                        )
                         val wallet =
                             WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
                         result.success(wallet.walletToHashMap())
@@ -75,17 +79,19 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
-                        WalletEventsChannel.sendEvent(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletRefresh()
-                        wallet.startRefresh()
-                        wallet.refreshHistory()
-                        wallet.refresh()
                         if (wallet.isSynchronized) {
                             wallet.refreshHistory()
-                            wallet.startRefresh()
                         } else {
                             wallet.refresh()
                         }
+                        WalletEventsChannel.sendEvent(
+                            hashMapOf(
+                                "EVENT_TYPE" to "OPEN_WALLET",
+                                "state" to false
+                            )
+                        )
+                        WalletEventsChannel.sendEvent(wallet.walletToHashMap())
                     } catch (e: Exception) {
                         e.printStackTrace()
                         result.error("WALLET_OPEN_ERROR", e.message, e.localizedMessage);
@@ -246,7 +252,6 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         "isSynchronized" to this.isSynchronized,
         "blockChainHeight" to this.blockChainHeight,
         "numSubaddresses" to this.numSubaddresses,
-        "height" to this.restoreHeight,
         "seedLanguage" to this.seedLanguage,
         "restoreHeight" to this.restoreHeight,
         "transactions" to this.history.all.map { it.toHashMap() }.reversed().toList(),

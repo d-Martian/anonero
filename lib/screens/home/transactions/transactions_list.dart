@@ -61,9 +61,10 @@ class _TransactionsListState extends State<TransactionsList> {
         ),
         Consumer(builder: (context, ref, c) {
           bool isConnecting = ref.watch(connectingToNodeStateProvider);
+          bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
           Map<String, num>? sync = ref.watch(syncProgressStateProvider);
 
-          if (isConnecting) {
+          if (isConnecting || isWalletOpening) {
             return SliverAppBar(
                 automaticallyImplyLeading: false,
                 pinned: true,
@@ -152,7 +153,6 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 
   getStats(Transaction transaction) {
-    print("transaction ${transaction.isPending} ${transaction.isConfirmed} ${transaction.confirmations}");
     if (!(transaction.isConfirmed ?? false)) {
       int confirms = transaction.confirmations ?? 0;
       double progress = confirms / maxConfirms;

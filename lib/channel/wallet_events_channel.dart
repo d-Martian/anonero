@@ -11,6 +11,7 @@ class WalletEventsChannel {
   late StreamSubscription _events;
   final StreamController<Node?> _nodeStream = StreamController<Node?>();
   final StreamController<Wallet?> _walletStream = StreamController<Wallet?>();
+  final StreamController<bool> _walletOpenStateStream = StreamController<bool>();
   static final WalletEventsChannel _singleton = WalletEventsChannel._internal();
 
   Stream<Node?> nodeStream() {
@@ -21,22 +22,33 @@ class WalletEventsChannel {
     return _walletStream.stream;
   }
 
+
+  Stream<bool> walletOpenStream() {
+    return _walletOpenStateStream.stream;
+  }
+
   WalletEventsChannel._internal() {
     _events = channel.receiveBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
         switch (type) {
-                case "NODE":
-                  {
-                    _nodeStream.sink.add(Node.fromJson(event));
-                    break;
-                  }
-                case "WALLET":
-                  {
-                    _walletStream.sink.add(Wallet.fromJson(event));
-                    break;
-                  }
-              }
+          case "NODE":
+            {
+              _nodeStream.sink.add(Node.fromJson(event));
+              break;
+            }
+          case "WALLET":
+            {
+              _walletStream.sink.add(Wallet.fromJson(event));
+              break;
+            }
+          case "OPEN_WALLET":
+            {
+              bool isLoading = event['state'];
+              _walletOpenStateStream.sink.add(isLoading);
+              break;
+            }
+        }
       } catch (e) {
         print(e);
       }
