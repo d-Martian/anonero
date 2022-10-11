@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 class Node {
@@ -25,6 +27,7 @@ class Node {
       this.password});
 
   Node.fromJson(Map json) {
+    print("Node:Sync: ${jsonEncode(json)}");
     try {
       height = json['height'] ?? 0;
       status = json['status'] ?? "disconnected";
@@ -52,7 +55,7 @@ class Node {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['height'] = height;
     data['responseCode'] = responseCode;
     data['host'] = host;

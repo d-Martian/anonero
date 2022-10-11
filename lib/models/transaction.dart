@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 class Transaction {
@@ -35,6 +37,7 @@ class Transaction {
 
   Transaction.fromJson(Map json) {
     try {
+      print("Transaction :: ${jsonEncode(json)}");
       displayLabel = json['displayLabel'];
       subaddressLabel = json['subaddressLabel'];
       address = json['address'];

@@ -27,6 +27,7 @@ class _TransactionsListState extends State<TransactionsList> {
         SliverAppBar(
           automaticallyImplyLeading: false,
           pinned: false,
+          centerTitle: false,
           floating: true,
           backgroundColor: Theme
               .of(context)

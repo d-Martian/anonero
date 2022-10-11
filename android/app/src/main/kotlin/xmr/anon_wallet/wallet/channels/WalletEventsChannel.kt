@@ -12,6 +12,7 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.AnonWallet
+import xmr.anon_wallet.wallet.model.walletToHashMap
 import xmr.anon_wallet.wallet.services.NodeManager
 import java.io.File
 
@@ -95,7 +96,7 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
         Log.i(TAG, "moneyReceived: $txId $amount")
         val wallet = WalletManager.getInstance().wallet;
         if (wallet != null) {
-            sendEvent(wallet.walletToHashMap())
+             sendEvent(wallet.walletToHashMap())
         }
     }
 

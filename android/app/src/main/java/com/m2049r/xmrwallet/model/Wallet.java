@@ -117,6 +117,14 @@ public class Wallet {
             this.accountLookahead = accountLookahead;
             this.subaddressLookahead = subaddressLookahead;
         }
+
+        public int getAccountLookahead() {
+            return accountLookahead;
+        }
+
+        public int getSubaddressLookahead() {
+            return subaddressLookahead;
+        }
     }
 
     public enum StatusEnum {

@@ -23,7 +23,9 @@ import java.util.regex.Pattern
 @ToString
 @EqualsAndHashCode
 data class Subaddress(
-    val accountIndex: Int, val addressIndex: Int, val address: String?,
+    val accountIndex: Int,
+    val addressIndex: Int,
+    val address: String?,
     val label: String? = null
 ) : Comparable<Subaddress> {
     private var amount: Long = 0
@@ -31,6 +33,7 @@ data class Subaddress(
     fun setAmount(amount: Long) {
         this.amount = amount
     }
+
 
     override fun compareTo(another: Subaddress): Int { // newer is <
         val compareAccountIndex = another.accountIndex - accountIndex
@@ -42,7 +45,10 @@ data class Subaddress(
     val displayLabel: String?
         get() = if (label!!.isEmpty() || DEFAULT_LABEL_FORMATTER.matcher(label).matches()) "#$addressIndex" else label
 
+    val totalAmount: Long
+        get() = amount
+
     companion object {
-     public  val DEFAULT_LABEL_FORMATTER = Pattern.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$")
+        public val DEFAULT_LABEL_FORMATTER = Pattern.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$")
     }
 }

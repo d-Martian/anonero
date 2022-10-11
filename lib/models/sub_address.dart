@@ -1,25 +1,38 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+
 class SubAddress {
   int? accountIndex;
   String? address;
   String? squashedAddress;
   int? addressIndex;
+  num? totalAmount;
   String? label;
+  String? displayLabel;
 
   SubAddress({this.accountIndex, this.address, this.squashedAddress, this.addressIndex, this.label});
 
   SubAddress.fromJson(dynamic json) {
-    accountIndex = json['accountIndex'];
-    address = json['address'];
-    squashedAddress = json['squashedAddress'];
-    addressIndex = json['addressIndex'];
-    label = json['label'];
+    print("SubAddress :: ${jsonEncode(json)}");
+    try {
+      accountIndex = json['accountIndex'];
+      address = json['address'];
+      squashedAddress = json['squashedAddress'];
+      addressIndex = json['addressIndex'];
+      totalAmount = json['totalAmount'];
+      label = json['label'];
+    } catch (e,s) {
+      debugPrintStack(stackTrace: s);
+      print(e);
+    }
   }
 
   String getLabel() {
     if (label != null && label!.isNotEmpty) {
       return label!;
     } else {
-      return "SUBADDRESS $addressIndex";
+      return "SUBADDRESS #$addressIndex";
     }
   }
 
