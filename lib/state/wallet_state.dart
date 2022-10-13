@@ -40,3 +40,13 @@ final walletBalanceProvider = Provider((ref) {
     return wallet.balance;
   }
 });
+
+final walletAvailableBalanceProvider = Provider((ref) {
+  var walletAsync = ref.watch(walletStateStreamProvider);
+  Wallet? wallet = walletAsync.value;
+  if (wallet == null) {
+    return 0;
+  } else {
+    return wallet.unlockedBalance;
+  }
+});
