@@ -24,11 +24,8 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeProvider().getTheme(),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text("LOADING"),
-        ),
-        body: const CircularProgressIndicator(),
+      home: const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       ),
     );
   }
@@ -49,7 +46,7 @@ class _AnonAppState extends State<AnonApp> {
   Widget build(BuildContext context) {
     return ProviderScope(
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'anon',
         theme: ThemeProvider().getTheme(),
         home: AppMain(this.widget.state),
       ),
@@ -65,15 +62,14 @@ class _AnonAppState extends State<AnonApp> {
 
 class AppMain extends ConsumerWidget {
   final WalletState state;
+
   const AppMain(this.state, {Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context, ref) {
     return state == WalletState.walletReady ? const LockScreen() : const LandingScreen();
   }
 }
-
-
 
 class LockScreen extends StatelessWidget {
   const LockScreen({Key? key}) : super(key: key);
@@ -99,12 +95,12 @@ class LockScreen extends StatelessWidget {
             child: Container(
               alignment: Alignment.bottomCenter,
               child: Consumer(
-                builder: (context,ref,c){
+                builder: (context, ref, c) {
                   return NumberPadWidget(
                     maxPinSize: maxPinSize,
                     minPinSize: minPinSize,
                     onSubmit: (String pin) {
-                      onSubmit(pin, context,ref);
+                      onSubmit(pin, context, ref);
                     },
                   );
                 },
@@ -116,7 +112,7 @@ class LockScreen extends StatelessWidget {
     );
   }
 
-  void onSubmit(String pin, BuildContext context,WidgetRef ref) async {
+  void onSubmit(String pin, BuildContext context, WidgetRef ref) async {
     try {
       Wallet? wallet = await WalletChannel().openWallet(pin);
       WalletChannel().startSync();

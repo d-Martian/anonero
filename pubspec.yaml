@@ -40,6 +40,8 @@ dependencies:
   sembast: ^3.3.0
   intl: ^0.17.0
   qr_flutter: ^4.0.0
+  animations: ^2.0.7
+  qr_code_scanner: ^1.0.1
 
 dev_dependencies:
   flutter_test:
