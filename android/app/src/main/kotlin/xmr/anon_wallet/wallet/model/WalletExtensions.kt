@@ -17,7 +17,7 @@ fun Wallet.getLatestSubaddress(): Subaddress? {
     var lastUsedSubaddress = getLastSubAddressIndex()
     lastUsedSubaddress++
     val address = this.getSubaddressObject(lastUsedSubaddress);
-    if ( lastUsedSubaddress == this.numSubaddresses) {
+    if (lastUsedSubaddress == this.numSubaddresses) {
         this.addSubaddress(accountIndex, "Subaddress #${address.addressIndex}")
     }
     return address
@@ -41,14 +41,17 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         "name" to this.name,
         "address" to this.address,
         "secretViewKey" to this.secretViewKey,
-        "balance" to this.balance,
+        "balance" to this.balanceAll,
+        "balanceAll" to this.balanceAll,
+        "unlockedBalanceAll" to this.unlockedBalanceAll,
+        "unlockedBalance" to this.unlockedBalance,
         "currentAddress" to nextAddress,
         "isSynchronized" to this.isSynchronized,
         "blockChainHeight" to this.blockChainHeight,
         "numSubaddresses" to this.numSubaddresses,
         "seedLanguage" to this.seedLanguage,
         "restoreHeight" to this.restoreHeight,
-        "transactions" to this.history.all.map { it.toHashMap() }.reversed().toList(),
+        "transactions" to this.history.all.sortedByDescending { it.timestamp }.sortedBy { it.isPending }.map { it.toHashMap() }.toList(),
         "EVENT_TYPE" to "WALLET",
     )
 }

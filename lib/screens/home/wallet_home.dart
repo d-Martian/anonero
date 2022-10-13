@@ -1,4 +1,5 @@
 import 'package:anon_wallet/screens/home/receive_screen.dart';
+import 'package:anon_wallet/screens/home/spend/spend_screen.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/widgets/bottom_bar.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class _WalletHomeState extends State<WalletHome> {
           ReceiveWidget(() {
             _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
           }),
-          Container(color: Colors.grey.shade700),
+          const SpendScreen(),
           Container(color: Colors.grey.shade900),
         ],
         onPageChanged: (index) {

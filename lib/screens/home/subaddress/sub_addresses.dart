@@ -25,7 +25,7 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
     var value = ref.watch(getSubAddressesProvider);
     return Scaffold(
         appBar: AppBar(
-          title: Text("SubAddresses"),
+          title: const Text("SubAddresses"),
         ),
         body: value.map(
             data: (data) {

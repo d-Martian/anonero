@@ -44,7 +44,6 @@ object NodeManager {
                 node.testRpcService()
                 Log.i("TAG", "setNode: ${node.toHashMap()}")
                 WalletManager.getInstance().setDaemon(node)
-                WalletManager.getInstance().wallet.init(0)
                 currentNode = node
                 isConfigured = true
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {

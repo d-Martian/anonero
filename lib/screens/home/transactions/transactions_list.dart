@@ -6,6 +6,7 @@ import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
+import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -121,34 +122,39 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 
   Widget _buildTxItem(Transaction transaction) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-      decoration: BoxDecoration(
-          border: Border.all(width: 1, color: Colors.grey.shade600),
-          borderRadius: const BorderRadius.all(Radius.circular(8))),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          getStats(transaction),
-          Text(
-            formatMonero(transaction.amount),
-            style: Theme
-                .of(context)
-                .textTheme
-                .headlineSmall,
-          ),
-          Column(
-            children: [Text(formatTime(transaction.timeStamp), style: Theme
-                .of(context)
-                .textTheme
-                .caption)
-            ],
-          )
-        ],
+    return GestureDetector(
+      onTap: (){
+
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+        decoration: BoxDecoration(
+            border: Border.all(width: 1, color:transaction.isSpend ? Theme.of(context).primaryColor : Colors.grey.shade600),
+            borderRadius: const BorderRadius.all(Radius.circular(8))),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            getStats(transaction),
+            Text(
+              formatMonero(transaction.amount),
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .headlineSmall,
+            ),
+            Column(
+              children: [Text(formatTime(transaction.timeStamp), style: Theme
+                  .of(context)
+                  .textTheme
+                  .caption)
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -176,7 +182,7 @@ class _TransactionsListState extends State<TransactionsList> {
         ),
       );
     }
-    return (transaction.amount ?? 0) < 0
+     return (transaction.isSpend)
         ? Icon(
       CupertinoIcons.arrow_turn_left_up,
       color: Theme

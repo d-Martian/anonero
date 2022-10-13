@@ -1,7 +1,7 @@
 package xmr.anon_wallet.wallet.model
 
 import com.m2049r.xmrwallet.model.TransactionInfo
-
+import com.m2049r.xmrwallet.model.TransactionInfo.Direction
 
 
 fun TransactionInfo.toHashMap(): HashMap<String, Any> {
@@ -19,6 +19,7 @@ fun TransactionInfo.toHashMap(): HashMap<String, Any> {
         "hash" to this.hash,
         "notes" to this.notes,
         "displayLabel" to this.displayLabel,
+        "isSpend" to (this.direction == Direction.Direction_Out) ,
         "subaddressLabel" to this.subaddressLabel,
         "fee" to this.fee,
     )

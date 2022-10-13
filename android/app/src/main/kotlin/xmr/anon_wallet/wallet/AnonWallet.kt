@@ -1,19 +1,16 @@
 package xmr.anon_wallet.wallet
 
 import android.app.Application
-import android.util.Log
-import androidx.datastore.core.DataStore
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.m2049r.xmrwallet.model.NetworkType
 import com.m2049r.xmrwallet.model.Wallet
-import com.m2049r.xmrwallet.model.WalletManager
 import io.flutter.embedding.android.FlutterActivity
 import kotlinx.coroutines.*
-import xmr.anon_wallet.wallet.channels.WalletEventsChannel
 import java.io.File
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 
 object AnonWallet {
@@ -22,6 +19,8 @@ object AnonWallet {
     lateinit var walletDir: File
     private var currentWallet: Wallet? = null
     private val walletScope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
+    const val XMR_DECIMALS = 12
+    val ONE_XMR = 10.0.pow(XMR_DECIMALS.toDouble()).roundToInt()
 
     @JvmName("setApplication1")
     fun setApplication(flutterActivity: FlutterActivity) {

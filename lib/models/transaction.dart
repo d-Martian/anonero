@@ -15,6 +15,7 @@ class Transaction {
   int? accountIndex;
   String? paymentId;
   num? amount = 0;
+  bool isSpend = false;
   int? timeStamp;
   int? addressIndex;
   bool? isConfirmed;
@@ -37,12 +38,12 @@ class Transaction {
 
   Transaction.fromJson(Map json) {
     try {
-      print("Transaction :: ${jsonEncode(json)}");
       displayLabel = json['displayLabel'];
       subaddressLabel = json['subaddressLabel'];
       address = json['address'];
       notes = json['notes'];
       fee = json['fee'];
+      isSpend = json['isSpend'];
       confirmations = json['confirmations'];
       isPending = json['isPending'] ?? true;
       blockheight = json['blockheight'];

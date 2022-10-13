@@ -4,10 +4,7 @@ import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
-import xmr.anon_wallet.wallet.channels.NodeMethodChannel
-import xmr.anon_wallet.wallet.channels.AddressMethodChannel
-import xmr.anon_wallet.wallet.channels.WalletEventsChannel
-import xmr.anon_wallet.wallet.channels.WalletMethodChannel
+import xmr.anon_wallet.wallet.channels.*
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 
 class MainActivity : FlutterActivity() {
@@ -33,13 +30,17 @@ class MainActivity : FlutterActivity() {
          */
         WalletMethodChannel(binaryMessenger, lifecycle)
         /**
-         * Wallet specific Methods28089
+         * Wallet specific Methods
          */
         AddressMethodChannel(binaryMessenger, lifecycle)
         /**
          * Node specific Methods
          */
         NodeMethodChannel(binaryMessenger, lifecycle)
+        /**
+         * Spend specific Methods
+         */
+        SpendMethodChannel(binaryMessenger, lifecycle)
     }
 
 }

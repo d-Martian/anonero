@@ -15,6 +15,7 @@ class Wallet {
   num blockChainHeight = 0;
   num height = 0;
   num balance = 0;
+  num unlockedBalance = 0;
   num numSubaddresses = 0;
   num restoreHeight = 0;
   List<String> seed = [];
@@ -24,7 +25,7 @@ class Wallet {
   Wallet();
 
   Wallet.fromJson(dynamic json) {
-    print("wallet:sync ${json}");
+    print("wallet:sync ${jsonEncode(json)}");
     name = json['name'] ?? "";
     seedLanguage = json['seedLanguage'] ?? "";
     address = json['address'] ?? "";
@@ -36,6 +37,7 @@ class Wallet {
     blockChainHeight = json['blockChainHeight'] ?? 0;
     isSynchronized = json['isSynchronized'] ?? false;
     balance = json['balance'] ?? 0;
+    unlockedBalance = json['unlockedBalance'] ?? 0;
     numSubaddresses = json['numSubaddresses'] ?? 0;
     height = json['height'] ?? 0;
     if (json.containsKey("seed")) {
