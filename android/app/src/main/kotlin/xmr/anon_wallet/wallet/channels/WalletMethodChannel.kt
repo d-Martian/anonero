@@ -1,19 +1,14 @@
 package xmr.anon_wallet.wallet.channels
 
-import android.util.Log
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import com.m2049r.xmrwallet.data.Node
 import com.m2049r.xmrwallet.model.NetworkType
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.utils.RestoreHeight
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.slf4j.MDC.put
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.model.walletToHashMap
 import xmr.anon_wallet.wallet.services.NodeManager
@@ -65,7 +60,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
     private fun startSync(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                val wallet = WalletManager.getInstance().wallet;
+                WalletManager.getInstance().wallet;
             }
         }
     }
@@ -90,16 +85,19 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         val wallet =
                             WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
                         result.success(wallet.walletToHashMap())
-                        WalletEventsChannel.initWalletRefresh()
                         wallet.refreshHistory()
-                        if (wallet.isSynchronized) {
-                            wallet.startRefresh()
-                        } else {
-                            wallet.refresh()
-                            wallet.refreshHistory()
-                            wallet.startRefresh()
+                        NodeManager.getNode()?.let {
+                            if(it.isSuccessful){
+                                WalletEventsChannel.initWalletRefresh()
+                                if (wallet.isSynchronized) {
+                                    wallet.startRefresh()
+                                } else {
+                                    wallet.refresh()
+                                    wallet.refreshHistory()
+                                }
+                                WalletManager.getInstance().wallet.init(0)
+                            }
                         }
-                        WalletManager.getInstance().wallet.init(0)
                         WalletEventsChannel.sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "OPEN_WALLET",
