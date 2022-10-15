@@ -14,28 +14,27 @@ class _SetPinScreenState extends State<SetPinScreen> {
   String key = "";
   String confirmKey = "";
   PageController controller = PageController();
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: (){
-        if(controller.page == 0){
+      onWillPop: () {
+        if (controller.page == 0) {
           return Future.value(true);
-        }else{
+        } else {
           controller.animateToPage(0, duration: const Duration(milliseconds: 240), curve: Curves.linear);
           return Future.value(false);
         }
       },
       child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 60),
+        body: SafeArea(
           child: Column(
             children: [
               Hero(
                 tag: "anon_logo",
-                child:
-                    SizedBox(width: 240, child: Image.asset("assets/anon_logo.png")),
+                child: SizedBox(width: 180, child: Image.asset("assets/anon_logo.png")),
               ),
-              const Text("Please enter your pin"),
+              const Text("Enter your PIN"),
               Expanded(
                 child: PageView(
                   controller: controller,
@@ -50,7 +49,8 @@ class _SetPinScreenState extends State<SetPinScreen> {
                           setState(() {
                             key = pin;
                           });
-                          controller.animateToPage(1, duration: const Duration(milliseconds: 240), curve: Curves.linear);
+                          controller.animateToPage(1,
+                              duration: const Duration(milliseconds: 240), curve: Curves.linear);
                         },
                       ),
                     ),
@@ -63,8 +63,8 @@ class _SetPinScreenState extends State<SetPinScreen> {
                           onSubmit: (String pin) {
                             setState(() {
                               confirmKey = pin;
-                              if(confirmKey == key){
-                                Navigator.pop(context,confirmKey);
+                              if (confirmKey == key) {
+                                Navigator.pop(context, confirmKey);
                               }
                             });
                           }),
@@ -72,7 +72,6 @@ class _SetPinScreenState extends State<SetPinScreen> {
                   ],
                 ),
               ),
-
             ],
           ),
         ),
@@ -86,8 +85,10 @@ class NumberPadWidget extends StatefulWidget {
   final int minPinSize;
   final String? value;
   final void Function(String key) onSubmit;
+  final void Function(String key)? onKeyPress;
 
-  const NumberPadWidget({Key? key, this.maxPinSize = 10, this.minPinSize = 4,this.value, required this.onSubmit})
+  const NumberPadWidget(
+      {Key? key, this.maxPinSize = 10, this.minPinSize = 4, this.value, required this.onSubmit, this.onKeyPress})
       : super(key: key);
 
   @override
@@ -99,11 +100,11 @@ class _NumberPadWidgetState extends State<NumberPadWidget> {
   bool showDoneButton = false;
   bool valueMatch = true;
 
-  _onValueChanges(){
+  _onValueChanges() {
     setState(() {
       showDoneButton = widget.minPinSize <= value.length;
-      if(widget.value != null){
-        valueMatch =   widget.value!.startsWith(value);
+      if (widget.value != null) {
+        valueMatch = widget.value!.startsWith(value);
       }
     });
   }
@@ -127,6 +128,7 @@ class _NumberPadWidgetState extends State<NumberPadWidget> {
               value = "$value$key";
               _onValueChanges();
             });
+            widget.onKeyPress?.call(key);
           },
           onDeleteLongPress: () {
             setState(() {
@@ -149,10 +151,11 @@ class _NumberPadWidgetState extends State<NumberPadWidget> {
           doneIcon: const Icon(Icons.done),
         ),
         const Padding(padding: EdgeInsets.all(8)),
-         AnimatedSlide(
+        AnimatedSlide(
           offset: !valueMatch ? const Offset(0, 0) : const Offset(-32, 0),
           duration: const Duration(milliseconds: 100),
-          child: Text("Pin does not match",style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.redAccent)),
+          child: Text("Pin does not match",
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.redAccent)),
         )
       ],
     );

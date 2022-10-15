@@ -90,7 +90,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 controller: pageController,
                 children: [
-                  RemoteNodeWidget(),
+                  const RemoteNodeWidget(),
                   WalletPassphraseWidget(
                     onPassSeedPhraseAdded: (value) {
                       ref.read(walletSeedPhraseProvider.state).state = value;
@@ -102,7 +102,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Center(
+                        const Center(
                             child: SizedBox(
                                 width: 120,
                                 height: 120,
@@ -111,7 +111,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                                 ))),
                         Container(
                             padding: EdgeInsets.symmetric(vertical: 24),
-                            child: Text("Creating your wallet please wait..."))
+                            child: const Text("Creating your wallet please wait..."))
                       ],
                     ),
                   ),

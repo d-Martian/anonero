@@ -1,6 +1,5 @@
 package xmr.anon_wallet.wallet.channels
 
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.model.PendingTransaction
 import com.m2049r.xmrwallet.model.Wallet
@@ -40,6 +39,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
                 try {
                     success = pendingTx.commit("", true)
                     if (success) {
+                        wallet.refreshHistory()
                         wallet.setUserNote(txId, notes)
                     }
                 } catch (e: Exception) {

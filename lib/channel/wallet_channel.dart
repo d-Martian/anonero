@@ -12,6 +12,7 @@ enum WalletState {
 class WalletChannel {
   static const platform = MethodChannel('wallet.channel');
   static final WalletChannel _singleton = WalletChannel._internal();
+
   WalletChannel._internal();
 
   factory WalletChannel() {
@@ -22,6 +23,14 @@ class WalletChannel {
     dynamic value =
         await platform.invokeMethod("create", {"name": "default", "password": password, "seedPhrase": seedPhrase});
     return Wallet.fromJson(value);
+  }
+
+  Future<void> rescan() async {
+    dynamic value = await platform.invokeMethod("rescan");
+  }
+
+  Future<void> refresh() async {
+    dynamic value = await platform.invokeMethod("refresh");
   }
 
   Future<Wallet?> openWallet(String password) async {
@@ -35,9 +44,8 @@ class WalletChannel {
     return Wallet.fromJson(value);
   }
 
-  void startSync()async {
-    dynamic value =
-        await platform.invokeMethod("startSync");
+  void startSync() async {
+    dynamic value = await platform.invokeMethod("startSync");
   }
 
   Future<WalletState> getWalletState() async {
@@ -51,5 +59,9 @@ class WalletChannel {
     return WalletState.walletNotInitialized;
   }
 
-
+  Future<Wallet>  getWalletPrivate(String seedPassphrase) async {
+    dynamic value =
+        await platform.invokeMethod("viewWalletInfo", {"seedPassphrase": seedPassphrase});
+    return Wallet.fromJson(value);
+  }
 }

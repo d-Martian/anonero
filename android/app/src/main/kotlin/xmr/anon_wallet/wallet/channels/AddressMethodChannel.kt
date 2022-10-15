@@ -1,6 +1,5 @@
 package xmr.anon_wallet.wallet.channels
 
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.data.Subaddress
 import com.m2049r.xmrwallet.model.WalletManager

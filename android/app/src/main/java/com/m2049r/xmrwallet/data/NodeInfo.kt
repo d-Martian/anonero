@@ -27,9 +27,12 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
+import xmr.anon_wallet.wallet.AnonWallet
+import xmr.anon_wallet.wallet.utils.AnonPreferences
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.InetSocketAddress
+import java.net.Proxy
 import java.net.SocketAddress
 
 class NodeInfo : Node {
@@ -91,7 +94,7 @@ class NodeInfo : Node {
         hashMap["levinPort"] = levinPort
         hashMap["username"] = username ?: ""
         hashMap["password"] = password ?: ""
-        hashMap["EVENT_TYPE"] =  "NODE"
+        hashMap["EVENT_TYPE"] = "NODE"
         hashMap["favourite"] = this.isFavourite
         return hashMap
     }
@@ -155,9 +158,10 @@ class NodeInfo : Node {
         return Request(url, json, this.username, password)
     }
 
-    fun  getHeight(): Long {
+    fun getHeight(): Long {
         return height
     }
+
     private fun testRpcService(port: Int): Boolean? {
         Timber.d("Testing %s", toNodeString())
         clear()
@@ -295,6 +299,16 @@ class NodeInfo : Node {
 //            }
                 OkHttpClient?
             private get() = if (mockClient != null) mockClient else OkHttpClient.Builder()
+                .apply {
+                    val preferences = AnonPreferences(AnonWallet.getAppContext())
+                    if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPort.isNullOrEmpty()) {
+                        val iSock = InetSocketAddress(
+                            preferences.proxyServer, preferences.proxyPort!!.trim().toInt()
+                        )
+                        Log.i("tag","Setting Proxy ${preferences.proxyServer} ${preferences.proxyPort}")
+                        this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
+                    }
+                }
                 .build() // Unit-test mode
 
         //            if ((username != null) && (!username.isEmpty())) {

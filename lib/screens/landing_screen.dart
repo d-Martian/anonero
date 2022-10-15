@@ -33,7 +33,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   Hero(
                       tag: "anon_logo",
                       child: SizedBox(
-                          width: MediaQuery.of(context).size.width / 1.3, child: Image.asset("assets/anon_logo.png"))),
+                          width: MediaQuery.of(context).size.width / 0.7, child: Image.asset("assets/anon_logo.png"))),
                 ],
               )),
           Flexible(

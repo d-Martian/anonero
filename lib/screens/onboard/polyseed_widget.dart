@@ -22,13 +22,12 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+    return SafeArea(
+  	child: Container( 
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: Container(
-              height: 300,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -73,6 +72,7 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
             ),
           )
         ],
+      ),
       ),
     );
   }

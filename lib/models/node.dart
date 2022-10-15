@@ -13,6 +13,8 @@ class Node {
   num syncBlock = 0;
   String? username;
   String? password;
+  String? proxyServer;
+  String? proxyPort;
   String status = "disconnected";
   String connectionError = "";
 
@@ -41,6 +43,8 @@ class Node {
       favourite = json['favourite'];
       username = json['username'];
       password = json['password'];
+      proxyServer = json['proxyServer'];
+      proxyPort= json['proxyPort'];
     } catch (e, s) {
       debugPrintStack(stackTrace: s);
     }

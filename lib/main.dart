@@ -1,14 +1,14 @@
 import 'package:anon_wallet/anon_wallet.dart';
-import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/channel/wallet_events_channel.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/screens/landing_screen.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
-import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() async {
@@ -71,14 +71,20 @@ class AppMain extends ConsumerWidget {
   }
 }
 
-class LockScreen extends StatelessWidget {
+class LockScreen extends HookWidget {
   const LockScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final error = useState<String?>(null);
+    final loading = useState<bool>(false);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        flexibleSpace: loading.value ? const LinearProgressIndicator() : null,
+        backgroundColor: Theme
+            .of(context)
+            .scaffoldBackgroundColor,
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -90,7 +96,16 @@ class LockScreen extends StatelessWidget {
             child: SizedBox(width: 240, child: Image.asset("assets/anon_logo.png")),
           ),
           const Text("Please enter your pin"),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 24)),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 6)),
+          AnimatedOpacity(opacity: error.value == null ? 0 : 1, duration: Duration(milliseconds: 300), child: Text(
+            error.value ?? "",
+            style: Theme
+                .of(context)
+                .textTheme
+                .subtitle2
+                ?.copyWith(color: Colors.red),
+          ),),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 4)),
           Expanded(
             child: Container(
               alignment: Alignment.bottomCenter,
@@ -98,29 +113,41 @@ class LockScreen extends StatelessWidget {
                 builder: (context, ref, c) {
                   return NumberPadWidget(
                     maxPinSize: maxPinSize,
+                    onKeyPress: (s){
+                      error.value = null;
+                    },
                     minPinSize: minPinSize,
                     onSubmit: (String pin) {
-                      onSubmit(pin, context, ref);
+                      onSubmit(pin, context, ref, error, loading);
                     },
                   );
                 },
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  void onSubmit(String pin, BuildContext context, WidgetRef ref) async {
+  void onSubmit(String pin, BuildContext context, WidgetRef ref, ValueNotifier<String?> error,
+      ValueNotifier<bool> loading) async {
     try {
+      error.value = null;
+      loading.value = true;
       Wallet? wallet = await WalletChannel().openWallet(pin);
       WalletChannel().startSync();
+      WalletEventsChannel().initEventChannel();
+      loading.value = false;
       if (wallet != null) {
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (c) => WalletHome()), (route) => false);
       }
+    } on PlatformException catch (e) {
+      error.value = e.message;
     } catch (e) {
       print(e);
+    } finally {
+      loading.value = false;
     }
   }
 }

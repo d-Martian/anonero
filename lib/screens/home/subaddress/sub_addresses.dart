@@ -2,6 +2,7 @@ import 'package:anon_wallet/channel/address_channel.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/screens/home/subaddress/edit_sub_address.dart';
 import 'package:anon_wallet/state/sub_addresses.dart';
+import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -65,7 +66,7 @@ class SubAddressItem extends StatelessWidget {
       title: GestureDetector(
         onTap: () {
           showDialog(
-              barrierColor: const Color(0xab1e1e1e),
+              barrierColor: barrierColor,
               context: context,
               builder: (context) {
                 return SubAddressEditDialog(subAddress);

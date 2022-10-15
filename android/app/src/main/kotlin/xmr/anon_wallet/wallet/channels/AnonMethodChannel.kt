@@ -16,7 +16,7 @@ import kotlinx.coroutines.*
 abstract class AnonMethodChannel(messenger: BinaryMessenger, name: String, lifecycle: Lifecycle) : MethodChannel(messenger, name),
     MethodChannel.MethodCallHandler, DefaultLifecycleObserver {
 
-    private val _mainScope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
+    private var _mainScope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
 
     val scope: CoroutineScope
         get() = _mainScope
@@ -29,6 +29,9 @@ abstract class AnonMethodChannel(messenger: BinaryMessenger, name: String, lifec
                 }
                 if (event == Lifecycle.Event.ON_DESTROY) {
                     onClear()
+                }
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    _mainScope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
                 }
             }
         })

@@ -1,4 +1,5 @@
 import 'package:anon_wallet/models/wallet.dart';
+import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:flutter/services.dart';
 
 import '../models/node.dart';
@@ -18,13 +19,18 @@ class NodeChannel {
     return Wallet.fromJson(value);
   }
 
+  Future setProxy(String proxy, String port) async {
+    dynamic value = await platform.invokeMethod("setProxy", {"proxyServer": proxy, "proxyPort": port});
+  }
+
+  Future<Proxy> getProxy() async {
+    dynamic value = await platform.invokeMethod("getProxy");
+    return Proxy.fromJson(value);
+  }
+
   Future setNode(String host, int port, String? username, String? password) async {
-    dynamic value = await platform.invokeMethod("setNode", {
-      "host": host,
-      "port": port,
-      "password": password,
-      "username": username
-    });
+    dynamic value = await platform
+        .invokeMethod("setNode", {"host": host, "port": port, "password": password, "username": username});
     return Node.fromJson(value);
   }
 }

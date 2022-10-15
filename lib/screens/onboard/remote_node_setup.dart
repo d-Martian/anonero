@@ -15,13 +15,13 @@ class RemoteNodeWidget extends ConsumerWidget {
     if (node != null && node.responseCode <= 200) {
       nodeMessage = "Connected to ${node.host}\nHeight : ${node.height}";
     }
-    return SizedBox(
+    return SafeArea(
+  	child: Container( 
       height: MediaQuery.of(context).size.height - 120,
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 280,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -35,7 +35,7 @@ class RemoteNodeWidget extends ConsumerWidget {
             child: ListTile(
               title: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text("Node", style: TextStyle(color: colorScheme.primary)),
+                child: Text("NODE", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
               ),
               subtitle: Column(
                 children: [
@@ -45,9 +45,15 @@ class RemoteNodeWidget extends ConsumerWidget {
                     },
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+              		borderRadius: BorderRadius.circular(12),
+              		borderSide: BorderSide(color: Colors.white, width: 1),
+              	),
                       helperText: nodeMessage,
                       helperMaxLines: 3,
-                      border: const OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                      	      borderRadius: BorderRadius.circular(12),                      
+                      ),
                       hintText: 'http://address.onion:port',
                     ),
                   ),
@@ -67,15 +73,21 @@ class RemoteNodeWidget extends ConsumerWidget {
             child: ListTile(
               title: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text("Username", style: TextStyle(color: colorScheme.primary)),
+                child: Text("USERNAME", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
               ),
               subtitle: TextField(
                 textInputAction: TextInputAction.next,
                 onChanged: (value) {
                   ref.read(remoteUserName.state).state = value;
                 },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+              	enabledBorder: OutlineInputBorder(
+              		borderRadius: BorderRadius.circular(12),
+              		borderSide: BorderSide(color: Colors.white, width: 1),
+              	),
+                border: OutlineInputBorder(
+                	borderRadius: BorderRadius.circular(12),
+              	),
                   hintText: '(optional)',
                 ),
               ),
@@ -85,15 +97,21 @@ class RemoteNodeWidget extends ConsumerWidget {
             child: ListTile(
               title: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text("Password", style: TextStyle(color: colorScheme.primary)),
+                child: Text("PASSWORD", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
               ),
               subtitle: TextField(
                 onChanged: (value) {
                   ref.read(remotePassword.state).state = value;
                 },
                 textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+              	enabledBorder: OutlineInputBorder(
+              		borderRadius: BorderRadius.circular(12),
+              		borderSide: BorderSide(color: Colors.white, width: 1),
+              	),
+                border: OutlineInputBorder(
+                	borderRadius: BorderRadius.circular(12),
+              	),
                   hintText: '(optional)',
                 ),
               ),
@@ -108,18 +126,18 @@ class RemoteNodeWidget extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Text(
-                    "ΛNON will only connect to the node specified above\n",
+                    "ΛNON will only connect\nto the node specified above\n",
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
-                  Text("If left blank, ΛNØN will connect\nto random community nodes",
-                      style: Theme.of(context).textTheme.labelLarge)
                 ],
               ),
             ),
           )
         ],
       ),
+      ),
     );
   }
 }
+

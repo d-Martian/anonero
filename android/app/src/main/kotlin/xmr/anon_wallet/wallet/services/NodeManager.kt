@@ -40,9 +40,7 @@ object NodeManager {
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {
                     put("status", "connecting")
                 })
-                Log.i("TAG", "setNode: ${node.toHashMap()}")
                 node.testRpcService()
-                Log.i("TAG", "setNode: ${node.toHashMap()}")
                 WalletManager.getInstance().setDaemon(node)
                 currentNode = node
                 isConfigured = true
@@ -59,6 +57,7 @@ object NodeManager {
                     )
                 )
                 e.printStackTrace()
+
             }
         }
     }

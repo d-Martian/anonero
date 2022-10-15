@@ -6,6 +6,7 @@ import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rxdart/rxdart.dart';
 
 class WalletEventsChannel {
   static const channel = EventChannel("wallet.events");
@@ -17,23 +18,27 @@ class WalletEventsChannel {
   static final WalletEventsChannel _singleton = WalletEventsChannel._internal();
 
   Stream<Node?> nodeStream() {
-    return _nodeStream.stream;
+    return _nodeStream.stream.asBroadcastStream();
   }
 
   Stream<Wallet?> walletStream() {
-    return _walletStream.stream;
+    return _walletStream.stream.asBroadcastStream();
   }
 
   Stream<List<SubAddress>> subAddresses() {
-    return _subAddressesStream.stream;
+    return _subAddressesStream.stream.asBroadcastStream();
   }
 
   Stream<bool> walletOpenStream() {
-    return _walletOpenStateStream.stream;
+    return _walletOpenStateStream.stream.asBroadcastStream();
   }
 
   WalletEventsChannel._internal() {
-    _events = channel.receiveBroadcastStream().listen((event) {
+    initEventChannel();
+  }
+
+  initEventChannel() {
+    _events = channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
         switch (type) {

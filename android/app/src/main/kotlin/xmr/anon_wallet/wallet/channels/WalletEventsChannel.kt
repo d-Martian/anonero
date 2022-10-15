@@ -22,7 +22,7 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     private const val WALLET_EVENTS = "wallet.events"
     private var lastBlockTime = 0L
     private var lastTxCount = 0
-    private val scope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
+    private var scope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
     private const val TAG = "WalletEventsChannel"
 
 
@@ -40,6 +40,9 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
                 if (event == Lifecycle.Event.ON_DESTROY) {
                     scope.cancel()
+                }
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    scope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
                 }
             }
         })
@@ -77,7 +80,6 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     }
 
     private fun checkWalletState() {
-        Log.i(TAG, "checkWalletState:")
         val cacheFile = File(AnonWallet.walletDir, "default")
         val keysFile = File(AnonWallet.walletDir, "default.keys")
         val addressFile = File(AnonWallet.walletDir, "default.address.txt")
@@ -113,14 +115,13 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
     override fun newBlock(height: Long) {
         val wallet = WalletManager.getInstance().wallet;
         if (wallet != null) {
-            Log.i(TAG, "newBlock: ${height}")
             // we want to see our transactions as they come in
             updateDaemonState(wallet, if (wallet.isSynchronized) height else 0)
             if (lastBlockTime < System.currentTimeMillis() - 2000) {
+                Log.i(TAG, "newBlock: ${height}")
                 lastBlockTime = System.currentTimeMillis()
                 val currentNode = NodeManager.getNode()
                 if (!wallet.isSynchronized) {
-                    // we want to see our transactions as they come in
                     // we want to see our transactions as they come in
                     wallet.refreshHistory()
                     val txCount = wallet.history.count
@@ -142,7 +143,6 @@ object WalletEventsChannel : EventChannel.StreamHandler, WalletListener {
 
     override fun updated() {
         Log.i(TAG, "updated:")
-
         val wallet = WalletManager.getInstance().wallet
         if (wallet != null) {
             sendEvent(wallet.walletToHashMap())

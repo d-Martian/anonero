@@ -1,8 +1,11 @@
 package xmr.anon_wallet.wallet.channels
 
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.model.NetworkType
+import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
+import com.m2049r.xmrwallet.util.KeyStoreHelper
 import com.m2049r.xmrwallet.utils.RestoreHeight
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -14,6 +17,7 @@ import xmr.anon_wallet.wallet.model.walletToHashMap
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 import java.io.File
+import java.net.SocketException
 import java.util.*
 
 
@@ -28,6 +32,8 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             withContext(Dispatchers.IO) {
                 try {
                     NodeManager.setNode()
+                } catch (socket: SocketException) {
+                    Log.i(TAG, "SocketException :${socket.message} ")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -53,7 +59,52 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             "generateSeed" -> generateSeed(call, result)
             "walletState" -> walletState(call, result)
             "openWallet" -> openWallet(call, result)
+            "viewWalletInfo" -> viewWalletInfo(call, result)
+            "rescan" -> rescan(call, result)
+            "refresh" -> refresh(call, result)
             "startSync" -> startSync(call, result)
+        }
+    }
+
+    private fun viewWalletInfo(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    val seedPassphrase = call.argument<String?>("seedPassphrase")
+                    val hash = AnonPreferences(AnonWallet.getAppContext()).passPhraseHash
+                    val hashedPass = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(),seedPassphrase)
+                    if(hashedPass == hash){
+                        val wallet = WalletManager.getInstance().wallet
+                        result.success(
+                            hashMapOf(
+                                "address" to wallet.address,
+                                "secretViewKey" to wallet.secretSpendKey,
+                                "seed" to wallet.getSeed(seedPassphrase),
+                                "spendKey" to wallet.secretSpendKey
+                            )
+                        )
+                    }else{
+                        result.error("1","Invalid passphrase","");
+                    }
+                } catch (e: Exception) {
+                    result.error("2",e.message,"");
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun refresh(call: MethodCall, result: Result) {
+        WalletManager.getInstance().wallet?.let {
+            it.refresh()
+            it.refreshHistory()
+            result.success(true)
+        }
+    }
+
+    private fun rescan(call: MethodCall, result: Result) {
+        WalletManager.getInstance().wallet?.let {
+            it.rescanBlockchainAsync()
         }
     }
 
@@ -67,11 +118,13 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
 
     private fun openWallet(call: MethodCall, result: Result) {
         val walletPassword = call.argument<String>("password")
-        val walletFile = File(AnonWallet.walletDir, "default")
+        val walletFileName = "default";
+        val walletFile = File(AnonWallet.walletDir, walletFileName)
         if (walletPassword == null) {
             result.error("INVALID_PASSWORD", "invalid password", null)
             return
         }
+
         scope.launch {
             withContext(Dispatchers.IO) {
                 if (walletFile.exists()) {
@@ -82,12 +135,18 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                                 "state" to true
                             )
                         )
-                        val wallet =
-                            WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
+                        // check if we need connected hardware
+                        val checkPassword = AnonWallet.getWalletPassword(walletFileName, walletPassword) != null
+                        if (!checkPassword) {
+                            result.error("1", "Invalid Password", "invalid password")
+                            return@withContext
+                        }
+                        val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
                         result.success(wallet.walletToHashMap())
                         wallet.refreshHistory()
+                        listenWalletState()
                         NodeManager.getNode()?.let {
-                            if(it.isSuccessful){
+                            if (it.isSuccessful) {
                                 WalletEventsChannel.initWalletRefresh()
                                 if (wallet.isSynchronized) {
                                     wallet.startRefresh()
@@ -131,13 +190,12 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
     private fun createWallet(call: MethodCall, result: Result) {
         if (call.hasArgument("name") && call.hasArgument("password")) {
             val walletName = call.argument<String>("name")
-            val password = call.argument<String>("password")
+            val walletPin = call.argument<String>("password")
             val seedPhrase = call.argument<String?>("seedPhrase")
-            val height = 1L
             if (walletName == null || walletName.isEmpty()) {
                 return result.error(INVALID_ARG, "invalid name parameter", null);
             }
-            if (password == null || password.isEmpty()) {
+            if (walletPin == null || walletPin.isEmpty()) {
                 return result.error(INVALID_ARG, "invalid password parameter", null);
             }
             var restoreHeight = 1L
@@ -181,13 +239,14 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         )
                     )
                     val wallet = WalletManager.getInstance()
-                        .createWallet(newWalletFile, password, default, restoreHeight)
+                        .createWallet(newWalletFile, walletPin, default, restoreHeight)
+                    AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPhrase)
                     WalletEventsChannel.initWalletRefresh()
                     val map = wallet.walletToHashMap()
                     map["seed"] = wallet.getSeed(seedPhrase ?: "")
                     wallet.store()
                     result.success(map)
-                    if(AnonPreferences(AnonWallet.getAppContext()).serverUrl != null){
+                    if (AnonPreferences(AnonWallet.getAppContext()).serverUrl != null) {
                         NodeManager.setNode()
                     }
                     if (wallet.status.isOk) {

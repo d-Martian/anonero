@@ -8,6 +8,7 @@ class Wallet {
   String seedLanguage = "";
   String pin = "";
   String address = "";
+  String spendKey = "";
   String secretViewKey = "";
   String connectionStatus = "";
   bool isSynchronized = false;
@@ -30,7 +31,7 @@ class Wallet {
     seedLanguage = json['seedLanguage'] ?? "";
     address = json['address'] ?? "";
     secretViewKey = json['secretViewKey'] ?? "";
-    restoreHeight = json['restoreHeight'] ?? "";
+    restoreHeight = json['restoreHeight'] ?? 0;
     currentAddress = SubAddress.fromJson(json['currentAddress']);
     connectionStatus = json['connectionStatus'] ?? "";
     status = json['status'] ?? "";
@@ -42,6 +43,9 @@ class Wallet {
     height = json['height'] ?? 0;
     if (json.containsKey("seed")) {
       seed = (json['seed'] as String).split(" ");
+    }
+     if (json.containsKey("spendKey")) {
+       spendKey = (json['spendKey'] as String);
     }
     if (json.containsKey("transactions")) {
       json['transactions'].forEach((v) {
