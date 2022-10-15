@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 const ColorScheme colorScheme = ColorScheme(
   brightness: Brightness.dark,
@@ -32,19 +30,14 @@ const ColorScheme colorScheme = ColorScheme(
   inversePrimary: Color(0xff355967),
   shadow: Color(0xff000000),
 );
-
+const barrierColor = Color(0xab1e1e1e);
 class ThemeProvider extends ChangeNotifier {
   ThemeData getTheme() {
     return ThemeData(
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: {
-            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-          },
-        ),
         colorScheme: colorScheme,
-        appBarTheme: const AppBarTheme(color: Colors.transparent, centerTitle: true),
+        appBarTheme: const AppBarTheme(color: Colors.transparent),
         primaryColor: colorScheme.primary,
-        fontFamily: GoogleFonts.robotoMono().fontFamily,
+        fontFamily: 'RobotoMono',
         scaffoldBackgroundColor: Colors.black,
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
@@ -52,15 +45,14 @@ class ThemeProvider extends ChangeNotifier {
             return const EdgeInsets.symmetric(vertical: 14, horizontal: 34);
           }),
           shape: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.pressed)) {
+            if(states.contains(MaterialState.pressed)){
               return RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
             }
             return RoundedRectangleBorder(borderRadius: BorderRadius.circular(8));
           }),
         )),
         buttonTheme: ButtonThemeData(
-            padding: const EdgeInsets.all(12),
-            colorScheme: colorScheme.copyWith(primary: Colors.white, background: Colors.white)),
+            padding: const EdgeInsets.all(12), colorScheme: colorScheme.copyWith(primary: Colors.white,background: Colors.white)),
         useMaterial3: false);
   }
 }

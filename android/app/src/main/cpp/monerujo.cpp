@@ -100,12 +100,12 @@ struct MyWalletListener : Monero::WalletListener {
     jobject jlistener;
 
     MyWalletListener(JNIEnv *env, jobject aListener) {
-        LOGD("Created MyListener");
+        LOGD("Created Listener");
         jlistener = env->NewGlobalRef(aListener);;
     }
 
     ~MyWalletListener() {
-        LOGD("Destroyed MyListener");
+        LOGD("Destroyed  Listener");
     };
 
     void deleteGlobalJavaRef(JNIEnv *env) {
