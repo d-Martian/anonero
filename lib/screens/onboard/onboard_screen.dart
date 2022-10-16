@@ -8,6 +8,7 @@ import 'package:anon_wallet/screens/onboard/wallet_passphrase.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class OnboardScreen extends ConsumerStatefulWidget {
@@ -177,7 +178,16 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
       return;
     }
     if (pageController.page == 0 && ref.read(remoteHost).isNotEmpty) {
-      await ref.read(nodeConnectionProvider.notifier).connect();
+      try {
+        await ref.read(nodeConnectionProvider.notifier).connect();
+      } on PlatformException catch (e) {
+         ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(content: Text("${e.message}"), actions: [
+           TextButton(onPressed: (){
+             ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+           }, child: Text("Close"))
+         ]));
+
+      }
       return;
     }
 

@@ -43,28 +43,29 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
+          const SliverAppBar(
             title: Text("Nodes"),
             actions: [
-              Consumer(
-                builder: (context, ref, child) {
-                  return TextButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            barrierColor: barrierColor,
-                            builder: (context) {
-                              return Container(
-                                height: MediaQuery.of(context).size.height / 1.6,
-                                child: Scaffold(
-                                  body: RemoteNodeAddSheet(),
-                                ),
-                              );
-                            }).then((value) => load());
-                      },
-                      child: const Text("Add Node"));
-                },
-              )
+              // Consumer(
+              //   builder: (context, ref, child) {
+              //     return TextButton(
+              //         onPressed: () {
+              //           showModalBottomSheet(
+              //               context: context,
+              //               barrierColor: barrierColor,
+              //               builder: (context) {
+              //                 return Container(
+              //                   height: MediaQuery.of(context).size.height / 1.6,
+              //                   child: Scaffold(
+              //                     body: RemoteNodeAddSheet(),
+              //                   ),
+              //                 );
+              //               }).then((value) => load());
+              //         },
+              //         child: const Text("Add Node")
+              //     );
+              //   },
+              // )
             ],
           ),
           SliverList(
