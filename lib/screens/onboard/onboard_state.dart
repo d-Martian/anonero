@@ -53,7 +53,7 @@ class ConnectToNodeState extends StateNotifier<Node?> {
     String host = ref.read(remoteHost);
     String? username = ref.read(remoteUserName);
     String? password = ref.read(remotePassword);
-    int port = 28081;
+    int port = 38081;
     Uri uri = Uri.parse(host);
     if (uri.hasPort) {
       port = uri.port;

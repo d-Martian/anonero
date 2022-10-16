@@ -6,6 +6,7 @@ class Node {
   int height=0;
   int responseCode = 500;
   String? host;
+  bool? isActive;
   int? port;
   int? majorVersion;
   int? levinPort;
@@ -29,14 +30,14 @@ class Node {
       this.password});
 
   Node.fromJson(Map json) {
-    print("Node:Sync: ${jsonEncode(json)}");
     try {
       height = json['height'] ?? 0;
+      isActive = json['isActive'] ?? false;
       status = json['status'] ?? "disconnected";
       connectionError = json['connection_error'] ?? "";
-      responseCode = json['responseCode'];
+      responseCode = json['responseCode'] ?? 1000;
       host = json['host'];
-      port = json['port'];
+      port = json['rpcPort'];
       majorVersion = json['majorVersion'];
       levinPort = json['levinPort'];
       syncBlock = json['syncBlock'] ?? 0;

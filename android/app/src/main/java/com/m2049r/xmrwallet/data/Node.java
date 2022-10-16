@@ -17,6 +17,7 @@
 package com.m2049r.xmrwallet.data;
 
 
+import com.google.gson.annotations.SerializedName;
 import com.m2049r.utils.OnionHelper;
 import com.m2049r.xmrwallet.model.NetworkType;
 import com.m2049r.xmrwallet.model.WalletManager;
@@ -86,7 +87,6 @@ public class Node {
             return (other instanceof Address) && (getHostAddress().equals(((Address) other).getHostAddress()));
         }
     }
-
     private String name = null;
     final private NetworkType networkType;
     Address hostAddress;

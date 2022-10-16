@@ -2,10 +2,12 @@ import 'dart:ffi';
 import 'dart:math';
 
 import 'package:anon_wallet/anon_wallet.dart';
+import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
+import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,8 @@ class TransactionsList extends StatefulWidget {
 }
 
 class _TransactionsListState extends State<TransactionsList> {
+
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -43,7 +47,17 @@ class _TransactionsListState extends State<TransactionsList> {
               IconButton(onPressed: () {
                 widget.onScanClick?.call();
               }, icon: const Icon(Icons.crop_free)),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+              PopupMenuButton<int>(
+                color: Colors.grey[900],
+                onSelected: (item)  {
+                  if(item == 0 ){
+                    WalletChannel().rescan();
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem<int>(value: 0, child: Text('Resync blockchain')),
+                ],
+              ),
             ],
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,

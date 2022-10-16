@@ -18,6 +18,7 @@ package com.m2049r.xmrwallet.data
 import android.util.Log
 import com.m2049r.levin.scanner.LevinPeer
 import com.m2049r.levin.util.NodePinger
+import com.m2049r.xmrwallet.model.WalletManager
 import lombok.Getter
 import lombok.Setter
 import lombok.ToString
@@ -89,13 +90,14 @@ class NodeInfo : Node {
         hashMap["height"] = height
         hashMap["responseCode"] = responseCode
         hashMap["host"] = host
-        hashMap["port"] = rpcPort
+        hashMap["rpcPort"] = rpcPort
         hashMap["majorVersion"] = majorVersion
         hashMap["levinPort"] = levinPort
         hashMap["username"] = username ?: ""
         hashMap["password"] = password ?: ""
         hashMap["EVENT_TYPE"] = "NODE"
         hashMap["favourite"] = this.isFavourite
+        hashMap["isActive"] =  false
         return hashMap
     }
 
@@ -148,12 +150,7 @@ class NodeInfo : Node {
     }
 
     private fun rpcServiceRequest(port: Int): Request {
-        val url: HttpUrl = HttpUrl.Builder()
-            .scheme("http")
-            .host(this.host)
-            .port(port)
-            .addPathSegment("json_rpc")
-            .build()
+        val url: HttpUrl = HttpUrl.Builder().scheme("http").host(this.host).port(port).addPathSegment("json_rpc").build()
         val json = "{\"jsonrpc\":\"2.0\",\"id\":\"0\",\"method\":\"getlastblockheader\"}"
         return Request(url, json, this.username, password)
     }
@@ -263,10 +260,7 @@ class NodeInfo : Node {
 
     @ToString
     class Request @JvmOverloads constructor(
-        val url: HttpUrl?,
-        val json: String? = null,
-        val username: String? = null,
-        val password: String? = null
+        val url: HttpUrl?, val json: String? = null, val username: String? = null, val password: String? = null
     ) {
         constructor(url: HttpUrl?, json: JSONObject?) : this(url, json?.toString(), null, null) {}
 
@@ -298,18 +292,16 @@ class NodeInfo : Node {
 //                return client;
 //            }
                 OkHttpClient?
-            private get() = if (mockClient != null) mockClient else OkHttpClient.Builder()
-                .apply {
+            private get() = if (mockClient != null) mockClient else OkHttpClient.Builder().apply {
                     val preferences = AnonPreferences(AnonWallet.getAppContext())
                     if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPort.isNullOrEmpty()) {
                         val iSock = InetSocketAddress(
                             preferences.proxyServer, preferences.proxyPort!!.trim().toInt()
                         )
-                        Log.i("tag","Setting Proxy ${preferences.proxyServer} ${preferences.proxyPort}")
+                        Log.i("tag", "Setting Proxy ${preferences.proxyServer} ${preferences.proxyPort}")
                         this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
                     }
-                }
-                .build() // Unit-test mode
+                }.build() // Unit-test mode
 
         //            if ((username != null) && (!username.isEmpty())) {
         //TODO: DO OKHTTP AUTH AND TOR PROXY
@@ -325,9 +317,7 @@ class NodeInfo : Node {
 //            }
         private val request: okhttp3.Request
             get() {
-                val builder: okhttp3.Request.Builder = okhttp3.Request.Builder()
-                    .url(url!!)
-                    .header("User-Agent", USER_AGENT)
+                val builder: okhttp3.Request.Builder = okhttp3.Request.Builder().url(url!!).header("User-Agent", USER_AGENT)
                 if (json != null) {
                     builder.post(json.toRequestBody("application/json".toMediaTypeOrNull()))
                 } else {

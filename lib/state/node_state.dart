@@ -10,6 +10,22 @@ enum NodeConnectionState { connected, disconnected }
 
 final connectedNode = StateProvider<Node?>((ref) => null);
 final nodeConnectionState = StreamProvider((ref) => WalletEventsChannel().nodeStream());
+
+final nodeErrorState = StateProvider<String?>((ref) {
+  Node? node = ref.watch(nodeConnectionState).value;
+  if (node != null) {
+    if (node.connectionError.isNotEmpty) {
+      return node.connectionError;
+    } else if (node.responseCode <= 200) {
+      return null;
+    } else {
+      return "Node not connected";
+    }
+  } else {
+    return "Node not connected";
+  }
+});
+
 final connectingToNodeStateProvider = Provider<bool>((ref) {
   var connectionState = ref.watch(nodeConnectionState).value;
   if (connectionState != null) {
@@ -19,21 +35,19 @@ final connectingToNodeStateProvider = Provider<bool>((ref) {
   }
 });
 
-final syncProgressStateProvider = Provider<Map<String,num>?>((ref) {
+final syncProgressStateProvider = Provider<Map<String, num>?>((ref) {
   var connectionState = ref.watch(nodeConnectionState).value;
   Wallet? wallet = ref.watch(walletStateStreamProvider).value;
   if (connectionState != null) {
-    if (connectionState.syncBlock != 0 &&  connectionState.height != 0) {
-      num blockChainHeight =   connectionState.height;
-      num remaining = (blockChainHeight - connectionState.syncBlock ) ;
+    if (connectionState.syncBlock != 0 && connectionState.height != 0) {
+      num blockChainHeight = connectionState.height;
+      num remaining = (blockChainHeight - connectionState.syncBlock);
       num progress = connectionState.syncBlock / blockChainHeight;
-      if(progress >= 1){
+      print("progress ${progress}");
+      if (progress >= 1) {
         return null;
       }
-      return {
-        "remaining" : remaining,
-        "progress":progress
-      };
+      return {"remaining": remaining, "progress": progress};
     } else {
       return null;
     }

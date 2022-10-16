@@ -2,7 +2,6 @@ package xmr.anon_wallet.wallet
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -23,6 +22,7 @@ object AnonWallet {
     const val NOCRAZYPASS_FLAGFILE = ".nocrazypass"
     private lateinit var application: Application;
     lateinit var walletDir: File
+    lateinit var nodesFile: File
     private var currentWallet: Wallet? = null
     private val walletScope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
     const val XMR_DECIMALS = 12
@@ -40,6 +40,7 @@ object AnonWallet {
 
     private fun initWalletPaths() {
         walletDir = File(application.filesDir, "wallets")
+        nodesFile = File(application.filesDir, "nodes.json")
         if (!walletDir.exists()) {
             walletDir.mkdirs()
         }

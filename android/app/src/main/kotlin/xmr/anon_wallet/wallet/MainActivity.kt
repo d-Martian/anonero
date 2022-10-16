@@ -1,19 +1,16 @@
 package xmr.anon_wallet.wallet
 
-import android.util.Log
-import androidx.annotation.NonNull
+ import androidx.annotation.NonNull
 import com.m2049r.xmrwallet.model.WalletManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.channels.*
-import xmr.anon_wallet.wallet.model.walletToHashMap
-import xmr.anon_wallet.wallet.services.NodeManager
-import xmr.anon_wallet.wallet.utils.AnonPreferences
-import java.net.SocketException
+
 
 class MainActivity : FlutterActivity() {
+
     override fun onStart() {
         AnonWallet.setApplication(this)
         super.onStart()
@@ -27,28 +24,30 @@ class MainActivity : FlutterActivity() {
         val binaryMessenger = flutterEngine.dartExecutor.binaryMessenger
         registerChannels(binaryMessenger)
     }
-
-
-    override fun popSystemNavigator(): Boolean {
-        WalletManager.getInstance().wallet?.let {
-            it.store()
-            it.close()
-        }
-        return super.popSystemNavigator()
-    }
-
     override fun onPause() {
-        WalletManager.getInstance().wallet?.let {
-            it.store()
+        scope.launch {
+            withContext(Dispatchers.IO){
+                WalletManager.getInstance().wallet?.let {
+                    it.store()
+                }
+            }
         }
         super.onPause()
     }
 
-    override fun onDestroy() {
-        WalletManager.getInstance().wallet?.let {
-            it.store()
-            it.close()
+    override fun onStop() {
+        scope.launch {
+            withContext(Dispatchers.IO){
+                WalletManager.getInstance().wallet?.let {
+                    it.store()
+                    it.close()
+                }
+            }
         }
+        super.onStop()
+    }
+
+    override fun onDestroy() {
         scope.cancel()
         super.onDestroy()
     }
