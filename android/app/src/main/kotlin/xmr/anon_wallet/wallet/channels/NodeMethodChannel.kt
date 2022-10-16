@@ -59,12 +59,14 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             }
             preferences.proxyServer = proxyServer
             preferences.proxyPort = proxyPort
-            WalletManager.getInstance().wallet.setProxy("${proxyServer}:${proxyPort}");
+            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
+            WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
         }
         if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
             preferences.proxyServer = proxyServer
             preferences.proxyPort = proxyPort
-            WalletManager.getInstance().wallet.setProxy("")
+            WalletManager.getInstance()?.wallet?.setProxy("")
+            WalletManager.getInstance()?.setProxy("")
         }
         result.success(true)
     }

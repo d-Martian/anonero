@@ -49,7 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   useEffect(() {
                     ref.read(proxyStateProvider.notifier).getState();
                     return null;
-                  });
+                  },[]);
                   return ListTile(
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => ProxySettings()));

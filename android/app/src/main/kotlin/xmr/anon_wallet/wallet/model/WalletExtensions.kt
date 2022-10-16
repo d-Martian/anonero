@@ -48,6 +48,8 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         "currentAddress" to nextAddress,
         "isSynchronized" to this.isSynchronized,
         "blockChainHeight" to this.blockChainHeight,
+        "daemonBlockChainHeight" to this.daemonBlockChainHeight,
+        "daemonBlockChainTargetHeight" to this.daemonBlockChainTargetHeight,
         "numSubaddresses" to this.numSubaddresses,
         "seedLanguage" to this.seedLanguage,
         "restoreHeight" to this.restoreHeight,

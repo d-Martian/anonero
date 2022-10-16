@@ -10,6 +10,8 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import xmr.anon_wallet.wallet.AnonWallet
+import xmr.anon_wallet.wallet.AnonWallet.proxyPort
+import xmr.anon_wallet.wallet.AnonWallet.proxyServer
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel
 import xmr.anon_wallet.wallet.services.NodeManager.storeNodesList
 import xmr.anon_wallet.wallet.utils.AnonPreferences
@@ -51,6 +53,13 @@ object NodeManager {
                         node.username = username
                         node.password = it
                     }
+                }
+
+                val proxyServer = preferences.proxyServer;
+                val proxyPort = preferences.proxyPort;
+                if (!proxyPort.isNullOrEmpty() && !proxyServer.isNullOrEmpty()) {
+                    WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
+                    WalletManager.getInstance()?.wallet?.setProxy("${proxyServer}:${proxyPort}")
                 }
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {
                     put("status", "connecting")
