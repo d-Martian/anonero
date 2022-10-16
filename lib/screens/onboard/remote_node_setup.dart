@@ -64,7 +64,12 @@ class RemoteNodeWidget extends ConsumerWidget {
                     Consumer(builder: (context, ref, c) {
                       bool isConnecting = ref.watch(connectingToNodeStateProvider);
                       if (isConnecting) {
-                        return const LinearProgressIndicator(minHeight: 3);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(3),
+                              child: const LinearProgressIndicator(minHeight: 4)),
+                        );
                       } else {
                         return const SizedBox();
                       }
@@ -145,16 +150,15 @@ class RemoteNodeWidget extends ConsumerWidget {
                   useEffect(() {
                     ref.read(proxyStateProvider.notifier).getState();
                     return null;
-                  },[]);
+                  }, []);
                   return Container(
                     width: MediaQuery.of(context).size.width,
                     padding: const EdgeInsets.only(top: 24),
                     child: TextButton.icon(
                       style: ButtonStyle(
-                        foregroundColor: proxy.isConnected() ?
-                        MaterialStateColor.resolveWith((states)=>Colors.green):
-                        MaterialStateColor.resolveWith((states)=>Theme.of(context).primaryColor)
-                      ),
+                          foregroundColor: proxy.isConnected()
+                              ? MaterialStateColor.resolveWith((states) => Colors.green)
+                              : MaterialStateColor.resolveWith((states) => Theme.of(context).primaryColor)),
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
