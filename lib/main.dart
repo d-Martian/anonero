@@ -93,7 +93,7 @@ class LockScreen extends HookWidget {
         children: [
           Hero(
             tag: "anon_logo",
-            child: SizedBox(width: 240, child: Image.asset("assets/anon_logo.png")),
+            child: SizedBox(width: 180, child: Image.asset("assets/anon_logo.png")),
           ),
           const Text("Please enter your pin"),
           const Padding(padding: EdgeInsets.symmetric(vertical: 6)),

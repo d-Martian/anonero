@@ -8,23 +8,19 @@ import com.m2049r.xmrwallet.util.KeyStoreHelper
 import com.m2049r.xmrwallet.utils.RestoreHeight
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.AnonWallet
+import xmr.anon_wallet.wallet.channels.WalletEventsChannel.sendEvent
 import xmr.anon_wallet.wallet.model.walletToHashMap
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 import java.io.File
 import java.net.SocketException
 import java.util.*
+import java.util.concurrent.Executors
 
 
 class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
-
-    init {
-        listenWalletState()
-    }
 
     init {
         scope.launch {
@@ -40,12 +36,12 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
         }
     }
 
-    private fun listenWalletState() {
+    private fun runWalletHandler() {
+        val walletContext = Executors.newFixedThreadPool(12).asCoroutineDispatcher()
         scope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(walletContext) {
                 WalletManager.getInstance().onManageCallBack {
-                    val wallet = WalletManager.getInstance().wallet;
-                    var lastBlockTime: Long = 0
+                    val wallet = WalletManager.getInstance().wallet
                     wallet.setListener(WalletEventsChannel)
                 }
             }
@@ -55,7 +51,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "create" -> createWallet(call, result)
-            "generateSeed" -> generateSeed(call, result)
             "walletState" -> walletState(call, result)
             "openWallet" -> openWallet(call, result)
             "viewWalletInfo" -> viewWalletInfo(call, result)
@@ -83,10 +78,10 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                             )
                         )
                     } else {
-                        result.error("1", "Invalid passphrase", "");
+                        result.error("1", "Invalid passphrase", "")
                     }
                 } catch (e: Exception) {
-                    result.error("2", e.message, "");
+                    result.error("2", e.message, "")
                     e.printStackTrace()
                 }
             }
@@ -94,22 +89,24 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
     }
 
     private fun refresh(call: MethodCall, result: Result) {
-
         scope.launch {
             withContext(Dispatchers.IO) {
-                val wallet = WalletManager.getInstance().wallet;
+                val wallet = WalletManager.getInstance().wallet
                 if (wallet != null) {
-                    if (wallet.status.connectionStatus != null) {
-                        wallet.rescanBlockchainAsync()
-                        wallet.refresh()
+                    try {
+                        wallet.startRefresh()
                         wallet.refreshHistory()
-                    } else {
-                        result.success(false)
-                        hashMapOf(
-                            "EVENT_TYPE" to "NODE",
-                            "status" to "disconnected",
-                            "connection_error" to "Node not connected"
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("1", "error", "")
+                        sendEvent(
+                            hashMapOf(
+                                "EVENT_TYPE" to "NODE",
+                                "status" to "disconnected",
+                                "connection_error" to "${e.message}"
+                            )
                         )
+                        throw  CancellationException()
                     }
                 } else {
                     result.success(false)
@@ -122,18 +119,17 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
         scope.launch {
             withContext(Dispatchers.IO) {
                 WalletManager.getInstance().wallet?.let {
-                    if (it.status.connectionStatus != null) {
-                        it.rescanBlockchainAsync()
-                        it.refresh()
-                        it.refreshHistory()
+                    try {
                         result.success(true)
-                    } else {
+                        it.rescanBlockchainAsync()
+                        it.refreshHistory()
+                    } catch (e: Exception) {
                         result.success(false)
-                        WalletEventsChannel.sendEvent(
+                        sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "NODE",
                                 "status" to "disconnected",
-                                "connection_error" to "Node not connected"
+                                "connection_error" to "Error ${e.message}"
                             )
                         )
                     }
@@ -145,25 +141,24 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
     private fun startSync(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                WalletManager.getInstance().wallet;
+                WalletManager.getInstance().wallet
             }
         }
     }
 
     private fun openWallet(call: MethodCall, result: Result) {
         val walletPassword = call.argument<String>("password")
-        val walletFileName = "default";
+        val walletFileName = "default"
         val walletFile = File(AnonWallet.walletDir, walletFileName)
         if (walletPassword == null) {
-            result.error("INVALID_PASSWORD", "invalid password", null)
+            result.error("INVALID_PASSWORD", "invalid pin", null)
             return
         }
-
         scope.launch {
             withContext(Dispatchers.IO) {
                 if (walletFile.exists()) {
                     try {
-                        WalletEventsChannel.sendEvent(
+                        sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "OPEN_WALLET",
                                 "state" to true
@@ -172,35 +167,27 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         // check if we need connected hardware
                         val checkPassword = AnonWallet.getWalletPassword(walletFileName, walletPassword) != null
                         if (!checkPassword) {
-                            result.error("1", "Invalid Password", "invalid password")
+                            result.error("1", "Invalid pin", "invalid pin")
                             return@withContext
                         }
+                        runWalletHandler()
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
-                        result.success(wallet.walletToHashMap())
                         wallet.refreshHistory()
-                        listenWalletState()
+                        wallet.startRefresh()
+                        result.success(wallet.walletToHashMap())
                         NodeManager.getNode()?.let {
-                            if (it.isSuccessful) {
-                                WalletEventsChannel.initWalletRefresh()
-                                if (wallet.isSynchronized) {
-                                    wallet.startRefresh()
-                                } else {
-                                    wallet.refresh()
-                                    wallet.refreshHistory()
-                                }
-                                WalletManager.getInstance().wallet.init(0)
-                            }
+                            wallet.init(0)
                         }
-                        WalletEventsChannel.sendEvent(
+                        sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "OPEN_WALLET",
                                 "state" to false
                             )
                         )
-                        WalletEventsChannel.sendEvent(wallet.walletToHashMap())
+                        sendEvent(wallet.walletToHashMap())
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        result.error("WALLET_OPEN_ERROR", e.message, e.localizedMessage);
+                        result.error("WALLET_OPEN_ERROR", e.message, e.localizedMessage)
                     }
                 }
             }
@@ -227,10 +214,10 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             val walletPin = call.argument<String>("password")
             val seedPhrase = call.argument<String?>("seedPhrase")
             if (walletName == null || walletName.isEmpty()) {
-                return result.error(INVALID_ARG, "invalid name parameter", null);
+                return result.error(INVALID_ARG, "invalid name parameter", null)
             }
             if (walletPin == null || walletPin.isEmpty()) {
-                return result.error(INVALID_ARG, "invalid password parameter", null);
+                return result.error(INVALID_ARG, "invalid password parameter", null)
             }
             var restoreHeight = 1L
             scope.launch {
@@ -256,6 +243,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
 //                    }
                     val newWalletFile = File(AnonWallet.walletDir, walletName)
                     val default = "English"
+                    runWalletHandler()
                     //Close if wallet is already open
                     WalletManager.getInstance().wallet?.close()
                     if (AnonWallet.getNetworkType() == NetworkType.NetworkType_Mainnet) {
@@ -268,7 +256,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                     } else {
                         restoreHeight = NodeManager.getNode()?.getHeight() ?: 1L
                     }
-                    WalletEventsChannel.sendEvent(
+                    sendEvent(
                         hashMapOf(
                             "EVENT_TYPE" to "OPEN_WALLET",
                             "state" to true
@@ -277,7 +265,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                     val wallet = WalletManager.getInstance()
                         .createWallet(newWalletFile, walletPin, default, restoreHeight)
                     AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPhrase)
-                    WalletEventsChannel.initWalletRefresh()
                     val map = wallet.walletToHashMap()
                     map["seed"] = wallet.getSeed(seedPhrase ?: "")
                     wallet.store()
@@ -285,18 +272,21 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                     if (AnonPreferences(AnonWallet.getAppContext()).serverUrl != null) {
                         NodeManager.setNode()
                     }
+                    WalletEventsChannel.initWalletRefresh()
                     if (wallet.status.isOk) {
                         wallet.refresh()
+                        sendEvent(wallet.walletToHashMap())
+
                         WalletManager.getInstance().wallet.init(0)
                         wallet.refreshHistory()
-                        WalletEventsChannel.sendEvent(
+                        sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "OPEN_WALLET",
                                 "state" to false
                             )
                         )
                     } else {
-                        WalletEventsChannel.sendEvent(
+                        sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "OPEN_WALLET",
                                 "state" to false
@@ -308,7 +298,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             }.invokeOnCompletion {
                 if (it != null) {
                     it.printStackTrace()
-                    result.error(ERRORS, it.message, it);
+                    result.error(ERRORS, it.message, it)
                 }
             }
         }
@@ -317,23 +307,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
     ///TODO: Restore
     private fun restoreWallet(call: MethodCall, result: Result) {
 
-    }
-
-    private fun generateSeed(call: MethodCall, result: Result) {
-        if (call.hasArgument("seedPassPhrase") && call.hasArgument("password")) {
-            scope.launch {
-                val seedPassPhrase = call.argument<String>("seedPassPhrase")
-                val password = call.argument<String>("password")
-                val walletFile = File(AnonWallet.walletDir, "default")
-                val wallet = WalletManager.getInstance().openWallet(walletFile.path, password)
-                if (wallet.status.isOk) {
-                    val map = wallet.walletToHashMap();
-                    map["seed"] = wallet.getSeed(seedPassPhrase)
-                    wallet.close()
-                    result.success(map)
-                }
-            }
-        }
     }
 
     companion object {

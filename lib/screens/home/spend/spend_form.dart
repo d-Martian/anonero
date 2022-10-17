@@ -31,11 +31,14 @@ class _SpendFormState extends ConsumerState<SpendForm> {
 
   @override
   Widget build(BuildContext context) {
+
+
     OutlineInputBorder enabledBorder = OutlineInputBorder(
-        borderSide: BorderSide(width: 0, color: Theme.of(context).primaryColor),
+        borderSide: BorderSide(width: 1, color: Theme.of(context).primaryColor),
         borderRadius: BorderRadius.circular(12));
+
     OutlineInputBorder unFocusedBorder = OutlineInputBorder(
-        borderSide: const BorderSide(width: 0, color: Colors.white70), borderRadius: BorderRadius.circular(12));
+        borderSide: const BorderSide(width: 1, color:Colors.white), borderRadius: BorderRadius.circular(12));
     SpendValidationNotifier validationNotifier = ref.watch(validationProvider);
 
     bool? addressValid = validationNotifier.validAddress;
@@ -45,7 +48,6 @@ class _SpendFormState extends ConsumerState<SpendForm> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: const Text("Send"),
             toolbarHeight: 120,
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),

@@ -57,16 +57,15 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                 result.error("1", "Invalid port", "")
                 return;
             }
-            preferences.proxyServer = proxyServer
-            preferences.proxyPort = proxyPort
-            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
-            WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
-        }
-        if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
-            preferences.proxyServer = proxyServer
-            preferences.proxyPort = proxyPort
-            WalletManager.getInstance()?.wallet?.setProxy("")
-            WalletManager.getInstance()?.setProxy("")
+//            preferences.proxyServer = proxyServer
+//            preferences.proxyPort = proxyPort
+//            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
+//            WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
+        }else if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
+//            preferences.proxyServer = proxyServer
+//            preferences.proxyPort = proxyPort
+//            WalletManager.getInstance()?.wallet?.setProxy("")
+//            WalletManager.getInstance()?.setProxy("")
         }
         result.success(true)
     }
@@ -101,10 +100,9 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         node.password = it
                     }
                     val testSuccess = node.testRpcService()
+                    NodeManager.setCurrentActiveNode(node)
+
                     if (testSuccess == true) {
-                        WalletEventsChannel.sendEvent(node.toHashMap().apply {
-                            put("status", "connected")
-                        })
                         AnonPreferences(AnonWallet.getAppContext()).serverUrl = host
                         AnonPreferences(AnonWallet.getAppContext()).serverPort = port
                         if (!node.username.isNullOrEmpty()) {
@@ -113,7 +111,10 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         if (!node.password.isNullOrEmpty()) {
                             AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.password
                         }
-                        NodeManager.setCurrentActiveNode(node)
+                        WalletManager.getInstance().setDaemon(node)
+                        WalletEventsChannel.sendEvent(node.toHashMap().apply {
+                            put("status", "connected")
+                        })
                         result.success(node.toHashMap())
                     } else {
                         WalletEventsChannel.sendEvent(node.toHashMap().apply {
@@ -123,6 +124,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         result.error("2", "Failed to connect to remote node", "")
                     }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     WalletEventsChannel.sendEvent(
                         hashMapOf(
                             "EVENT_TYPE" to "NODE",

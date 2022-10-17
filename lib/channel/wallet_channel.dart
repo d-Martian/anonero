@@ -38,12 +38,6 @@ class WalletChannel {
     return Wallet.fromJson(value);
   }
 
-  Future<Wallet> generateSeed(String password, String seedPassPhrase) async {
-    dynamic value =
-        await platform.invokeMethod("generateSeed", {"seedPassPhrase": seedPassPhrase, "password": password});
-    return Wallet.fromJson(value);
-  }
-
   void startSync() async {
     dynamic value = await platform.invokeMethod("startSync");
   }

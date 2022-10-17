@@ -25,9 +25,6 @@ class ReceiveWidget extends ConsumerWidget {
           SliverAppBar(
             backgroundColor: Colors.transparent,
             title: const Text("ANON"),
-            leading: BackButton(
-              onPressed: callback,
-            ),
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(110),
                 child: Hero(

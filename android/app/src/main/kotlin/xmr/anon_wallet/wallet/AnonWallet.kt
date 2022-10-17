@@ -12,6 +12,7 @@ import com.m2049r.xmrwallet.util.KeyStoreHelper
 import io.flutter.embedding.android.FlutterActivity
 import kotlinx.coroutines.*
 import timber.log.Timber
+import xmr.anon_wallet.wallet.utils.AnonPreferences
 import xmr.anon_wallet.wallet.utils.CrazyPassEncoder
 import java.io.File
 import kotlin.math.pow
@@ -27,11 +28,15 @@ object AnonWallet {
     private val walletScope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
     const val XMR_DECIMALS = 12
     val ONE_XMR = 10.0.pow(XMR_DECIMALS.toDouble()).roundToInt()
-    var proxyServer: String? = "";
-    var proxyPort: String? = "";
 
     @JvmName("setApplication1")
     fun setApplication(flutterActivity: FlutterActivity) {
+        val prefs = AnonPreferences(flutterActivity)
+        //TODO
+//        if(prefs.proxyServer == null || prefs.proxyPort == null){
+//            prefs.proxyServer = "127.0.0.1"
+//            prefs.proxyPort = "9050"
+//        }
         this.application = flutterActivity.application
         initWalletPaths()
         attachScope(flutterActivity)
@@ -77,14 +82,6 @@ object AnonWallet {
     fun getWallet(): Wallet? {
         return this.currentWallet
     }
-
-
-    fun setProxyState(proxyServer: String?, proxyPort: String?) {
-        this.proxyServer = proxyServer
-        this.proxyPort = proxyPort
-    }
-
-
 
     fun getWalletPassword( walletName: String, password: String): String? {
         val walletPath: String = File(walletDir, "$walletName.keys").absolutePath

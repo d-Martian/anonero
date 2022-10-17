@@ -25,13 +25,13 @@ class MainActivity : FlutterActivity() {
         registerChannels(binaryMessenger)
     }
     override fun onPause() {
-        scope.launch {
-            withContext(Dispatchers.IO){
-                WalletManager.getInstance().wallet?.let {
-                    it.store()
-                }
-            }
-        }
+//        scope.launch {
+//            withContext(Dispatchers.IO){
+//                WalletManager.getInstance().wallet?.let {
+//                    it.store()
+//                }
+//            }
+//        }
         super.onPause()
     }
 
