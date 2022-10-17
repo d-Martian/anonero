@@ -17,7 +17,6 @@ import xmr.anon_wallet.wallet.utils.AnonPreferences
 import java.io.File
 import java.net.SocketException
 import java.util.*
-import java.util.concurrent.Executors
 
 
 class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
@@ -37,14 +36,15 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
     }
 
     private fun runWalletHandler() {
-        val walletContext = Executors.newFixedThreadPool(12).asCoroutineDispatcher()
-        scope.launch {
-            withContext(walletContext) {
-                WalletManager.getInstance().onManageCallBack {
+
+        WalletManager.getInstance().onManageCallBack {
+            scope.launch {
+                withContext(Dispatchers.IO) {
                     val wallet = WalletManager.getInstance().wallet
                     wallet.setListener(WalletEventsChannel)
                 }
             }
+
         }
     }
 
