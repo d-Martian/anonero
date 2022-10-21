@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rxdart/rxdart.dart';
 
 class WalletEventsChannel {
   static const channel = EventChannel("wallet.events");

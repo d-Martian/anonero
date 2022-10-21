@@ -166,6 +166,18 @@ struct MyWalletListener : Monero::WalletListener {
         if (jlistener == nullptr) return;
         LOGD("unconfirmedMoneyReceived %"
                      PRIu64, amount);
+        JNIEnv *jenv;
+        int envStat = attachJVM(&jenv);
+        if (envStat == JNI_ERR) return;
+
+        jlong amountLong = static_cast<jlong>(amount);
+        jstring jstring1 = jenv->NewStringUTF(txId.c_str());
+
+        jmethodID listenerClass_newBlock = jenv->GetMethodID(class_WalletListener, "unconfirmedMoneyReceived",
+                                                             "(Ljava/lang/String;J)V");
+        jenv->CallVoidMethod(jlistener, listenerClass_newBlock ,jstring1,amountLong);
+
+        detachJVM(jenv, envStat);
     }
 
     /**

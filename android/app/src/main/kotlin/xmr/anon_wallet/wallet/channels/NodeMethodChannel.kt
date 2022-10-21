@@ -19,9 +19,6 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             "setNode" -> setNode(call, result)
             "setProxy" -> setProxy(call, result)
             "getProxy" -> getProxy(call, result)
-            "getAllNodes" -> getAllNodes(result)
-            "addNewNode" -> addNewNode(call, result)
-            "removeNode" -> removeNode(call, result)
             "setCurrentNode" -> setCurrentNode(call, result)
             "testRpc" -> testRpc(call, result)
         }
@@ -57,16 +54,15 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                 result.error("1", "Invalid port", "")
                 return;
             }
-            preferences.proxyServer = proxyServer
-            preferences.proxyPort = proxyPort
-            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
-            WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
-        }
-        if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
-            preferences.proxyServer = proxyServer
-            preferences.proxyPort = proxyPort
-            WalletManager.getInstance()?.wallet?.setProxy("")
-            WalletManager.getInstance()?.setProxy("")
+//            preferences.proxyServer = proxyServer
+//            preferences.proxyPort = proxyPort
+//            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
+//            WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
+        }else if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
+//            preferences.proxyServer = proxyServer
+//            preferences.proxyPort = proxyPort
+//            WalletManager.getInstance()?.wallet?.setProxy("")
+//            WalletManager.getInstance()?.setProxy("")
         }
         result.success(true)
     }
@@ -101,10 +97,9 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         node.password = it
                     }
                     val testSuccess = node.testRpcService()
+                    NodeManager.setCurrentActiveNode(node)
+
                     if (testSuccess == true) {
-                        WalletEventsChannel.sendEvent(node.toHashMap().apply {
-                            put("status", "connected")
-                        })
                         AnonPreferences(AnonWallet.getAppContext()).serverUrl = host
                         AnonPreferences(AnonWallet.getAppContext()).serverPort = port
                         if (!node.username.isNullOrEmpty()) {
@@ -113,7 +108,10 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         if (!node.password.isNullOrEmpty()) {
                             AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.password
                         }
-                        NodeManager.setCurrentActiveNode(node)
+                        WalletManager.getInstance().setDaemon(node)
+                        WalletEventsChannel.sendEvent(node.toHashMap().apply {
+                            put("status", "connected")
+                        })
                         result.success(node.toHashMap())
                     } else {
                         WalletEventsChannel.sendEvent(node.toHashMap().apply {
@@ -123,6 +121,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         result.error("2", "Failed to connect to remote node", "")
                     }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     WalletEventsChannel.sendEvent(
                         hashMapOf(
                             "EVENT_TYPE" to "NODE",
@@ -134,104 +133,6 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     result.error("2", "${e.message}", e.cause)
                     throw CancellationException(e.message)
                 }
-            }
-        }
-    }
-
-    private fun addNewNode(call: MethodCall, result: Result) {
-        val port = call.argument<Int>("port")
-        var host = call.argument<String>("host")
-        val userName = call.argument<String?>("username")
-        val password = call.argument<String?>("password")
-        if (port == null || host == null) {
-            return result.error("1", "Invalid params", "")
-        }
-        if (host.lowercase().startsWith("http://")) {
-            host = host.replace("http://", "")
-        }
-        if (host.lowercase().startsWith("https://")) {
-            host = host.replace("https://", "")
-        }
-
-        this.scope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val findResult = NodeManager.getNodes().find {
-                        (it.host).lowercase() == host.lowercase() && (it.rpcPort == port)
-                    }
-                    if (findResult != null) {
-                        result.error("1", "Node already exist", "")
-                        return@withContext
-                    }
-                    val node = NodeInfo(/**/)
-                    node.host = host
-                    node.rpcPort = port
-                    userName?.let {
-                        node.username = it
-                    }
-                    password?.let {
-                        node.password = it
-                    }
-                    val testSuccess = node.testRpcService()
-                    if (testSuccess == true) {
-                        result.success(node.toHashMap())
-                        NodeManager.addNode(node)
-                    } else {
-                        result.error("2", "Failed to connect to remote node", "")
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    result.error("2", "${e.message}", e.cause)
-                    throw CancellationException(e.message)
-                }
-            }
-        }
-    }
-
-
-
-    private fun removeNode(call: MethodCall, result: Result) {
-        val port = call.argument<Int>("port")
-        var host = call.argument<String>("host")
-        val userName = call.argument<String?>("username")
-        val password = call.argument<String?>("password")
-        if (port == null || host == null) {
-            return result.error("1", "Invalid params", "")
-        }
-        if (host.lowercase().startsWith("http://")) {
-            host = host.replace("http://", "")
-        }
-        if (host.lowercase().startsWith("https://")) {
-            host = host.replace("https://", "")
-        }
-        scope.launch {
-            withContext(Dispatchers.IO){
-                try {
-                    NodeManager.removeNode(host,port,userName,password)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                result.success(true);
-            }
-        }
-    }
-
-
-
-    private fun getAllNodes(result: Result) {
-        scope.launch {
-            val server = AnonPreferences(AnonWallet.getAppContext()).serverUrl
-            val port = AnonPreferences(AnonWallet.getAppContext()).serverPort
-            val nodesList = arrayListOf<HashMap<String, Any>>()
-            NodeManager.getNodes().let { items->
-                items.forEach {
-                    val nodeHashMap = it.toHashMap()
-                    nodeHashMap["isActive"] = server == it.host && port == it.rpcPort;
-                    nodesList.add(nodeHashMap)
-                }
-            }
-            withContext(Dispatchers.IO) {
-                result.success(nodesList)
             }
         }
     }
@@ -265,7 +166,6 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     val success = node.testRpcService()
                     Log.i(TAG, "testRpc: ${node.toHashMap()}")
                     if (success == true) {
-                        NodeManager.updateExistingNode(node)
                     }
                     result.success(node.toHashMap());
                 } catch (e: Exception) {
