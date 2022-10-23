@@ -76,7 +76,7 @@ class _TransactionsListState extends State<TransactionsList> {
                 ),
               ),
             ),
-            title: const Text("ANON"),
+            title: const Text("[ΛИ0И"),
           ),
           Consumer(builder: (context, ref, c) {
             bool isConnecting = ref.watch(connectingToNodeStateProvider);
