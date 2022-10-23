@@ -1,6 +1,5 @@
 package xmr.anon_wallet.wallet.model
 
-import android.util.Log
 import com.m2049r.xmrwallet.data.Subaddress
 import com.m2049r.xmrwallet.model.Wallet
 
@@ -48,10 +47,12 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         "currentAddress" to nextAddress,
         "isSynchronized" to this.isSynchronized,
         "blockChainHeight" to this.blockChainHeight,
+        "daemonBlockChainHeight" to this.daemonBlockChainHeight,
+        "daemonBlockChainTargetHeight" to this.daemonBlockChainTargetHeight,
         "numSubaddresses" to this.numSubaddresses,
         "seedLanguage" to this.seedLanguage,
         "restoreHeight" to this.restoreHeight,
-        "transactions" to this.history.all.sortedByDescending { it.timestamp }.sortedBy { it.isPending }.map { it.toHashMap() }.toList(),
+        "transactions" to this.history.all.sortedByDescending { it.timestamp }.sortedBy { !it.isPending }.map { it.toHashMap() }.toList(),
         "EVENT_TYPE" to "WALLET",
     )
 }

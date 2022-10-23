@@ -125,7 +125,7 @@ abstract class Preferences(private var context: Context, private val name: Strin
 }
 
 
-class AnonPreferences(context: Context) : Preferences(context) {
+class AnonPreferences(context: Context) : Preferences(context,"AnonPreferences") {
     var proxyServer by stringPref()
     var proxyPort by stringPref()
     var serverPort by intPref()

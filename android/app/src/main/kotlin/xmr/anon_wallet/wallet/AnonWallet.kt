@@ -2,7 +2,6 @@ package xmr.anon_wallet.wallet
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -13,6 +12,7 @@ import com.m2049r.xmrwallet.util.KeyStoreHelper
 import io.flutter.embedding.android.FlutterActivity
 import kotlinx.coroutines.*
 import timber.log.Timber
+import xmr.anon_wallet.wallet.utils.AnonPreferences
 import xmr.anon_wallet.wallet.utils.CrazyPassEncoder
 import java.io.File
 import kotlin.math.pow
@@ -21,17 +21,23 @@ import kotlin.math.roundToInt
 
 object AnonWallet {
     const val NOCRAZYPASS_FLAGFILE = ".nocrazypass"
+    const val NOTIFICATION_CHANNEL_ID = "new_tx"
     private lateinit var application: Application;
     lateinit var walletDir: File
+    lateinit var nodesFile: File
     private var currentWallet: Wallet? = null
     private val walletScope = CoroutineScope(Dispatchers.Main.immediate) + SupervisorJob()
     const val XMR_DECIMALS = 12
     val ONE_XMR = 10.0.pow(XMR_DECIMALS.toDouble()).roundToInt()
-    var proxyServer: String? = "";
-    var proxyPort: String? = "";
 
     @JvmName("setApplication1")
     fun setApplication(flutterActivity: FlutterActivity) {
+        val prefs = AnonPreferences(flutterActivity)
+        //TODO
+//        if(prefs.proxyServer == null || prefs.proxyPort == null){
+//            prefs.proxyServer = "127.0.0.1"
+//            prefs.proxyPort = "9050"
+//        }
         this.application = flutterActivity.application
         initWalletPaths()
         attachScope(flutterActivity)
@@ -40,6 +46,7 @@ object AnonWallet {
 
     private fun initWalletPaths() {
         walletDir = File(application.filesDir, "wallets")
+        nodesFile = File(application.filesDir, "nodes.json")
         if (!walletDir.exists()) {
             walletDir.mkdirs()
         }
@@ -76,14 +83,6 @@ object AnonWallet {
     fun getWallet(): Wallet? {
         return this.currentWallet
     }
-
-
-    fun setProxyState(proxyServer: String?, proxyPort: String?) {
-        this.proxyServer = proxyServer
-        this.proxyPort = proxyPort
-    }
-
-
 
     fun getWalletPassword( walletName: String, password: String): String? {
         val walletPath: String = File(walletDir, "$walletName.keys").absolutePath

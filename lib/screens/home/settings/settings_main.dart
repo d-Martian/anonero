@@ -1,4 +1,5 @@
 import 'package:anon_wallet/channel/node_channel.dart';
+import 'package:anon_wallet/screens/home/settings/nodes/nodes_settings.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/home/settings/view_wallet_private.dart';
@@ -36,39 +37,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Text("Connection", style: titleStyle),
                 ),
                 Divider(color: dividerColor, height: 2),
-                HookConsumer(builder: (context, ref, child) {
-                  Proxy proxy = ref.watch(proxyStateProvider);
-                  useEffect(() {
-                    ref.read(proxyStateProvider.notifier).getState();
-                    return null;
-                  });
-                  return ListTile(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ProxySettings()));
-                    },
-                    title: const Text("Proxy"),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                    subtitle: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        proxy.isConnected()
-                            ? Container(
-                                padding: const EdgeInsets.only(right: 2),
-                                child: const Icon(Icons.check, size: 18, color: Colors.green),
-                              )
-                            : const SizedBox(),
-                        Text(
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: proxy.isConnected() ? Colors.green : dividerColor),
-                          proxy.isConnected() ? "Active" : "Disabled",
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 34),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const NodesSettingsScreens()));
+                  },
+                  title: const Text("Node"),
+                ),
+                Opacity(
+                  opacity: 0.4,
+                  child: HookConsumer(builder: (context, ref, child) {
+                    Proxy proxy = ref.watch(proxyStateProvider);
+                    useEffect(() {
+                      ref.read(proxyStateProvider.notifier).getState();
+                      return null;
+                    },[]);
+                    return ListTile(
+                      onTap: () {
+                        // Navigator.push(context, MaterialPageRoute(builder: (context) => ProxySettings()));
+                      },
+                      title: const Text("Proxy"),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 34),
+                      // subtitle: Row(
+                      //   crossAxisAlignment: CrossAxisAlignment.center,
+                      //   mainAxisAlignment: MainAxisAlignment.start,
+                      //   children: [
+                      //     proxy.isConnected()
+                      //         ? Container(
+                      //       padding: const EdgeInsets.only(right: 2),
+                      //       child: const Icon(Icons.check, size: 18, color: Colors.green),
+                      //     )
+                      //         : const SizedBox(),
+                      //     Text(
+                      //       style: Theme.of(context)
+                      //           .textTheme
+                      //           .bodySmall
+                      //           ?.copyWith(color: proxy.isConnected() ? Colors.green : dividerColor),
+                      //       proxy.isConnected() ? "Active" : "Disabled",
+                      //     ),
+                      //   ],
+                      // ),
+                    );
+                  }),
+                ),
                 Divider(color: dividerColor, height: 2),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),

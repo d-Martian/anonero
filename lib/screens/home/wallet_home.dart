@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:anon_wallet/channel/wallet_events_channel.dart';
+import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/screens/home/receive_screen.dart';
 import 'package:anon_wallet/screens/home/settings/settings_main.dart';
 import 'package:anon_wallet/screens/home/spend/spend_screen.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
+import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:anon_wallet/widgets/bottom_bar.dart';
@@ -14,16 +16,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class WalletHome extends StatefulWidget {
+class WalletHome extends ConsumerStatefulWidget {
   const WalletHome({Key? key}) : super(key: key);
 
   @override
-  State<WalletHome> createState() => _WalletHomeState();
+  ConsumerState<WalletHome> createState() => _WalletHomeState();
 }
 
-class _WalletHomeState extends State<WalletHome> {
+class _WalletHomeState extends ConsumerState<WalletHome> {
   int _currentView = 0;
   final PageController _pageController = PageController();
+  GlobalKey scaffoldState = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +51,13 @@ class _WalletHomeState extends State<WalletHome> {
                         onPressed: () {
                           Navigator.of(context).pop(false);
                         },
-                        child: Text("No")),
+                        child: const Text("No")),
                     TextButton(
                         onPressed: () {
                           Navigator.of(context).pop(true);
                           SystemNavigator.pop(animated: true);
                         },
-                        child: Text("Yes")),
+                        child: const Text("Yes")),
                   ],
                 );
               });
@@ -58,11 +67,12 @@ class _WalletHomeState extends State<WalletHome> {
         return false;
       },
       child: Scaffold(
+        key: scaffoldState,
         body: PageView(
           controller: _pageController,
           children: [
             Builder(
-              builder: (context){
+              builder: (context) {
                 return TransactionsList(
                   onScanClick: () {
                     showBottomSheet(
@@ -74,7 +84,8 @@ class _WalletHomeState extends State<WalletHome> {
                                 onScanCallback: (value) {
                                   AppHaptics.lightImpact();
                                   ref.read(addressStateProvider.state).state = value;
-                                  _pageController.animateToPage(2, duration: const Duration(milliseconds: 220), curve: Curves.ease);
+                                  _pageController.animateToPage(2,
+                                      duration: const Duration(milliseconds: 220), curve: Curves.ease);
                                 },
                               );
                             },
@@ -92,6 +103,25 @@ class _WalletHomeState extends State<WalletHome> {
           ],
           onPageChanged: (index) {
             setState(() => _currentView = index);
+          },
+        ),
+        floatingActionButton: Consumer(
+          builder: (context, ref, child) {
+            ref.listen<String?>(nodeErrorState, (String? previousCount, String? newValue) {
+              if (newValue != null && scaffoldState.currentContext != null) {
+                ScaffoldMessenger.of(scaffoldState.currentContext!)
+                    .showMaterialBanner(MaterialBanner(content: Text(newValue), actions: [
+                  TextButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                      },
+                      child: const Text("Close"))
+                ]));
+              } else {
+                ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+              }
+            });
+            return const SizedBox.shrink();
           },
         ),
         bottomNavigationBar: BottomBar(

@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rxdart/rxdart.dart';
 
 class WalletEventsChannel {
   static const channel = EventChannel("wallet.events");
@@ -41,6 +39,7 @@ class WalletEventsChannel {
     _events = channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
+        print("Sync:${type} ${event}");
         switch (type) {
           case "NODE":
             {

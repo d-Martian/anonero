@@ -2,13 +2,11 @@ package xmr.anon_wallet.wallet.channels
 
 import android.util.Log
 import androidx.lifecycle.Lifecycle
-import com.m2049r.xmrwallet.data.Node
 import com.m2049r.xmrwallet.data.NodeInfo
 import com.m2049r.xmrwallet.model.WalletManager
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import kotlinx.coroutines.*
-import timber.log.Timber
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
@@ -21,6 +19,8 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             "setNode" -> setNode(call, result)
             "setProxy" -> setProxy(call, result)
             "getProxy" -> getProxy(call, result)
+            "setCurrentNode" -> setCurrentNode(call, result)
+            "testRpc" -> testRpc(call, result)
         }
     }
 
@@ -54,18 +54,18 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                 result.error("1", "Invalid port", "")
                 return;
             }
-            preferences.proxyServer = proxyServer
-            preferences.proxyPort = proxyPort
-            WalletManager.getInstance().wallet.setProxy("${proxyServer}:${proxyPort}");
-        }
-        if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
-            preferences.proxyServer = proxyServer
-            preferences.proxyPort = proxyPort
-            WalletManager.getInstance().wallet.setProxy("")
+//            preferences.proxyServer = proxyServer
+//            preferences.proxyPort = proxyPort
+//            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
+//            WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
+        }else if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
+//            preferences.proxyServer = proxyServer
+//            preferences.proxyPort = proxyPort
+//            WalletManager.getInstance()?.wallet?.setProxy("")
+//            WalletManager.getInstance()?.setProxy("")
         }
         result.success(true)
     }
-
 
     private fun setNode(call: MethodCall, result: Result) {
         val port = call.argument<Int>("port")
@@ -97,10 +97,9 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         node.password = it
                     }
                     val testSuccess = node.testRpcService()
+                    NodeManager.setCurrentActiveNode(node)
+
                     if (testSuccess == true) {
-                        WalletEventsChannel.sendEvent(node.toHashMap().apply {
-                            put("status", "connected")
-                        })
                         AnonPreferences(AnonWallet.getAppContext()).serverUrl = host
                         AnonPreferences(AnonWallet.getAppContext()).serverPort = port
                         if (!node.username.isNullOrEmpty()) {
@@ -109,7 +108,10 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         if (!node.password.isNullOrEmpty()) {
                             AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.password
                         }
-                        NodeManager.setCurrentNode(node)
+                        WalletManager.getInstance().setDaemon(node)
+                        WalletEventsChannel.sendEvent(node.toHashMap().apply {
+                            put("status", "connected")
+                        })
                         result.success(node.toHashMap())
                     } else {
                         WalletEventsChannel.sendEvent(node.toHashMap().apply {
@@ -119,6 +121,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         result.error("2", "Failed to connect to remote node", "")
                     }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     WalletEventsChannel.sendEvent(
                         hashMapOf(
                             "EVENT_TYPE" to "NODE",
@@ -129,6 +132,93 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     e.printStackTrace()
                     result.error("2", "${e.message}", e.cause)
                     throw CancellationException(e.message)
+                }
+            }
+        }
+    }
+
+    private fun testRpc(call: MethodCall, result: Result) {
+        val port = call.argument<Int>("port")
+        var host = call.argument<String>("host")
+        val userName = call.argument<String?>("username")
+        val password = call.argument<String?>("password")
+        if (port == null || host == null) {
+            return result.error("1", "Invalid params", "")
+        }
+        if (host.lowercase().startsWith("http://")) {
+            host = host.replace("http://", "")
+        }
+        if (host.lowercase().startsWith("https://")) {
+            host = host.replace("https://", "")
+        }
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                val node = NodeInfo(/**/)
+                node.host = host
+                node.rpcPort = port
+                userName?.let {
+                    node.username = it
+                }
+                password?.let {
+                    node.password = it
+                }
+                try {
+                    val success = node.testRpcService()
+                    Log.i(TAG, "testRpc: ${node.toHashMap()}")
+                    if (success == true) {
+                    }
+                    result.success(node.toHashMap());
+                } catch (e: Exception) {
+                    result.error("1", "${e.message}", "")
+                }
+            }
+        }
+    }
+
+    private fun setCurrentNode(call: MethodCall, result: Result) {
+        val port = call.argument<Int>("port")
+        var host = call.argument<String>("host")
+        val userName = call.argument<String?>("username")
+        val password = call.argument<String?>("password")
+        if (port == null || host == null) {
+            return result.error("1", "Invalid params", "")
+        }
+        if (host.lowercase().startsWith("http://")) {
+            host = host.replace("http://", "")
+        }
+        if (host.lowercase().startsWith("https://")) {
+            host = host.replace("https://", "")
+        }
+        scope.launch {
+            withContext(Dispatchers.IO){
+                try {
+                    val node = NodeInfo(/**/)
+                    node.host = host
+                    node.rpcPort = port
+                    userName?.let {
+                        node.username = it
+                    }
+                    password?.let {
+                        node.password = it
+                    }
+                    AnonPreferences(AnonWallet.getAppContext()).serverUrl = host
+                    AnonPreferences(AnonWallet.getAppContext()).serverPort = port
+                    if (!node.username.isNullOrEmpty()) {
+                        AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.username
+                    }
+                    if (!node.password.isNullOrEmpty()) {
+                        AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.password
+                    }
+
+                    NodeManager.setCurrentActiveNode(node)
+                    WalletManager.getInstance().setDaemon(node)
+                    WalletManager.getInstance().wallet?.let {
+                        it.refresh()
+                        it.startRefresh()
+                    }
+                    result.success(node.toHashMap())
+                } catch (e: Exception) {
+                    result.error("1","${e.message}",e)
                 }
             }
         }

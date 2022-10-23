@@ -20,25 +20,32 @@ class ReceiveWidget extends ConsumerWidget {
     bool isWalletOpening = ref.watch(walletLoadingProvider) ?? true;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text("ANON"),
-        leading: BackButton(
-          onPressed: callback,
-        ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const SubAddressesList();
-                },fullscreenDialog: true ));
-              },
-              icon: const Icon(Icons.history))
-        ],
-      ),
-      body: isWalletOpening
-          ? const Center(child: CircularProgressIndicator())
-          : Container(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.transparent,
+            title: const Text("ANON"),
+            bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(110),
+                child: Hero(
+                  tag: "anon_logo",
+                  child: SizedBox(width: 160, child: Image.asset("assets/anon_logo.png")),
+                )),
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return const SubAddressesList();
+                    },fullscreenDialog: true ));
+                  },
+                  icon: const Icon(Icons.history))
+            ],
+          ),
+          SliverFillRemaining(
+            fillOverscroll: true,
+            child:  isWalletOpening
+                ? const Center(child: CircularProgressIndicator())
+                : Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -71,7 +78,7 @@ class ReceiveWidget extends ConsumerWidget {
                         child: Text(
                           "${subAddress?.getLabel()} ",
                           style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).primaryColor),
+                          Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).primaryColor),
                         ),
                       ),
                     ),
@@ -83,6 +90,9 @@ class ReceiveWidget extends ConsumerWidget {
                 ],
               ),
             ),
+          )
+        ],
+      ),
     );
   }
 }

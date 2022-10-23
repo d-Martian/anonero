@@ -33,4 +33,36 @@ class NodeChannel {
         .invokeMethod("setNode", {"host": host, "port": port, "password": password, "username": username});
     return Node.fromJson(value);
   }
+
+  Future addNode(String host, int port, String? username, String? password) async {
+    dynamic value = await platform
+        .invokeMethod("addNewNode", {"host": host, "port": port, "password": password, "username": username});
+    return Node.fromJson(value);
+  }
+
+  Future<Node?> testRpc(String? host, int? port, String? username, String? password) async {
+    dynamic value = await platform
+        .invokeMethod("testRpc", {"host": host, "port": port, "password": password, "username": username});
+    print("value {$value");
+    return Node.fromJson(value);
+  }
+
+  Future<List<Node>> getAllNodes() async {
+    dynamic value = await platform.invokeMethod("getAllNodes");
+    List<Node> nodes = [];
+    value.forEach((item) {
+      nodes.add(Node.fromJson(item));
+    });
+    return nodes;
+  }
+
+  Future setCurrentNode(Node node) async {
+    dynamic value = await platform.invokeMethod(
+        "setCurrentNode", {"host": node.host, "port": node.port, "password": node.password, "username": node.username});
+  }
+
+  Future removeNode(Node node) async {
+    dynamic value = await platform.invokeMethod(
+        "removeNode", {"host": node.host, "port": node.port, "password": node.password, "username": node.username});
+  }
 }
