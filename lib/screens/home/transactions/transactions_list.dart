@@ -76,7 +76,7 @@ class _TransactionsListState extends State<TransactionsList> {
                 ),
               ),
             ),
-            title: const Text("[ΛИ0И"),
+            title: const Text("[ΛИ0И]"),
           ),
           Consumer(builder: (context, ref, c) {
             bool isConnecting = ref.watch(connectingToNodeStateProvider);
@@ -200,5 +200,5 @@ String formatTime(int? timestamp) {
     return "";
   }
   var dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-  return DateFormat("H:m\ndd/M").format(dateTime);
+  return DateFormat("HH:mm\ndd/M").format(dateTime);
 }
