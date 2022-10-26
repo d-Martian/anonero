@@ -40,10 +40,22 @@ class NodeChannel {
     return Node.fromJson(value);
   }
 
+  Future<Node?> getNodeFromPrefs() async {
+    try {
+      dynamic value = await platform.invokeMethod("getNodeFromPrefs");
+      if (value != null) {
+        return Node.fromJson(value);
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+    return null;
+  }
+
   Future<Node?> testRpc(String? host, int? port, String? username, String? password) async {
     dynamic value = await platform
         .invokeMethod("testRpc", {"host": host, "port": port, "password": password, "username": username});
-    print("value {$value");
     return Node.fromJson(value);
   }
 

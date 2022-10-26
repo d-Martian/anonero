@@ -50,13 +50,11 @@ object NodeManager {
                     put("status", "connecting")
                 })
                 currentNode = node
-                if (testRPC()) {
-                    WalletManager.getInstance().setDaemon(node)
-                    isConfigured = true
-                    WalletEventsChannel.sendEvent(node.toHashMap().apply {
-                        put("status", "connected")
-                    })
-                }
+                WalletManager.getInstance().setDaemon(node)
+                isConfigured = true
+                WalletEventsChannel.sendEvent(node.toHashMap().apply {
+                    put("status", "connected")
+                })
             } catch (e: Exception) {
                 WalletEventsChannel.sendEvent(
                     hashMapOf(

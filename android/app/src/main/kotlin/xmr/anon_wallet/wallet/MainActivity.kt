@@ -21,6 +21,7 @@ import io.flutter.plugin.common.BinaryMessenger
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.channels.*
 import xmr.anon_wallet.wallet.model.walletToHashMap
+import xmr.anon_wallet.wallet.utils.AnonPreferences
 
 
 class MainActivity : FlutterActivity() {
@@ -60,23 +61,16 @@ class MainActivity : FlutterActivity() {
     }
     override fun onResume() {
         super.onResume()
-       WalletEventsChannel.initWalletListeners()
-        WalletManager.getInstance().wallet?.let {
-            it.startRefresh()
-            it.refreshHistory()
-            Log.i("TAG", "onResume: CALLLLLDO")
-            WalletEventsChannel.sendEvent(it.walletToHashMap())
+        scope.launch {
+            withContext(Dispatchers.IO){
+                WalletEventsChannel.initWalletListeners()
+                WalletManager.getInstance().wallet?.let {
+                    it.startRefresh()
+                    it.refreshHistory()
+                    WalletEventsChannel.sendEvent(it.walletToHashMap())
+                }
+            }
         }
-    }
-    override fun onPause() {
-//        scope.launch {
-//            withContext(Dispatchers.IO){
-//                WalletManager.getInstance().wallet?.let {
-//                    it.store()
-//                }
-//            }
-//        }
-        super.onPause()
     }
 
     override fun onDestroy() {

@@ -83,7 +83,7 @@ public class WalletManager {
     private void manageWallet(Wallet wallet) {
         Timber.d("Managing %s", wallet.getName());
         managedWallet = wallet;
-        if(onManageCallback != null){
+        if (onManageCallback != null) {
             onManageCallback.invoke();
         }
     }
@@ -286,7 +286,7 @@ public class WalletManager {
 
     public String getDaemonAddress() {
         if (daemonAddress == null) {
-            throw new IllegalStateException("use setDaemon() to initialise daemon and net first!");
+            return null;
         }
         return this.daemonAddress;
     }

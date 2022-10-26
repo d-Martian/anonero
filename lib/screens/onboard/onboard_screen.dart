@@ -173,11 +173,13 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
   onNext(BuildContext context) async {
     FocusManager.instance.primaryFocus?.unfocus();
     Node? connectionState = ref.read(nodeConnectionState).value;
+    print("connectionState ${connectionState}");
     if (pageController.page == 0 && connectionState != null && connectionState.isConnected()) {
       pageController.nextPage(duration: const Duration(milliseconds: 200), curve: Curves.easeInOutSine);
       return;
     }
-    if (pageController.page == 0 && ref.read(remoteHost).isNotEmpty) {
+    print("ref.read(remoteHost).trim() ${pageController.page} ${ref.read(remoteHost).trim()}");
+    if (pageController.page == 0 && ref.read(remoteHost).trim().isNotEmpty) {
       try {
         await ref.read(nodeConnectionProvider.notifier).connect();
       } on PlatformException catch (e) {

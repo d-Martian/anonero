@@ -7,12 +7,18 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 final walletStateStreamProvider = StreamProvider<Wallet?>((ref) => WalletEventsChannel().walletStream());
 final walletLoadingStreamProvider = StreamProvider<bool>((ref) => WalletEventsChannel().walletOpenStream());
 
-final walletLoadingProvider = Provider<bool?>((ref) =>ref.watch(walletLoadingStreamProvider).value);
+final walletLoadingProvider = Provider<bool?>((ref) => ref.watch(walletLoadingStreamProvider).value);
 
 final walletAddressProvider = Provider((ref) {
   var walletAsync = ref.watch(walletStateStreamProvider);
   Wallet? wallet = walletAsync.value;
-  return wallet != null ? wallet.address :  "";
+  return wallet != null ? wallet.address : "";
+});
+
+final connectionStatus = Provider<bool>((ref) {
+  var walletAsync = ref.watch(walletStateStreamProvider);
+  Wallet? wallet = walletAsync.value;
+  return wallet != null ? wallet.isConnected() : false;
 });
 
 final currentSubAddressProvider = Provider<SubAddress?>((ref) {
@@ -21,11 +27,10 @@ final currentSubAddressProvider = Provider<SubAddress?>((ref) {
   return wallet?.currentAddress;
 });
 
-
 final walletTransactions = Provider<List<Transaction>>((ref) {
   var walletAsync = ref.watch(walletStateStreamProvider);
   Wallet? wallet = walletAsync.value;
-  if(wallet != null){
+  if (wallet != null) {
     return wallet.transactions;
   }
   return [];
