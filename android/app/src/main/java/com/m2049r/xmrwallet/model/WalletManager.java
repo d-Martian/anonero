@@ -285,9 +285,6 @@ public class WalletManager {
     }
 
     public String getDaemonAddress() {
-        if (daemonAddress == null) {
-            return null;
-        }
         return this.daemonAddress;
     }
 

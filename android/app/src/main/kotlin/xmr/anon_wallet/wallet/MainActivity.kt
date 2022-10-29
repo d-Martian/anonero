@@ -5,15 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.os.Bundle
-import android.os.PersistableBundle
+import android.os.Process
 import android.os.PowerManager
 import android.os.PowerManager.WakeLock
-import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.NonNull
-import androidx.core.app.NotificationCompat
-import anon.xmr.app.anon_wallet.R
 import com.m2049r.xmrwallet.model.WalletManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -21,7 +17,6 @@ import io.flutter.plugin.common.BinaryMessenger
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.channels.*
 import xmr.anon_wallet.wallet.model.walletToHashMap
-import xmr.anon_wallet.wallet.utils.AnonPreferences
 
 
 class MainActivity : FlutterActivity() {
@@ -59,10 +54,11 @@ class MainActivity : FlutterActivity() {
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }
+
     override fun onResume() {
         super.onResume()
         scope.launch {
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
                 WalletEventsChannel.initWalletListeners()
                 WalletManager.getInstance().wallet?.let {
                     it.startRefresh()
@@ -75,7 +71,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         scope.launch {
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
                 WalletManager.getInstance().wallet?.let {
                     it.store()
                     it.close()
@@ -84,6 +80,8 @@ class MainActivity : FlutterActivity() {
         }
         scope.cancel()
         super.onDestroy()
+        //kill process
+        Process.killProcess(Process.myPid())
     }
 
 
