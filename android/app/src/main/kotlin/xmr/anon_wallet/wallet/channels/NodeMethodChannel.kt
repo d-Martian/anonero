@@ -58,32 +58,40 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
         val proxyServer = call.argument<String?>("proxyServer")
         val proxyPort = call.argument<String?>("proxyPort")
         val preferences = AnonPreferences(AnonWallet.getAppContext());
-
-        if (!proxyServer.isNullOrEmpty() && !proxyPort.isNullOrEmpty()) {
-            if (!Patterns.IP_ADDRESS.matcher(proxyServer).matches()) {
-                result.error("1", "Invalid server IP", "")
-                return
+        this.scope.launch {
+            withContext(Dispatchers.IO){
+              try {
+                  if (!proxyServer.isNullOrEmpty() && !proxyPort.isNullOrEmpty()) {
+                      if (!Patterns.IP_ADDRESS.matcher(proxyServer).matches()) {
+                          result.error("1", "Invalid server IP", "")
+                          return@withContext
+                      }
+                      val port = try {
+                          proxyPort.toInt()
+                      } catch (e: Exception) {
+                          -1
+                      }
+                      if (1 > port || port > 65535) {
+                          result.error("1", "Invalid port", "")
+                          return@withContext;
+                      }
+                      preferences.proxyServer = proxyServer
+                      preferences.proxyPort = proxyPort
+                      WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
+                      WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
+                  }else if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
+                      preferences.proxyServer = proxyServer
+                      preferences.proxyPort = proxyPort
+                      WalletManager.getInstance()?.wallet?.setProxy("")
+                      WalletManager.getInstance()?.setProxy("")
+                  }
+                  result.success(true)
+              }catch (e:Exception){
+                  result.error("0",e.message,"")
+                  throw  CancellationException(e.message)
+              }
             }
-            val port = try {
-                proxyPort.toInt()
-            } catch (e: Exception) {
-                -1
-            }
-            if (1 > port || port > 65535) {
-                result.error("1", "Invalid port", "")
-                return;
-            }
-            preferences.proxyServer = proxyServer
-            preferences.proxyPort = proxyPort
-            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
-            WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
-        }else if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
-            preferences.proxyServer = proxyServer
-            preferences.proxyPort = proxyPort
-            WalletManager.getInstance()?.wallet?.setProxy("")
-            WalletManager.getInstance()?.setProxy("")
         }
-        result.success(true)
     }
 
     private fun setNode(call: MethodCall, result: Result) {
