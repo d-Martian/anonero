@@ -53,7 +53,7 @@ object AnonWallet {
     }
 
     fun getNetworkType(): NetworkType {
-        return NetworkType.NetworkType_Stagenet
+        return NetworkType.NetworkType_Mainnet
     }
 
     fun setWallet(wallet: Wallet) {
