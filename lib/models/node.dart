@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 class Node {
-  int height=0;
+  int height = 0;
+  int blockchainHeight = 0;
   int responseCode = 500;
   String? host;
   bool? isActive;
@@ -32,6 +33,7 @@ class Node {
   Node.fromJson(Map json) {
     try {
       height = json['height'] ?? 0;
+      blockchainHeight = json['blockchainHeight'] ?? 0;
       isActive = json['isActive'] ?? false;
       status = json['status'] ?? "disconnected";
       connectionError = json['connection_error'] ?? "";
@@ -45,7 +47,7 @@ class Node {
       username = json['username'];
       password = json['password'];
       proxyServer = json['proxyServer'];
-      proxyPort= json['proxyPort'];
+      proxyPort = json['proxyPort'];
     } catch (e, s) {
       debugPrintStack(stackTrace: s);
     }
@@ -57,6 +59,21 @@ class Node {
 
   bool isConnected() {
     return status == "connected";
+  }
+
+  String toNodeString() {
+    if (host != null && (host?.isNotEmpty ?? false)) {
+      Map<String, String> params = Map();
+      if (username != null && (username?.isNotEmpty ?? false)) {
+        params["username"] = username!;
+      }
+      if (password != null && (password?.isNotEmpty ?? false)) {
+        params["password"] = password!;
+      }
+      Uri uri = Uri(scheme: "http", host: host, port: port,queryParameters: params.isNotEmpty ? params : null);
+      return uri.toString();
+    }
+    return "";
   }
 
   Map<String, dynamic> toJson() {

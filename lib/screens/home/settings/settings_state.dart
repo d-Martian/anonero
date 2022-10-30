@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/wallet.dart';
-import 'package:flutter/material.dart';
+import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class Proxy {
@@ -46,5 +51,6 @@ class ViewWalletPrivateDetailsStateNotifier extends StateNotifier<Wallet?> {
 }
 
 final proxyStateProvider = StateNotifierProvider<ProxyStateNotifier, Proxy>((ref) => ProxyStateNotifier(Proxy()));
+
 final viewPrivateWalletProvider = StateNotifierProvider<ViewWalletPrivateDetailsStateNotifier, Wallet?>(
     (ref) => ViewWalletPrivateDetailsStateNotifier(null));

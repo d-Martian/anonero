@@ -60,7 +60,6 @@ class MoneroHandlerThread : WalletListener {
             if (lastBlockTime < System.currentTimeMillis() - 2000) {
                 Log.i(TAG, "newBlock: ${height}")
                 lastBlockTime = System.currentTimeMillis()
-                wallet.refreshHistory()
                 val currentNode = NodeManager.getNode()
                 if (!wallet.isSynchronized) {
                     // we want to see our transactions as they come in
@@ -94,11 +93,6 @@ class MoneroHandlerThread : WalletListener {
     override fun refreshed() {
 
         val wallet = WalletManager.getInstance().wallet;
-        Log.i(
-            TAG, "refreshed: ${Thread.currentThread().name} ${Thread.currentThread().id} ${Thread.currentThread().isDaemon}" +
-                    "" +
-                    "wallet : ${wallet}"
-        )
         wallet.setSynchronized()
         wallet.store()
         val currentNode = NodeManager.getNode()
@@ -147,7 +141,6 @@ class MoneroHandlerThread : WalletListener {
         GlobalScope.launch {
             withContext(Dispatchers.Main){
                 try {
-                    Log.i("TAG", "onCreate: CAxxxxxLLED")
                     val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(AnonWallet.getAppContext(), AnonWallet.NOTIFICATION_CHANNEL_ID)
                     val notification = notificationBuilder.setAutoCancel(false)
                         .setWhen(System.currentTimeMillis())
@@ -159,7 +152,6 @@ class MoneroHandlerThread : WalletListener {
                         .build()
                     val mNotificationManager = AnonWallet.getAppContext().getSystemService(FlutterActivity.NOTIFICATION_SERVICE) as NotificationManager
                     mNotificationManager.notify(12, notification)
-                    Log.i("TAG", "onCreate: CALLED")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

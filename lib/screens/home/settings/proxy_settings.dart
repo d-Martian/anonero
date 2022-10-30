@@ -96,8 +96,9 @@ class ProxySettings extends HookConsumerWidget {
                           Navigator.pop(context);
                         } on PlatformException catch (e) {
                           SnackBar snackBar = SnackBar(
+                            behavior: SnackBarBehavior.floating,
                             backgroundColor: Colors.grey[900],
-                            content: Text('${e.message}',
+                            content: Text('Error : ${e.message}',
                                 style: Theme.of(context).textTheme.subtitle2?.copyWith(color: Colors.white)),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);

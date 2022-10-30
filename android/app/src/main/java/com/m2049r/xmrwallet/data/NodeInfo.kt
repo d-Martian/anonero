@@ -88,6 +88,7 @@ class NodeInfo : Node {
     fun toHashMap(): HashMap<String, Any> {
         val hashMap = hashMapOf<String, Any>()
         hashMap["height"] = height
+        hashMap["blockchainHeight"] = WalletManager.getInstance().blockchainHeight ?: 0
         hashMap["responseCode"] = responseCode
         hashMap["host"] = host
         hashMap["rpcPort"] = rpcPort
@@ -295,13 +296,13 @@ class NodeInfo : Node {
 //            }
                 OkHttpClient?
             private get() = if (mockClient != null) mockClient else OkHttpClient.Builder().apply {
-//                    val preferences = AnonPreferences(AnonWallet.getAppContext())
-//                    if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPort.isNullOrEmpty()) {
-//                        val iSock = InetSocketAddress(
-//                            preferences.proxyServer, preferences.proxyPort!!.trim().toInt()
-//                        )
-//                        this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
-//                    }
+                    val preferences = AnonPreferences(AnonWallet.getAppContext())
+                    if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPort.isNullOrEmpty()) {
+                        val iSock = InetSocketAddress(
+                            preferences.proxyServer, preferences.proxyPort!!.trim().toInt()
+                        )
+                        this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
+                    }
                 }.build() // Unit-test mode
 
         //            if ((username != null) && (!username.isEmpty())) {

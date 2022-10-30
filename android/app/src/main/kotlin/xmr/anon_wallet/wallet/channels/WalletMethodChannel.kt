@@ -81,7 +81,9 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                 val wallet = WalletManager.getInstance().wallet
                 if (wallet != null) {
                     try {
+                        WalletEventsChannel.initWalletListeners()
                         wallet.startRefresh()
+                        wallet.refresh()
                         wallet.refreshHistory()
                         result.success(true)
                     } catch (e: Exception) {
@@ -158,21 +160,30 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                             return@withContext
                         }
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
+                        wallet.refreshHistory()
+                        sendEvent(wallet.walletToHashMap())
+                        result.success(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletListeners()
-                        if(WalletManager.getInstance().daemonAddress == null){
-                            NodeManager.setNode()
-                        }
                         if (wallet.isSynchronized) {
                             wallet.startRefresh()
-                        } else {
-                            wallet.refresh()
                         }
-                        wallet.refreshHistory()
-                        result.success(wallet.walletToHashMap())
-                        //init if daemon if daemon is set
+                        if (WalletManager.getInstance().daemonAddress == null) {
+                            NodeManager.setNode()
+                        }
+
                         WalletManager.getInstance().daemonAddress?.let {
-                            wallet.init(0)
+                            WalletEventsChannel.initialized = wallet.init(0)
+                            wallet.setProxy(getProxy())
+                            if (WalletEventsChannel.initialized){
+                                wallet.refreshHistory()
+                                wallet.refresh()
+                            }
+                            sendEvent(wallet.walletToHashMap())
                         }
+                        sendEvent(wallet.walletToHashMap())
+                        wallet.refreshHistory()
+                        sendEvent(wallet.walletToHashMap())
+                        WalletManager.getInstance().setProxy(getProxy())
                         sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "OPEN_WALLET",
@@ -240,6 +251,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                     val default = "English"
                     //Close if wallet is already open
                     WalletManager.getInstance().wallet?.close()
+                    WalletManager.getInstance().setProxy(getProxy())
                     if (AnonWallet.getNetworkType() == NetworkType.NetworkType_Mainnet) {
                         if (NodeManager.getNode() != null && NodeManager.getNode()?.getHeight() != null) {
                             restoreHeight = NodeManager.getNode()?.getHeight()!!
@@ -270,7 +282,13 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                     if (wallet.status.isOk) {
                         wallet.refresh()
                         sendEvent(wallet.walletToHashMap())
-                        WalletManager.getInstance().wallet.init(0)
+                        WalletManager.getInstance().daemonAddress?.let {
+
+                            WalletEventsChannel.initialized =   wallet.init(0)
+                            wallet.setProxy(getProxy())
+                            sendEvent(wallet.walletToHashMap())
+                            Log.i(TAG, "openWallet: ${wallet.fullStatus}")
+                        }
                         wallet.refreshHistory()
                         sendEvent(
                             hashMapOf(
@@ -300,6 +318,15 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
     ///TODO: Restore
     private fun restoreWallet(call: MethodCall, result: Result) {
 
+    }
+
+    private fun getProxy(): String {
+        val prefs = AnonPreferences(AnonWallet.getAppContext());
+        return if (prefs.proxyPort.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
+            ""
+        } else {
+            "${prefs.proxyServer}:${prefs.proxyPort}"
+        }
     }
 
     companion object {
