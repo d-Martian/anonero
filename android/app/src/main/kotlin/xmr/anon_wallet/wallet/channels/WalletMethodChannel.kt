@@ -160,9 +160,10 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                             return@withContext
                         }
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
+                        result.success(wallet.walletToHashMap())
+                        sendEvent(wallet.walletToHashMap())
                         wallet.refreshHistory()
                         sendEvent(wallet.walletToHashMap())
-                        result.success(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletListeners()
                         if (wallet.isSynchronized) {
                             wallet.startRefresh()
