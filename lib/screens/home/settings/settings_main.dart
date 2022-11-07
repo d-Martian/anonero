@@ -3,7 +3,9 @@ import 'package:anon_wallet/screens/home/settings/nodes/nodes_settings.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/home/settings/view_wallet_private.dart';
+import 'package:anon_wallet/screens/onboard/remote_node_setup.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
+import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -38,12 +40,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Text("Connection", style: titleStyle),
                 ),
                 Divider(color: dividerColor, height: 2),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const NodesSettingsScreens()));
-                  },
-                  title: const Text("Node"),
+                Opacity(
+                  opacity: 0.4,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 34),
+                    onTap: () {
+                      // Navigator.push(context, MaterialPageRoute(builder: (context) => const NodesSettingsScreens()));
+                    },
+                    title: const Text("Node"),
+                  ),
                 ),
                 HookConsumer(builder: (context, ref, child) {
                   Proxy proxy = ref.watch(proxyStateProvider);
