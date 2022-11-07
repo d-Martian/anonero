@@ -49,7 +49,7 @@ class MainActivity : FlutterActivity() {
     private fun initializeProxySettings() {
         val prefs = AnonPreferences(this)
         if(prefs.firstRun == true){
-            prefs.proxyServer = "127.0.0"
+            prefs.proxyServer = "127.0.0.1"
             prefs.proxyPort = "9050"
             prefs.firstRun = false
         }
