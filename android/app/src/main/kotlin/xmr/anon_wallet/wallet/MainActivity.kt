@@ -17,6 +17,7 @@ import io.flutter.plugin.common.BinaryMessenger
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.channels.*
 import xmr.anon_wallet.wallet.model.walletToHashMap
+import xmr.anon_wallet.wallet.utils.AnonPreferences
 
 
 class MainActivity : FlutterActivity() {
@@ -41,6 +42,16 @@ class MainActivity : FlutterActivity() {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "wallet:wakelock").apply {
                 acquire()
             }
+        }
+        initializeProxySettings()
+    }
+
+    private fun initializeProxySettings() {
+        val prefs = AnonPreferences(this)
+        if(prefs.firstRun == true){
+            prefs.proxyServer = "127.0.0"
+            prefs.proxyPort = "9050"
+            prefs.firstRun = false
         }
     }
 
