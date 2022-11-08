@@ -5,6 +5,8 @@ import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/transaction.dart';
+import 'package:anon_wallet/screens/home/transactions/tx_details.dart';
+import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
@@ -82,7 +84,26 @@ class _TransactionsListState extends State<TransactionsList> {
             bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
             bool connected = ref.watch(connectionStatus) ?? false;
             Map<String, num>? sync = ref.watch(syncProgressStateProvider);
-            if (isConnecting || isWalletOpening) {
+           if (sync != null && sync['remaining']!=0) {
+              return SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  pinned: true,
+                  toolbarHeight: 10,
+                  collapsedHeight: 10,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  flexibleSpace: Column(
+                    children: [
+                      LinearProgressIndicator(
+                        value: sync['progress']?.toDouble() ?? 0.0,
+                      ),
+                      const Padding(padding: EdgeInsets.all(6)),
+                      Text(
+                        "Syncing blocks : ${sync['remaining']} blocks remaining",
+                        style: Theme.of(context).textTheme.caption,
+                      )
+                    ],
+                  ));
+            }else if (isConnecting || isWalletOpening) {
               return SliverAppBar(
                   automaticallyImplyLeading: false,
                   pinned: true,
@@ -111,27 +132,8 @@ class _TransactionsListState extends State<TransactionsList> {
                         )
                       ],
                     ));
-              }else if (sync != null ) {
-                return SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    pinned: true,
-                    toolbarHeight: 10,
-                    collapsedHeight: 10,
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    flexibleSpace: Column(
-                      children: [
-                        LinearProgressIndicator(
-                          value: sync['progress']?.toDouble() ?? 0.0,
-                        ),
-                        const Padding(padding: EdgeInsets.all(6)),
-                        Text(
-                          "Syncing blocks : ${sync['remaining']} blocks remaining",
-                          style: Theme.of(context).textTheme.caption,
-                        )
-                      ],
-                    ));
-              }
-              return const SliverToBoxAdapter();
+              }else {
+              return const SliverToBoxAdapter();}
             }
           }),
           Consumer(
@@ -149,65 +151,15 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 
   Widget _buildTxItem(Transaction transaction) {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-        decoration: BoxDecoration(
-            border: Border.all(
-                width: 1, color: transaction.isSpend ? Theme.of(context).primaryColor : Colors.grey.shade600),
-            borderRadius: const BorderRadius.all(Radius.circular(8))),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            getStats(transaction),
-            Text(
-              formatMonero(transaction.amount),
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            Column(
-              children: [Text(formatTime(transaction.timeStamp), style: Theme.of(context).textTheme.caption)],
-            )
-          ],
-        ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+      child: InkWell(
+        onTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>TxDetails(transaction: transaction),fullscreenDialog: true));
+        },
+        child: TransactionItem(transaction:transaction),
       ),
     );
-  }
-
-  getStats(Transaction transaction) {
-    if (!(transaction.isConfirmed ?? false)) {
-      int confirms = transaction.confirmations ?? 0;
-      double progress = confirms / maxConfirms;
-      return SizedBox(
-        height: 30,
-        width: 30,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            CircularProgressIndicator(
-              color: Colors.green,
-              strokeWidth: 1,
-              value: progress,
-            ),
-            Text(
-              "$confirms",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.green, fontSize: 12),
-            )
-          ],
-        ),
-      );
-    }
-    return (transaction.isSpend)
-        ? Icon(
-            CupertinoIcons.arrow_turn_left_up,
-            color: Theme.of(context).primaryColor,
-          )
-        : const Icon(CupertinoIcons.arrow_turn_left_down);
   }
 }
 
@@ -216,5 +168,5 @@ String formatTime(int? timestamp) {
     return "";
   }
   var dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-  return DateFormat("H:m\ndd/M").format(dateTime);
+  return DateFormat("H:mm\ndd/M").format(dateTime);
 }
