@@ -1,6 +1,7 @@
 package xmr.anon_wallet.wallet.channels
 
 import android.util.Log
+import android.util.Patterns
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.data.NodeInfo
 import com.m2049r.xmrwallet.model.WalletManager
@@ -19,6 +20,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             "setNode" -> setNode(call, result)
             "setProxy" -> setProxy(call, result)
             "getProxy" -> getProxy(call, result)
+            "getNodeFromPrefs" -> getNodeFromPrefs(call, result)
             "setCurrentNode" -> setCurrentNode(call, result)
             "testRpc" -> testRpc(call, result)
         }
@@ -34,41 +36,66 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
         )
     }
 
+    private fun getNodeFromPrefs(call: MethodCall, result: Result) {
+        val preferences = AnonPreferences(AnonWallet.getAppContext());
+        if(preferences.serverUrl.isNullOrEmpty() || preferences.serverPort == null){
+            result.error("0","No node found",null);
+            return;
+        }
+        val hashMap = hashMapOf<String, Any>()
+        hashMap["host"] = preferences.serverUrl ?: "";
+        preferences.serverPort?.let {
+            hashMap["rpcPort"] = it;
+        }
+        hashMap["username"] = preferences.serverUserName ?: ""
+        hashMap["password"] = preferences.serverPassword ?: ""
+        hashMap["EVENT_TYPE"] = "NODE"
+        hashMap["isActive"] =  false
+        return result.success(hashMap)
+    }
+
     private fun setProxy(call: MethodCall, result: Result) {
         val proxyServer = call.argument<String?>("proxyServer")
         val proxyPort = call.argument<String?>("proxyPort")
         val preferences = AnonPreferences(AnonWallet.getAppContext());
-
-        val regex = Regex("^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}\$")
-        if (!proxyServer.isNullOrEmpty() && !proxyPort.isNullOrEmpty()) {
-            if (!regex.matches(proxyServer)) {
-                result.error("1", "Invalid server IP", "")
-                return;
+        this.scope.launch {
+            withContext(Dispatchers.IO){
+              try {
+                  if (!proxyServer.isNullOrEmpty() && !proxyPort.isNullOrEmpty()) {
+                      if (!Patterns.IP_ADDRESS.matcher(proxyServer).matches()) {
+                          result.error("1", "Invalid server IP", "")
+                          return@withContext
+                      }
+                      val port = try {
+                          proxyPort.toInt()
+                      } catch (e: Exception) {
+                          -1
+                      }
+                      if (1 > port || port > 65535) {
+                          result.error("1", "Invalid port", "")
+                          return@withContext;
+                      }
+                      preferences.proxyServer = proxyServer
+                      preferences.proxyPort = proxyPort
+                      WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
+                      WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
+                  }else if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
+                      preferences.proxyServer = proxyServer
+                      preferences.proxyPort = proxyPort
+                      WalletManager.getInstance()?.wallet?.setProxy("")
+                      WalletManager.getInstance()?.setProxy("")
+                  }
+                  result.success(true)
+              }catch (e:Exception){
+                  result.error("0",e.message,"")
+                  throw  CancellationException(e.message)
+              }
             }
-            val port = try {
-                proxyPort.toInt()
-            } catch (e: Exception) {
-                -1
-            }
-            if (1 > port || port > 65535) {
-                result.error("1", "Invalid port", "")
-                return;
-            }
-//            preferences.proxyServer = proxyServer
-//            preferences.proxyPort = proxyPort
-//            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
-//            WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
-        }else if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
-//            preferences.proxyServer = proxyServer
-//            preferences.proxyPort = proxyPort
-//            WalletManager.getInstance()?.wallet?.setProxy("")
-//            WalletManager.getInstance()?.setProxy("")
         }
-        result.success(true)
     }
 
     private fun setNode(call: MethodCall, result: Result) {
-        val port = call.argument<Int>("port")
+        val port = call.argument<Int?>("port")
         var host = call.argument<String>("host")
         val userName = call.argument<String?>("username")
         val password = call.argument<String?>("password")
@@ -80,6 +107,10 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
         }
         if (host.lowercase().startsWith("https://")) {
             host = host.replace("https://", "")
+        }
+        if(host.trim().isEmpty()){
+            result.error("0","Invalid hostname","");
+            return
         }
         this.scope.launch {
             withContext(Dispatchers.IO) {
@@ -96,8 +127,16 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     password?.let {
                         node.password = it
                     }
+                    if(host.contains(".onion")){
+                        if(AnonPreferences(AnonWallet.getAppContext()).proxyServer.isNullOrEmpty()){
+                            WalletEventsChannel.sendEvent(node.toHashMap().apply {
+                                put("status", "not-connected")
+                            })
+                            result.error("0","Please set tor proxy to connect onion urls","");
+                            return@withContext;
+                        }
+                    }
                     val testSuccess = node.testRpcService()
-                    NodeManager.setCurrentActiveNode(node)
 
                     if (testSuccess == true) {
                         AnonPreferences(AnonWallet.getAppContext()).serverUrl = host
@@ -109,6 +148,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                             AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.password
                         }
                         WalletManager.getInstance().setDaemon(node)
+                        NodeManager.setCurrentActiveNode(node)
                         WalletEventsChannel.sendEvent(node.toHashMap().apply {
                             put("status", "connected")
                         })

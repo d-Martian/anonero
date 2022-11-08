@@ -25,7 +25,6 @@ class TransactionsList extends StatefulWidget {
 
 class _TransactionsListState extends State<TransactionsList> {
 
-
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -81,8 +80,8 @@ class _TransactionsListState extends State<TransactionsList> {
           Consumer(builder: (context, ref, c) {
             bool isConnecting = ref.watch(connectingToNodeStateProvider);
             bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
+            bool connected = ref.watch(connectionStatus) ?? false;
             Map<String, num>? sync = ref.watch(syncProgressStateProvider);
-
             if (isConnecting || isWalletOpening) {
               return SliverAppBar(
                   automaticallyImplyLeading: false,
@@ -95,7 +94,24 @@ class _TransactionsListState extends State<TransactionsList> {
                     minHeight: 1,
                   ));
             } else {
-              if (sync != null) {
+              if (!connected){
+                return SliverAppBar(
+                    automaticallyImplyLeading: false,
+                    pinned: true,
+                    toolbarHeight: 10,
+                    collapsedHeight: 10,
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    flexibleSpace: Column(
+                      children: [
+                        const LinearProgressIndicator(),
+                        const Padding(padding: EdgeInsets.all(6)),
+                        Text(
+                          "Disconnected",
+                          style: Theme.of(context).textTheme.caption,
+                        )
+                      ],
+                    ));
+              }else if (sync != null ) {
                 return SliverAppBar(
                     automaticallyImplyLeading: false,
                     pinned: true,

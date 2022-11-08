@@ -19,7 +19,6 @@ import android.util.Log
 import com.m2049r.levin.scanner.LevinPeer
 import com.m2049r.levin.util.NodePinger
 import com.m2049r.xmrwallet.model.WalletManager
-import lombok.Getter
 import lombok.Setter
 import lombok.ToString
 import okhttp3.*
@@ -35,6 +34,13 @@ import java.net.HttpURLConnection
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.net.SocketAddress
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+
 
 class NodeInfo : Node {
     private var height: Long = 0
@@ -88,6 +94,7 @@ class NodeInfo : Node {
     fun toHashMap(): HashMap<String, Any> {
         val hashMap = hashMapOf<String, Any>()
         hashMap["height"] = height
+        hashMap["blockchainHeight"] = WalletManager.getInstance().blockchainHeight ?: 0
         hashMap["responseCode"] = responseCode
         hashMap["host"] = host
         hashMap["rpcPort"] = rpcPort
@@ -295,13 +302,40 @@ class NodeInfo : Node {
 //            }
                 OkHttpClient?
             private get() = if (mockClient != null) mockClient else OkHttpClient.Builder().apply {
-//                    val preferences = AnonPreferences(AnonWallet.getAppContext())
-//                    if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPort.isNullOrEmpty()) {
-//                        val iSock = InetSocketAddress(
-//                            preferences.proxyServer, preferences.proxyPort!!.trim().toInt()
-//                        )
-//                        this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
-//                    }
+                    val preferences = AnonPreferences(AnonWallet.getAppContext())
+                    if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPort.isNullOrEmpty()) {
+                        val iSock = InetSocketAddress(
+                            preferences.proxyServer, preferences.proxyPort!!.trim().toInt()
+                        )
+                        this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
+                    }
+                    if(!preferences.serverUserName.isNullOrEmpty() && !preferences.serverPassword.isNullOrEmpty()){
+                        this.authenticator { _, response ->
+                            val credential = Credentials.basic(preferences.serverUserName!!, preferences.serverPassword!!)
+                            response.request.newBuilder().header("Authorization", credential).build()
+                        }
+                    }
+                    if(request.url.host.contains(".onion")){
+                        // Create a trust manager that does not validate certificate chains
+                        val trustAllCerts = arrayOf<TrustManager>(
+                            object : X509TrustManager {
+                                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                                override fun getAcceptedIssuers(): Array<X509Certificate> {
+                                    return arrayOf()
+                                }
+                            }
+                        )
+                        // Install the all-trusting trust manager
+                        val sslContext = SSLContext.getInstance("SSL")
+                        sslContext.init(null, trustAllCerts, SecureRandom())
+
+                        // Create an ssl socket factory with our all-trusting manager
+                        val sslSocketFactory = sslContext.socketFactory
+
+                        this.sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+                        this.hostnameVerifier { _, _ -> true }
+                    }
                 }.build() // Unit-test mode
 
         //            if ((username != null) && (!username.isEmpty())) {

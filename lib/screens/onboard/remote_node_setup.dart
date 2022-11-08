@@ -43,10 +43,11 @@ class RemoteNodeWidget extends ConsumerWidget {
                 ),
                 subtitle: Column(
                   children: [
-                    TextField(
+                    TextFormField(
                       onChanged: (value) {
                         ref.read(remoteHost.state).state = value;
                       },
+                      initialValue: ref.read(remoteHost.state).state,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
@@ -143,36 +144,36 @@ class RemoteNodeWidget extends ConsumerWidget {
                 ),
               ),
             ),
-            // SliverToBoxAdapter(
-            //   child: HookConsumer(
-            //     builder: (c, ref, child) {
-            //       Proxy proxy = ref.watch(proxyStateProvider);
-            //       useEffect(() {
-            //         ref.read(proxyStateProvider.notifier).getState();
-            //         return null;
-            //       }, []);
-            //       return Container(
-            //         width: MediaQuery.of(context).size.width,
-            //         padding: const EdgeInsets.only(top: 24),
-            //         child: TextButton.icon(
-            //           style: ButtonStyle(
-            //               foregroundColor: proxy.isConnected()
-            //                   ? MaterialStateColor.resolveWith((states) => Colors.green)
-            //                   : MaterialStateColor.resolveWith((states) => Theme.of(context).primaryColor)),
-            //           onPressed: () {
-            //             Navigator.push(context, MaterialPageRoute(
-            //               builder: (context) {
-            //                 return ProxySettings();
-            //               },
-            //             ));
-            //           },
-            //           label: Text("Proxy Settings"),
-            //           icon: Icon(Icons.shield_outlined),
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // )
+            SliverToBoxAdapter(
+              child: HookConsumer(
+                builder: (c, ref, child) {
+                  Proxy proxy = ref.watch(proxyStateProvider);
+                  useEffect(() {
+                    ref.read(proxyStateProvider.notifier).getState();
+                    return null;
+                  }, []);
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.only(top: 24),
+                    child: TextButton.icon(
+                      style: ButtonStyle(
+                          foregroundColor: proxy.isConnected()
+                              ? MaterialStateColor.resolveWith((states) => Colors.green)
+                              : MaterialStateColor.resolveWith((states) => Theme.of(context).primaryColor)),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) {
+                            return ProxySettings();
+                          },
+                        ));
+                      },
+                      label: Text("Proxy Settings"),
+                      icon: Icon(Icons.shield_outlined),
+                    ),
+                  );
+                },
+              ),
+            )
           ],
         ),
       ),

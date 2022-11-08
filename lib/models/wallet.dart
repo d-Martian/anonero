@@ -6,6 +6,8 @@ import 'package:anon_wallet/models/transaction.dart';
 class Wallet {
   String name = "";
   String seedLanguage = "";
+  String connection = "";
+  String connectionError = "";
   String pin = "";
   String address = "";
   String spendKey = "";
@@ -35,6 +37,8 @@ class Wallet {
     connectionStatus = json['connectionStatus'] ?? "";
     status = json['status'] ?? "";
     blockChainHeight = json['blockChainHeight'] ?? 0;
+    connection = json['connection'] ?? "";
+    connectionError = json['connectionError'] ?? "";
     isSynchronized = json['isSynchronized'] ?? false;
     balance = json['balance'] ?? 0;
     unlockedBalance = json['unlockedBalance'] ?? 0;
@@ -51,6 +55,10 @@ class Wallet {
         transactions.add(Transaction.fromJson(v));
       });
     }
+  }
+
+  bool isConnected() {
+    return connection.contains("ConnectionStatus_Connected");
   }
 
 }

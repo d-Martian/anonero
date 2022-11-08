@@ -26,6 +26,7 @@ object WalletEventsChannel : EventChannel.StreamHandler {
     private var connectionStatus = ConnectionStatus.ConnectionStatus_Disconnected
     private const val STATUS_UPDATE_INTERVAL: Long = 120000 // 120s (blocktime)
     var updated = true
+    var initialized = false
 
 
     fun init(binaryMessenger: BinaryMessenger, lifecycle: Lifecycle) {

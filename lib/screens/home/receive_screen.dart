@@ -17,7 +17,6 @@ class ReceiveWidget extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     var subAddress = ref.watch(currentSubAddressProvider);
     var address = subAddress?.address ?? "";
-    bool isWalletOpening = ref.watch(walletLoadingProvider) ?? true;
 
     return Scaffold(
       body: CustomScrollView(
@@ -43,9 +42,7 @@ class ReceiveWidget extends ConsumerWidget {
           ),
           SliverFillRemaining(
             fillOverscroll: true,
-            child:  isWalletOpening
-                ? const Center(child: CircularProgressIndicator())
-                : Container(
+            child:  Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -1,4 +1,5 @@
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -96,8 +97,9 @@ class ProxySettings extends HookConsumerWidget {
                           Navigator.pop(context);
                         } on PlatformException catch (e) {
                           SnackBar snackBar = SnackBar(
+                            behavior: SnackBarBehavior.floating,
                             backgroundColor: Colors.grey[900],
-                            content: Text('${e.message}',
+                            content: Text('Error : ${e.message}',
                                 style: Theme.of(context).textTheme.subtitle2?.copyWith(color: Colors.white)),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -114,24 +116,27 @@ class ProxySettings extends HookConsumerWidget {
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.black),
                       )),
                 ),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                  child: TextButton(
-                      onPressed: () async {
-                        await ref.read(proxyStateProvider.notifier).setProxy("", "");
-                        SnackBar snackBar = SnackBar(
-                          backgroundColor: Colors.grey[900],
-                          content: Text('Proxy disabled',
-                              style: Theme.of(context).textTheme.subtitle2?.copyWith(color: Colors.white)),
-                        );
-                        await ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        "Disable proxy",
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.red),
-                      )),
+                Opacity(
+                  opacity: !kReleaseMode  ? 1 : 0,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                    child: TextButton(
+                        onPressed: () async {
+                          await ref.read(proxyStateProvider.notifier).setProxy("", "");
+                          SnackBar snackBar = SnackBar(
+                            backgroundColor: Colors.grey[900],
+                            content: Text('Proxy disabled',
+                                style: Theme.of(context).textTheme.subtitle2?.copyWith(color: Colors.white)),
+                          );
+                          await ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Disable proxy",
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.red),
+                        )),
+                  ),
                 )
               ],
             ),

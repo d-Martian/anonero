@@ -1,7 +1,10 @@
 package xmr.anon_wallet.wallet.model
 
+import android.util.Log
 import com.m2049r.xmrwallet.data.Subaddress
 import com.m2049r.xmrwallet.model.Wallet
+import xmr.anon_wallet.wallet.channels.WalletEventsChannel
+import xmr.anon_wallet.wallet.channels.WalletEventsChannel.initialized
 
 fun Wallet.getLastSubAddressIndex(): Int {
     //index starts from 1 to ignore primary 0 address
@@ -36,7 +39,16 @@ fun Subaddress.toHashMap(): HashMap<String, Any> {
 
 fun Wallet.walletToHashMap(): HashMap<String, Any> {
     val nextAddress = if (this.getLatestSubaddress() != null) this.getLatestSubaddress()?.toHashMap()!! else hashMapOf<String, String>()
+    var connection = "disconnected";
+    var error = "";
+    if(WalletEventsChannel.initialized){
+        connection = "${this.fullStatus}"
+        error = this.fullStatus.errorString
+    }
+    Log.i("Wallet", "Wallet FullStatus: ${connection} $error")
     return hashMapOf(
+        "connection" to (connection) ,
+        "connectionError" to (error) ,
         "name" to this.name,
         "address" to this.address,
         "secretViewKey" to this.secretViewKey,
