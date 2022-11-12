@@ -17,16 +17,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class TransactionsList extends StatefulWidget {
+  final VoidCallback? onScanClick;
 
-  final VoidCallback? onScanClick ;
-  const TransactionsList({Key? key,this.onScanClick}) : super(key: key);
+  const TransactionsList({Key? key, this.onScanClick}) : super(key: key);
 
   @override
   State<TransactionsList> createState() => _TransactionsListState();
 }
 
 class _TransactionsListState extends State<TransactionsList> {
-
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -45,13 +44,15 @@ class _TransactionsListState extends State<TransactionsList> {
             expandedHeight: 180,
             actions: [
               IconButton(onPressed: () {}, icon: const Icon(Icons.lock)),
-              IconButton(onPressed: () {
-                widget.onScanClick?.call();
-              }, icon: const Icon(Icons.crop_free)),
+              IconButton(
+                  onPressed: () {
+                    widget.onScanClick?.call();
+                  },
+                  icon: const Icon(Icons.crop_free)),
               PopupMenuButton<int>(
                 color: Colors.grey[900],
-                onSelected: (item)  {
-                  if(item == 0 ){
+                onSelected: (item) {
+                  if (item == 0) {
                     WalletChannel().rescan();
                   }
                 },
@@ -84,7 +85,7 @@ class _TransactionsListState extends State<TransactionsList> {
             bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
             bool connected = ref.watch(connectionStatus) ?? false;
             Map<String, num>? sync = ref.watch(syncProgressStateProvider);
-           if (sync != null && sync['remaining']!=0) {
+            if (sync != null && sync['remaining'] != 0) {
               return SliverAppBar(
                   automaticallyImplyLeading: false,
                   pinned: true,
@@ -103,7 +104,7 @@ class _TransactionsListState extends State<TransactionsList> {
                       )
                     ],
                   ));
-            }else if (isConnecting || isWalletOpening) {
+            } else if (isConnecting || isWalletOpening) {
               return SliverAppBar(
                   automaticallyImplyLeading: false,
                   pinned: true,
@@ -115,7 +116,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     minHeight: 1,
                   ));
             } else {
-              if (!connected){
+              if (!connected) {
                 return SliverAppBar(
                     automaticallyImplyLeading: false,
                     pinned: true,
@@ -132,8 +133,9 @@ class _TransactionsListState extends State<TransactionsList> {
                         )
                       ],
                     ));
-              }else {
-              return const SliverToBoxAdapter();}
+              } else {
+                return const SliverToBoxAdapter();
+              }
             }
           }),
           Consumer(
@@ -153,11 +155,16 @@ class _TransactionsListState extends State<TransactionsList> {
   Widget _buildTxItem(Transaction transaction) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-      child: InkWell(
-        onTap: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>TxDetails(transaction: transaction),fullscreenDialog: true));
+      child: Consumer(
+        builder: (context, ref, c) {
+          return InkWell(
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => TxDetails(transaction: transaction), fullscreenDialog: true));
+            },
+            child: TransactionItem(transaction: transaction),
+          );
         },
-        child: TransactionItem(transaction:transaction),
       ),
     );
   }

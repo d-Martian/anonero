@@ -43,6 +43,11 @@ class WalletChannel {
     return value;
   }
 
+  Future<bool> setTxUserNotes(String txId, String notes) async {
+    bool value = await platform.invokeMethod("setTxUserNotes", {"txId": txId, "message": notes});
+    return value;
+  }
+
   void startSync() async {
     dynamic value = await platform.invokeMethod("startSync");
   }
@@ -58,9 +63,8 @@ class WalletChannel {
     return WalletState.walletNotInitialized;
   }
 
-  Future<Wallet>  getWalletPrivate(String seedPassphrase) async {
-    dynamic value =
-        await platform.invokeMethod("viewWalletInfo", {"seedPassphrase": seedPassphrase});
+  Future<Wallet> getWalletPrivate(String seedPassphrase) async {
+    dynamic value = await platform.invokeMethod("viewWalletInfo", {"seedPassphrase": seedPassphrase});
     return Wallet.fromJson(value);
   }
 }

@@ -36,6 +36,20 @@ final walletTransactions = Provider<List<Transaction>>((ref) {
   return [];
 });
 
+final getSpecificTransaction = Provider.family<Transaction, Transaction>((ref, selectedTx) {
+  var walletAsync = ref.watch(walletStateStreamProvider);
+  Wallet? wallet = walletAsync.value;
+  if (wallet != null) {
+    try {
+      Transaction transaction = wallet.transactions.firstWhere((element) => element.hash == selectedTx.hash);
+      return transaction;
+    } catch (e) {
+      return selectedTx;
+    }
+  }
+  return selectedTx;
+});
+
 final walletBalanceProvider = Provider((ref) {
   var walletAsync = ref.watch(walletStateStreamProvider);
   Wallet? wallet = walletAsync.value;
