@@ -44,6 +44,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             "rescan" -> rescan(call, result)
             "refresh" -> refresh(call, result)
             "startSync" -> startSync(call, result)
+            "getTxKey" -> getTxKey(call, result)
         }
     }
 
@@ -175,7 +176,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         WalletManager.getInstance().daemonAddress?.let {
                             WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
-                            if (WalletEventsChannel.initialized){
+                            if (WalletEventsChannel.initialized) {
                                 wallet.refreshHistory()
                                 wallet.refresh()
                             }
@@ -285,7 +286,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
 
-                            WalletEventsChannel.initialized =   wallet.init(0)
+                            WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
                             sendEvent(wallet.walletToHashMap())
                             Log.i(TAG, "openWallet: ${wallet.fullStatus}")
@@ -327,6 +328,25 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             ""
         } else {
             "${prefs.proxyServer}:${prefs.proxyPort}"
+        }
+    }
+
+    private fun getTxKey(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("txId")) {
+                    try {
+                        val txId = call.argument<String>("txId")
+                        val txKey = WalletManager.getInstance().wallet.getTxKey(txId)
+                        result.success(txKey)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw  CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
         }
     }
 

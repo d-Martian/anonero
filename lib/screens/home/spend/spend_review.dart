@@ -26,7 +26,7 @@ class SpendReview extends ConsumerWidget {
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              title: const Text("Send"),
+              leading: BackButton(onPressed: close,),
               toolbarHeight: 120,
               bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(60),
@@ -78,7 +78,7 @@ class SpendReview extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: const Text("Send"),
+            leading: BackButton(onPressed: close,),
             toolbarHeight: 120,
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),

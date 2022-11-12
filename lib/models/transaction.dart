@@ -15,7 +15,6 @@ class Transaction {
   int? blockheight;
   int? accountIndex;
   String? paymentId;
-  String? txKey;
   num? amount = 0;
   bool isSpend = false;
   int? timeStamp;
@@ -46,7 +45,6 @@ class Transaction {
       subaddressLabel = json['subaddressLabel'];
       address = json['address'];
       notes = json['notes'];
-      txKey = json['txKey'];
       fee = json['fee'];
       isSpend = json['isSpend'];
       confirmations = json['confirmations'];

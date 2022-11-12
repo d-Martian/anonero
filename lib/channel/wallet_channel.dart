@@ -38,6 +38,11 @@ class WalletChannel {
     return Wallet.fromJson(value);
   }
 
+  Future<String?> getTxKey(String txId) async {
+    String? value = await platform.invokeMethod("getTxKey", {"txId": txId});
+    return value;
+  }
+
   void startSync() async {
     dynamic value = await platform.invokeMethod("startSync");
   }

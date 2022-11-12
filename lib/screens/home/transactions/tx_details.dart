@@ -1,3 +1,4 @@
+import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
@@ -14,9 +15,18 @@ class TxDetails extends StatefulWidget {
 }
 
 class _TxDetailsState extends State<TxDetails> {
+
+  String? txKey = "";
+
   @override
   Widget build(BuildContext context) {
-    TextStyle? titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).primaryColor);
+    TextStyle? titleStyle = Theme
+        .of(context)
+        .textTheme
+        .titleMedium
+        ?.copyWith(color: Theme
+        .of(context)
+        .primaryColor);
     Transaction transaction = widget.transaction;
     Transfer? transfer = transaction.transfers.length == 1 ? transaction.transfers[0] : null;
     return Scaffold(
@@ -33,18 +43,18 @@ class _TxDetailsState extends State<TxDetails> {
           SliverToBoxAdapter(
             child: transfer != null
                 ? Container(
-                    margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                    child: ListTile(
-                      title: Text(
-                        "DESTINATION",
-                        style: titleStyle,
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(transfer.address ?? '-'),
-                      ),
-                    ),
-                  )
+              margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+              child: ListTile(
+                title: Text(
+                  "DESTINATION",
+                  style: titleStyle,
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(transfer.address ?? '-'),
+                ),
+              ),
+            )
                 : const SizedBox(),
           ),
           SliverToBoxAdapter(
@@ -84,7 +94,7 @@ class _TxDetailsState extends State<TxDetails> {
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(transaction.txKey ?? '-'),
+                  child: Text(txKey ?? '-'),
                 ),
               ),
             ),
@@ -99,7 +109,7 @@ class _TxDetailsState extends State<TxDetails> {
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text("${transaction.blockheight == 0 ? 'Pending': transaction.blockheight ?? '-'}"),
+                  child: Text("${transaction.blockheight == 0 ? 'Pending' : transaction.blockheight ?? '-'}"),
                 ),
               ),
             ),
@@ -124,11 +134,35 @@ class _TxDetailsState extends State<TxDetails> {
     );
   }
 
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      fetchTxKey();
+    });
+  }
+
   String formatTimeAndDate(int? timestamp) {
     if (timestamp == null) {
       return "";
     }
     var dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     return DateFormat("H:mm dd/MM/yyy").format(dateTime);
+  }
+
+  void fetchTxKey() async {
+    if (widget.transaction.hash != null) {
+      try {
+        String? key = await WalletChannel().getTxKey(widget.transaction.hash!);
+        if (key != null) {
+          setState(() {
+            txKey = key;
+          });
+        }
+      } catch (e,s) {
+      debugPrintStack(stackTrace: s);
+      }
+    }
   }
 }
