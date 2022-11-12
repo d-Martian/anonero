@@ -112,18 +112,18 @@ class _LandingScreenState extends State<LandingScreen> {
                 ),
                 const Padding(padding: EdgeInsets.all(12)),
                 Column(
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(primary: Colors.white),
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (c) => const RestoreScreen()));
-                      },
-                      child: Text("RESTORE WALLET",
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
-                              ?.copyWith(color: Colors.black, fontWeight: FontWeight.w700)),
-                    ),
+                  children: const [
+                    // ElevatedButton(
+                    //   style: ElevatedButton.styleFrom(primary: Colors.white),
+                    //   onPressed: () {
+                    //     Navigator.push(context, MaterialPageRoute(builder: (c) => const RestoreScreen()));
+                    //   },
+                    //   child: Text("RESTORE WALLET",
+                    //       style: Theme.of(context)
+                    //           .textTheme
+                    //           .labelLarge
+                    //           ?.copyWith(color: Colors.black, fontWeight: FontWeight.w700)),
+                    // ),
                   ],
                 )
               ],
