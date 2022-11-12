@@ -27,6 +27,29 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
     TextStyle? titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).primaryColor);
     Transaction transaction = ref.watch(getSpecificTransaction(widget.transaction));
     Transfer? transfer = transaction.transfers.length == 1 ? transaction.transfers[0] : null;
+    InlineSpan destination = const TextSpan(text: "");
+    if (transfer == null) {
+      if (transaction.subAddress != null) {
+        destination = TextSpan(
+          style: const TextStyle(
+            height: 1.5
+          ),
+          text: "",
+          children: <TextSpan>[
+            TextSpan(
+              text: "[${transaction.subAddress!.label}]",
+              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+            ),
+            TextSpan(
+              text: "  ${transaction.subAddress!.address}",
+              style: const TextStyle(color: Colors.white70),
+            )
+          ],
+        );
+      }
+    } else {
+      destination = TextSpan(text: transfer.address ?? '-');
+    }
     return Scaffold(
       key: scaffold,
       appBar: AppBar(
@@ -43,28 +66,27 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
         slivers: [
           SliverToBoxAdapter(
             child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
                 child: TransactionItem(
                   transaction: widget.transaction,
                 )),
           ),
           SliverToBoxAdapter(
-            child: transfer != null
-                ? Container(
-                    margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                    child: ListTile(
-                      title: Text(
-                        "DESTINATION",
-                        style: titleStyle,
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(transfer.address ?? '-'),
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
-          ),
+              child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+            child: ListTile(
+              title: Text(
+                "DESTINATION",
+                style: titleStyle,
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: RichText(
+                  text: destination,
+                ),
+              ),
+            ),
+          )),
           SliverToBoxAdapter(
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -96,7 +118,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
             ),
           ),
           SliverToBoxAdapter(
-            child: Container(
+            child: txKey == null ?  Container(
               margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               child: ListTile(
                 title: Text(
@@ -108,7 +130,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                   child: Text(txKey ?? '-'),
                 ),
               ),
-            ),
+            ): SizedBox(),
           ),
           SliverToBoxAdapter(
             child: Container(
@@ -259,7 +281,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
         setState(() {
           loading = false;
         });
-       ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+        ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
           content: Text("Error ${e}"),
           leading: const Icon(Icons.info_outline),
           actions: [
