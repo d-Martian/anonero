@@ -94,6 +94,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                 onTap: () {
                   showPassphraseDialog(context);
                 },
+                trailing: Icon(Icons.edit),
                 title: Text(
                   "DESCRIPTION",
                   style: titleStyle,
@@ -226,7 +227,6 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                 actions: [
                   TextButton(
                       onPressed: () {
-                        Navigator.pop(context);
                         Navigator.pop(context);
                       },
                       child: const Text("Cancel")),
