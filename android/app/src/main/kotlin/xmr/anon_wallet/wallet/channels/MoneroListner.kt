@@ -48,6 +48,7 @@ class MoneroHandlerThread : WalletListener {
         val wallet = WalletManager.getInstance().wallet;
         if (wallet != null) {
             wallet.refreshHistory()
+            sendEvent(AddressMethodChannel.getSubAddressesEvent())
             sendEvent(wallet.walletToHashMap())
         }
     }
@@ -103,6 +104,7 @@ class MoneroHandlerThread : WalletListener {
         }
         wallet.refreshHistory()
         sendEvent(wallet.walletToHashMap())
+        sendEvent(AddressMethodChannel.getSubAddressesEvent())
         updateDaemonState(wallet, wallet.blockChainHeight)
     }
 
