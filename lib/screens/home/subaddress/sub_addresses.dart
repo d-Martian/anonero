@@ -72,25 +72,23 @@ class SubAddressItem extends StatelessWidget {
     return Hero(
       tag: "sub:${subAddress.squashedAddress}",
       child: ListTile(
-        title: GestureDetector(
-          onLongPress: () {
-            showDialog(
-                barrierColor: barrierColor,
-                context: context,
-                builder: (context) {
-                  return SubAddressEditDialog(subAddress);
-                });
-          },
-          child: Text(
-            subAddress.getLabel(),
-            style: Theme
-                .of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Theme
-                .of(context)
-                .primaryColor),
-          ),
+        onLongPress: (){
+          showDialog(
+              barrierColor: barrierColor,
+              context: context,
+              builder: (context) {
+                return SubAddressEditDialog(subAddress);
+              });
+        },
+        title: Text(
+          subAddress.getLabel(),
+          style: Theme
+              .of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(color: Theme
+              .of(context)
+              .primaryColor),
         ),
         subtitle: Text("${subAddress.squashedAddress}"),
         trailing: Text(
