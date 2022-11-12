@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
@@ -14,7 +13,6 @@ class SubAddress {
   SubAddress({this.accountIndex, this.address, this.squashedAddress, this.addressIndex, this.label});
 
   SubAddress.fromJson(dynamic json) {
-    print("SubAddress :: ${jsonEncode(json)}");
     try {
       accountIndex = json['accountIndex'];
       address = json['address'];

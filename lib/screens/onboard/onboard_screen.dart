@@ -178,7 +178,6 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
       pageController.nextPage(duration: const Duration(milliseconds: 200), curve: Curves.easeInOutSine);
       return;
     }
-    print("ref.read(remoteHost).trim() ${pageController.page} ${ref.read(remoteHost).trim()}");
     if (pageController.page == 0 && ref.read(remoteHost).trim().isNotEmpty) {
       try {
         await ref.read(nodeConnectionProvider.notifier).connect();

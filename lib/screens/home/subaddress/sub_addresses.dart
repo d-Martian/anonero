@@ -1,6 +1,7 @@
 import 'package:anon_wallet/channel/address_channel.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/screens/home/subaddress/edit_sub_address.dart';
+import 'package:anon_wallet/screens/home/subaddress/sub_address_details.dart';
 import 'package:anon_wallet/state/sub_addresses.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
@@ -37,7 +38,13 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
                         childCount: data.value.length,
                             (context, index) {
                           SubAddress addr = data.value[index];
-                          return SubAddressItem(addr);
+                          return InkWell(child: SubAddressItem(addr),onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (c){
+                              return SubAddressDetails(
+                                subAddress: addr,
+                              );
+                            },fullscreenDialog: true));
+                          },);
                         },
                       ))
                 ],
@@ -62,34 +69,37 @@ class SubAddressItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: GestureDetector(
-        onTap: () {
-          showDialog(
-              barrierColor: barrierColor,
-              context: context,
-              builder: (context) {
-                return SubAddressEditDialog(subAddress);
-              });
-        },
-        child: Text(
-          subAddress.getLabel(),
+    return Hero(
+      tag: "sub:${subAddress.squashedAddress}",
+      child: ListTile(
+        title: GestureDetector(
+          onLongPress: () {
+            showDialog(
+                barrierColor: barrierColor,
+                context: context,
+                builder: (context) {
+                  return SubAddressEditDialog(subAddress);
+                });
+          },
+          child: Text(
+            subAddress.getLabel(),
+            style: Theme
+                .of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: Theme
+                .of(context)
+                .primaryColor),
+          ),
+        ),
+        subtitle: Text("${subAddress.squashedAddress}"),
+        trailing: Text(
+          formatMonero(subAddress.totalAmount),
           style: Theme
               .of(context)
               .textTheme
-              .titleMedium
-              ?.copyWith(color: Theme
-              .of(context)
-              .primaryColor),
+              .titleMedium,
         ),
-      ),
-      subtitle: Text("${subAddress.squashedAddress}"),
-      trailing: Text(
-        formatMonero(subAddress.totalAmount),
-        style: Theme
-            .of(context)
-            .textTheme
-            .titleMedium,
       ),
     );
   }
