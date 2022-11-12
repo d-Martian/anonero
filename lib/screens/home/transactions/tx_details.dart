@@ -68,7 +68,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
             child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
                 child: TransactionItem(
-                  transaction: widget.transaction,
+                  transaction: transaction,
                 )),
           ),
           SliverToBoxAdapter(
@@ -92,7 +92,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
               margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               child: ListTile(
                 onTap: () {
-                  showPassphraseDialog(context);
+                  showPassphraseDialog(context,transaction);
                 },
                 trailing: Icon(Icons.edit),
                 title: Text(
@@ -176,8 +176,8 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
     });
   }
 
-  void showPassphraseDialog(BuildContext dialogContext) {
-    TextEditingController controller = TextEditingController(text: widget.transaction.notes ?? "");
+  void showPassphraseDialog(BuildContext dialogContext, Transaction transaction) {
+    TextEditingController controller = TextEditingController(text: transaction.notes ?? "");
     FocusNode focusNode = FocusNode();
     showDialog(
         context: dialogContext,
