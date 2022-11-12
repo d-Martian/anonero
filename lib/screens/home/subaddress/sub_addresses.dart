@@ -38,13 +38,7 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
                         childCount: data.value.length,
                             (context, index) {
                           SubAddress addr = data.value[index];
-                          return InkWell(child: SubAddressItem(addr),onTap: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (c){
-                              return SubAddressDetails(
-                                subAddress: addr,
-                              );
-                            },fullscreenDialog: true));
-                          },);
+                          return SubAddressItem(addr);
                         },
                       ))
                 ],
@@ -72,6 +66,13 @@ class SubAddressItem extends StatelessWidget {
     return Hero(
       tag: "sub:${subAddress.squashedAddress}",
       child: ListTile(
+        onTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (c){
+            return SubAddressDetails(
+              subAddress: subAddress,
+            );
+          }));
+        },
         onLongPress: (){
           showDialog(
               barrierColor: barrierColor,
