@@ -18,7 +18,7 @@ class TxDetails extends ConsumerStatefulWidget {
 }
 
 class _TxDetailsState extends ConsumerState<TxDetails> {
-  String? txKey = "";
+  String? txKey ;
   bool loading = false;
   GlobalKey<ScaffoldState> scaffold = GlobalKey<ScaffoldState>();
 
@@ -119,7 +119,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
             ),
           ),
           SliverToBoxAdapter(
-            child: txKey == null ?  Container(
+            child: txKey != null ?  Container(
               margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               child: ListTile(
                 title: Text(
