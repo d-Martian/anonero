@@ -3,6 +3,7 @@ import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -113,7 +114,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                 title: Text("TRANSACTION ID", style: titleStyle),
                 subtitle: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(transaction.hash ?? '-'),
+                  child: SelectableText(transaction.hash ?? '-'),
                 ),
               ),
             ),
@@ -128,7 +129,21 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(txKey ?? '-'),
+                  child: SelectableText(txKey ?? '-'),
+                ),
+              ),
+            ): SizedBox(),
+          ), SliverToBoxAdapter(
+            child: transaction.fee != null ?  Container(
+              margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+              child: ListTile(
+                title: Text(
+                  "TRANSACTION FEE",
+                  style: titleStyle,
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: SelectableText(formatMonero(transaction.fee) ?? '-'),
                 ),
               ),
             ): SizedBox(),
