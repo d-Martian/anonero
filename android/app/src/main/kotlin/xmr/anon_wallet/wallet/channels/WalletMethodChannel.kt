@@ -3,11 +3,13 @@ package xmr.anon_wallet.wallet.channels
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.model.NetworkType
+import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import com.m2049r.xmrwallet.utils.RestoreHeight
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel.sendEvent
@@ -44,6 +46,8 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             "rescan" -> rescan(call, result)
             "refresh" -> refresh(call, result)
             "startSync" -> startSync(call, result)
+            "getTxKey" -> getTxKey(call, result)
+            "setTxUserNotes" -> setTxUserNotes(call, result)
         }
     }
 
@@ -175,7 +179,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         WalletManager.getInstance().daemonAddress?.let {
                             WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
-                            if (WalletEventsChannel.initialized){
+                            if (WalletEventsChannel.initialized) {
                                 wallet.refreshHistory()
                                 wallet.refresh()
                             }
@@ -285,7 +289,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
 
-                            WalletEventsChannel.initialized =   wallet.init(0)
+                            WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
                             sendEvent(wallet.walletToHashMap())
                             Log.i(TAG, "openWallet: ${wallet.fullStatus}")
@@ -327,6 +331,48 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             ""
         } else {
             "${prefs.proxyServer}:${prefs.proxyPort}"
+        }
+    }
+
+    private fun getTxKey(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("txId")) {
+                    try {
+                        val txId = call.argument<String>("txId")
+                        val txKey = WalletManager.getInstance().wallet.getTxKey(txId)
+                        result.success(txKey)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw  CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
+        }
+    }
+
+    private fun setTxUserNotes(call: MethodCall, result: MethodChannel.Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("txId") && call.hasArgument("message")) {
+                    try {
+                        val txId = call.argument<String>("txId")
+                        val message = call.argument<String>("message")
+                        val success = WalletManager.getInstance().wallet.setUserNote(txId,message)
+                        WalletManager.getInstance().wallet.store()
+                        WalletManager.getInstance().wallet.refreshHistory()
+                        sendEvent(WalletManager.getInstance().wallet.walletToHashMap())
+                        result.success(success)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw  CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
         }
     }
 

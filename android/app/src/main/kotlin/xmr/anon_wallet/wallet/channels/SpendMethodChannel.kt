@@ -43,6 +43,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
                         wallet.setUserNote(txId, notes)
                     }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     error = e.message ?: "";
                 }
 
@@ -74,19 +75,23 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
         }
         this.scope.launch {
             withContext(Dispatchers.IO) {
-                val wallet = WalletManager.getInstance().wallet
-                val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default)
-                result.success(
-                    hashMapOf(
-                        "fee" to pendingTx.fee,
-                        "amount" to pendingTx.amount,
-                        "state" to "preview",
-                        "status" to pendingTx.status.toString(),
-                        "txId" to (pendingTx.firstTxIdJ ?: ""),
-                        "txCount" to pendingTx.txCount,
-                        "errorString" to pendingTx.errorString,
+                try {
+                    val wallet = WalletManager.getInstance().wallet
+                    val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default)
+                    result.success(
+                        hashMapOf(
+                            "fee" to pendingTx.fee,
+                            "amount" to pendingTx.amount,
+                            "state" to "preview",
+                            "status" to pendingTx.status.toString(),
+                            "txId" to (pendingTx.firstTxIdJ ?: ""),
+                            "txCount" to pendingTx.txCount,
+                            "errorString" to pendingTx.errorString,
+                        )
                     )
-                )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:anon_wallet/models/sub_address.dart';
 import 'package:flutter/material.dart';
 
 class Transaction {
@@ -20,6 +21,8 @@ class Transaction {
   int? addressIndex;
   bool? isConfirmed;
   String? hash;
+  SubAddress? subAddress;
+  List<Transfer> transfers = [];
 
   Transaction(
       {this.displayLabel,
@@ -54,6 +57,20 @@ class Transaction {
       addressIndex = json['addressIndex'];
       isConfirmed = json['isConfirmed'];
       hash = json['hash'];
+      if (json.containsKey("transfers")) {
+        json['transfers'].forEach((v) {
+          transfers.add(Transfer.fromJson(v));
+        });
+      }
+      if (json.containsKey("addressDetail")) {
+        if(json["addressDetail"].length != 0){
+          try {
+            subAddress = SubAddress.fromJson(json["addressDetail"]);
+          } catch (e) {
+            print(e);
+          }
+        }
+      }
     } catch (e,s) {
       debugPrintStack(stackTrace: s);
       print(e);
@@ -78,4 +95,20 @@ class Transaction {
     data['hash'] = hash;
     return data;
   }
+}
+
+class Transfer{
+  num? amount;
+  String? address;
+
+  Transfer.fromJson(Map json) {
+    try {
+      address = json['address'];
+      amount = json['amount'];
+    } catch (e,s) {
+      debugPrintStack(stackTrace: s);
+      print(e);
+    }
+  }
+
 }

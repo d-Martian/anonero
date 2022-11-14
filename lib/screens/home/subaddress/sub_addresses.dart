@@ -1,6 +1,7 @@
 import 'package:anon_wallet/channel/address_channel.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/screens/home/subaddress/edit_sub_address.dart';
+import 'package:anon_wallet/screens/home/subaddress/sub_address_details.dart';
 import 'package:anon_wallet/state/sub_addresses.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
@@ -62,9 +63,17 @@ class SubAddressItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: GestureDetector(
-        onTap: () {
+    return Hero(
+      tag: "sub:${subAddress.squashedAddress}",
+      child: ListTile(
+        onTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (c){
+            return SubAddressDetails(
+              subAddress: subAddress,
+            );
+          }));
+        },
+        onLongPress: (){
           showDialog(
               barrierColor: barrierColor,
               context: context,
@@ -72,7 +81,7 @@ class SubAddressItem extends StatelessWidget {
                 return SubAddressEditDialog(subAddress);
               });
         },
-        child: Text(
+        title: Text(
           subAddress.getLabel(),
           style: Theme
               .of(context)
@@ -82,14 +91,14 @@ class SubAddressItem extends StatelessWidget {
               .of(context)
               .primaryColor),
         ),
-      ),
-      subtitle: Text("${subAddress.squashedAddress}"),
-      trailing: Text(
-        formatMonero(subAddress.totalAmount),
-        style: Theme
-            .of(context)
-            .textTheme
-            .titleMedium,
+        subtitle: Text("${subAddress.squashedAddress}"),
+        trailing: Text(
+          formatMonero(subAddress.totalAmount),
+          style: Theme
+              .of(context)
+              .textTheme
+              .titleMedium,
+        ),
       ),
     );
   }
