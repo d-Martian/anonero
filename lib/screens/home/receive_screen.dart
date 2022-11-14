@@ -23,7 +23,6 @@ class ReceiveWidget extends ConsumerWidget {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
-            title: const Text("ANON"),
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(110),
                 child: Hero(
