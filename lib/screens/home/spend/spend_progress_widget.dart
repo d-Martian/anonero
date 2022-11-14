@@ -20,7 +20,6 @@ class SpendProgressWidget extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: const Text("Send"),
             toolbarHeight: 120,
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),
