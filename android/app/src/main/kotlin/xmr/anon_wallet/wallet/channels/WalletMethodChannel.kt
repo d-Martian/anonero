@@ -3,6 +3,7 @@ package xmr.anon_wallet.wallet.channels
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.model.NetworkType
+import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import com.m2049r.xmrwallet.utils.RestoreHeight
@@ -360,6 +361,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         val txId = call.argument<String>("txId")
                         val message = call.argument<String>("message")
                         val success = WalletManager.getInstance().wallet.setUserNote(txId,message)
+                        WalletManager.getInstance().wallet.store()
                         WalletManager.getInstance().wallet.refreshHistory()
                         sendEvent(WalletManager.getInstance().wallet.walletToHashMap())
                         result.success(success)
