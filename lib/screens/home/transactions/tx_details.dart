@@ -143,7 +143,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: SelectableText(formatMonero(transaction.fee) ?? '-'),
+                  child: SelectableText(transaction.fee != null ? formatMonero(transaction.fee,minimumFractions: 8) : '-'),
                 ),
               ),
             ): SizedBox(),
