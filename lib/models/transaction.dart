@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:anon_wallet/models/sub_address.dart';
@@ -63,7 +62,7 @@ class Transaction {
         });
       }
       if (json.containsKey("addressDetail")) {
-        if(json["addressDetail"].length != 0){
+        if (json["addressDetail"].length != 0) {
           try {
             subAddress = SubAddress.fromJson(json["addressDetail"]);
           } catch (e) {
@@ -71,7 +70,7 @@ class Transaction {
           }
         }
       }
-    } catch (e,s) {
+    } catch (e, s) {
       debugPrintStack(stackTrace: s);
       print(e);
     }
@@ -97,7 +96,7 @@ class Transaction {
   }
 }
 
-class Transfer{
+class Transfer {
   num? amount;
   String? address;
 
@@ -105,10 +104,9 @@ class Transfer{
     try {
       address = json['address'];
       amount = json['amount'];
-    } catch (e,s) {
+    } catch (e, s) {
       debugPrintStack(stackTrace: s);
       print(e);
     }
   }
-
 }

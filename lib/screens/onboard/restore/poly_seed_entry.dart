@@ -28,7 +28,7 @@ class _PolySeedEntryState extends State<PolySeedEntry> {
         slivers: [
           SliverGrid(
             delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+              (context, index) {
                 return Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.white10),
@@ -42,7 +42,10 @@ class _PolySeedEntryState extends State<PolySeedEntry> {
                       Container(
                         width: 120,
                         child: TextField(
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 18),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(fontSize: 18),
                           textAlign: TextAlign.start,
                         ),
                       )

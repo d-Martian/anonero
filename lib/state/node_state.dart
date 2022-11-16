@@ -10,8 +10,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 enum NodeConnectionState { connected, disconnected }
 
 final connectedNode = StateProvider<Node?>((ref) => null);
-final nodeConnectionState = StreamProvider((ref) => WalletEventsChannel().nodeStream());
-final nodeFromPrefs = FutureProvider<Node?>((ref) => NodeChannel().getNodeFromPrefs());
+final nodeConnectionState =
+    StreamProvider((ref) => WalletEventsChannel().nodeStream());
+final nodeFromPrefs =
+    FutureProvider<Node?>((ref) => NodeChannel().getNodeFromPrefs());
 
 final nodeErrorState = StateProvider<String?>((ref) {
   Node? node = ref.watch(nodeConnectionState).value;
@@ -56,4 +58,5 @@ final syncProgressStateProvider = Provider<Map<String, num>?>((ref) {
     return null;
   }
 });
-final nodeSyncProgress = StateProvider<NodeConnectionState>((ref) => NodeConnectionState.disconnected);
+final nodeSyncProgress = StateProvider<NodeConnectionState>(
+    (ref) => NodeConnectionState.disconnected);

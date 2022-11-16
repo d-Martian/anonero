@@ -1,10 +1,10 @@
 import 'package:intl/intl.dart';
 
-String formatMonero(num? value,{int minimumFractions=4}) {
+String formatMonero(num? value, {int minimumFractions = 4}) {
   if (value == null) {
     return "";
   }
-  if(value == 0){
+  if (value == 0) {
     return "0";
   }
   var formatter = NumberFormat("###.####");
