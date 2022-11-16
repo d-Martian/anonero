@@ -8,7 +8,8 @@ import 'package:flutter/material.dart';
 class TransactionItem extends StatelessWidget {
   final Transaction transaction;
 
-  const TransactionItem({Key? key, required this.transaction}) : super(key: key);
+  const TransactionItem({Key? key, required this.transaction})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,10 @@ class TransactionItem extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
             border: Border.all(
-                width: 1, color: transaction.isSpend ? Theme.of(context).primaryColor : Colors.grey.shade600),
+                width: 1,
+                color: transaction.isSpend
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey.shade600),
             borderRadius: const BorderRadius.all(Radius.circular(8))),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
         child: Row(
@@ -32,7 +36,10 @@ class TransactionItem extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             Column(
-              children: [Text(formatTime(transaction.timeStamp), style: Theme.of(context).textTheme.caption)],
+              children: [
+                Text(formatTime(transaction.timeStamp),
+                    style: Theme.of(context).textTheme.caption)
+              ],
             )
           ],
         ),
@@ -58,21 +65,21 @@ class TransactionItem extends StatelessWidget {
             Text(
               "$confirms",
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.green, fontSize: 12),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Colors.green, fontSize: 12),
             )
           ],
         ),
       );
-    }else{
+    } else {
       return (transaction.isSpend)
           ? Icon(
-        CupertinoIcons.arrow_turn_left_up,
-        color: Theme.of(context).primaryColor,
-      )
+              CupertinoIcons.arrow_turn_left_up,
+              color: Theme.of(context).primaryColor,
+            )
           : const Icon(CupertinoIcons.arrow_turn_left_down);
     }
   }
-
-
-
 }

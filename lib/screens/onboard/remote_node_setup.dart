@@ -30,7 +30,11 @@ class RemoteNodeWidget extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Hero(tag: "anon_logo", child: SizedBox(width: 180, child: Image.asset("assets/anon_logo.png"))),
+                    Hero(
+                        tag: "anon_logo",
+                        child: SizedBox(
+                            width: 180,
+                            child: Image.asset("assets/anon_logo.png"))),
                   ],
                 ),
               ),
@@ -39,7 +43,10 @@ class RemoteNodeWidget extends ConsumerWidget {
               child: ListTile(
                 title: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text("NODE", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                  child: Text("NODE",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary)),
                 ),
                 subtitle: Column(
                   children: [
@@ -63,13 +70,16 @@ class RemoteNodeWidget extends ConsumerWidget {
                       ),
                     ),
                     Consumer(builder: (context, ref, c) {
-                      bool isConnecting = ref.watch(connectingToNodeStateProvider);
+                      bool isConnecting =
+                          ref.watch(connectingToNodeStateProvider);
                       if (isConnecting) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 0),
                           child: ClipRRect(
                               borderRadius: BorderRadius.circular(3),
-                              child: const LinearProgressIndicator(minHeight: 4)),
+                              child:
+                                  const LinearProgressIndicator(minHeight: 4)),
                         );
                       } else {
                         return const SizedBox();
@@ -83,7 +93,10 @@ class RemoteNodeWidget extends ConsumerWidget {
               child: ListTile(
                 title: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text("USERNAME", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                  child: Text("USERNAME",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary)),
                 ),
                 subtitle: TextField(
                   textInputAction: TextInputAction.next,
@@ -107,7 +120,10 @@ class RemoteNodeWidget extends ConsumerWidget {
               child: ListTile(
                 title: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text("PASSWORD", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                  child: Text("PASSWORD",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary)),
                 ),
                 subtitle: TextField(
                   onChanged: (value) {
@@ -158,8 +174,10 @@ class RemoteNodeWidget extends ConsumerWidget {
                     child: TextButton.icon(
                       style: ButtonStyle(
                           foregroundColor: proxy.isConnected()
-                              ? MaterialStateColor.resolveWith((states) => Colors.green)
-                              : MaterialStateColor.resolveWith((states) => Theme.of(context).primaryColor)),
+                              ? MaterialStateColor.resolveWith(
+                                  (states) => Colors.green)
+                              : MaterialStateColor.resolveWith(
+                                  (states) => Theme.of(context).primaryColor)),
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) {

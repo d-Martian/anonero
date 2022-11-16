@@ -38,7 +38,8 @@ class _LandingScreenState extends State<LandingScreen> {
                   Hero(
                       tag: "anon_logo",
                       child: SizedBox(
-                          width: MediaQuery.of(context).size.width / 0.7, child: Image.asset("assets/anon_logo.png"))),
+                          width: MediaQuery.of(context).size.width / 0.7,
+                          child: Image.asset("assets/anon_logo.png"))),
                 ],
               )),
           Flexible(
@@ -48,9 +49,9 @@ class _LandingScreenState extends State<LandingScreen> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Consumer(
-                  builder: (context,ref,c){
+                  builder: (context, ref, c) {
                     var existingNode = ref.watch(nodeFromPrefs);
-                    return  ElevatedButton(
+                    return ElevatedButton(
                       style: ElevatedButton.styleFrom(primary: Colors.white),
                       onPressed: () async {
                         ref.read(remoteUserName.notifier).state = "";
@@ -59,8 +60,10 @@ class _LandingScreenState extends State<LandingScreen> {
                         ref.read(navigatorState.notifier).state = 0;
                         ref.read(walletSeedPhraseProvider.notifier).state = "";
                         ref.read(walletLockPin.notifier).state = "";
-                        if(existingNode.hasValue && existingNode.value !=null){
-                          ref.read(remoteHost.notifier).state = existingNode.value!.toNodeString();
+                        if (existingNode.hasValue &&
+                            existingNode.value != null) {
+                          ref.read(remoteHost.notifier).state =
+                              existingNode.value!.toNodeString();
                         }
                         // showDialog(
                         //     context: context,
@@ -97,7 +100,8 @@ class _LandingScreenState extends State<LandingScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (c) => OnboardScreen(), settings: RouteSettings()));
+                                  builder: (c) => OnboardScreen(),
+                                  settings: RouteSettings()));
                         } catch (e, s) {
                           debugPrintStack(stackTrace: s);
                         }
@@ -106,7 +110,9 @@ class _LandingScreenState extends State<LandingScreen> {
                           style: Theme.of(context)
                               .textTheme
                               .labelLarge
-                              ?.copyWith(color: Colors.black, fontWeight: FontWeight.w700)),
+                              ?.copyWith(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w700)),
                     );
                   },
                 ),

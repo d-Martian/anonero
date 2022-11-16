@@ -4,10 +4,13 @@ import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final walletStateStreamProvider = StreamProvider<Wallet?>((ref) => WalletEventsChannel().walletStream());
-final walletLoadingStreamProvider = StreamProvider<bool>((ref) => WalletEventsChannel().walletOpenStream());
+final walletStateStreamProvider =
+    StreamProvider<Wallet?>((ref) => WalletEventsChannel().walletStream());
+final walletLoadingStreamProvider =
+    StreamProvider<bool>((ref) => WalletEventsChannel().walletOpenStream());
 
-final walletLoadingProvider = Provider<bool?>((ref) => ref.watch(walletLoadingStreamProvider).value);
+final walletLoadingProvider =
+    Provider<bool?>((ref) => ref.watch(walletLoadingStreamProvider).value);
 
 final walletAddressProvider = Provider((ref) {
   var walletAsync = ref.watch(walletStateStreamProvider);
@@ -36,12 +39,14 @@ final walletTransactions = Provider<List<Transaction>>((ref) {
   return [];
 });
 
-final getSpecificTransaction = Provider.family<Transaction, Transaction>((ref, selectedTx) {
+final getSpecificTransaction =
+    Provider.family<Transaction, Transaction>((ref, selectedTx) {
   var walletAsync = ref.watch(walletStateStreamProvider);
   Wallet? wallet = walletAsync.value;
   if (wallet != null) {
     try {
-      Transaction transaction = wallet.transactions.firstWhere((element) => element.hash == selectedTx.hash);
+      Transaction transaction = wallet.transactions
+          .firstWhere((element) => element.hash == selectedTx.hash);
       return transaction;
     } catch (e) {
       return selectedTx;

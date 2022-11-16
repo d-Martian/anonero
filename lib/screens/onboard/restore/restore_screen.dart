@@ -1,4 +1,3 @@
-
 import 'package:anon_wallet/screens/onboard/restore/poly_seed_entry.dart';
 import 'package:anon_wallet/screens/onboard/wallet_passphrase.dart';
 import 'package:flutter/material.dart';
@@ -49,25 +48,25 @@ class _RestoreScreenState extends State<RestoreScreen> {
         slivers: [
           SliverToBoxAdapter(
               child: SizedBox(
-                height: topSegment,
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Padding(padding: EdgeInsets.all(34)),
-                    Hero(
-                      tag: "anon_logo",
-                      child: SizedBox(
-                          width: 180, child: Image.asset("assets/anon_logo.png")),
-                    ),
-                    Text(
-                      page,
-                      style: Theme.of(context).textTheme.headline5,
-                    )
-                  ],
+            height: topSegment,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Padding(padding: EdgeInsets.all(34)),
+                Hero(
+                  tag: "anon_logo",
+                  child: SizedBox(
+                      width: 180, child: Image.asset("assets/anon_logo.png")),
                 ),
-              )),
+                Text(
+                  page,
+                  style: Theme.of(context).textTheme.headline5,
+                )
+              ],
+            ),
+          )),
           SliverToBoxAdapter(
             child: SizedBox(
               height: mainPager,
@@ -78,14 +77,13 @@ class _RestoreScreenState extends State<RestoreScreen> {
                   const RemoteNodeWidget(),
                   Container(
                       alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 26),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 26),
                       child: const PolySeedEntry(
                         seedWords:
-                        "tortoise science attend hero device normal wheel dry slender tooth cup dash certain estate rice morning",
+                            "tortoise science attend hero device normal wheel dry slender tooth cup dash certain estate rice morning",
                       )),
-                  WalletPassphraseWidget(onPassSeedPhraseAdded: (v){
-
-                  }),
+                  WalletPassphraseWidget(onPassSeedPhraseAdded: (v) {}),
                 ],
               ),
             ),
@@ -96,23 +94,22 @@ class _RestoreScreenState extends State<RestoreScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               alignment: Alignment.centerRight,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    primary: Colors.white
-                ),
+                style: ElevatedButton.styleFrom(primary: Colors.white),
                 onPressed: () {
                   if (pageController.page == 2) {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
                       return const SetPinScreen();
                     }));
                     return;
                   }
-                  pageController.nextPage(duration: const Duration(milliseconds: 200), curve: Curves.easeInOutSine);
+                  pageController.nextPage(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOutSine);
                 },
                 child: Text("Next",
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge
-                        ?.copyWith(color: Colors.black, fontWeight: FontWeight.w700)),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Colors.black, fontWeight: FontWeight.w700)),
               ),
             ),
           )

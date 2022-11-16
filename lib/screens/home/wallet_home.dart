@@ -62,7 +62,8 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
                 );
               });
         } else {
-          _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
+          _pageController.animateToPage(0,
+              duration: const Duration(milliseconds: 220), curve: Curves.ease);
         }
         return false;
       },
@@ -83,9 +84,12 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
                               return QRScannerView(
                                 onScanCallback: (value) {
                                   AppHaptics.lightImpact();
-                                  ref.read(addressStateProvider.state).state = value;
+                                  ref.read(addressStateProvider.state).state =
+                                      value;
                                   _pageController.animateToPage(2,
-                                      duration: const Duration(milliseconds: 220), curve: Curves.ease);
+                                      duration:
+                                          const Duration(milliseconds: 220),
+                                      curve: Curves.ease);
                                 },
                               );
                             },
@@ -96,7 +100,9 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
               },
             ),
             ReceiveWidget(() {
-              _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
+              _pageController.animateToPage(0,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.ease);
             }),
             const SpendScreen(),
             const SettingsScreen(),
@@ -107,13 +113,16 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
         ),
         floatingActionButton: Consumer(
           builder: (context, ref, child) {
-            ref.listen<String?>(nodeErrorState, (String? previousCount, String? newValue) {
+            ref.listen<String?>(nodeErrorState,
+                (String? previousCount, String? newValue) {
               if (newValue != null && scaffoldState.currentContext != null) {
                 ScaffoldMessenger.of(scaffoldState.currentContext!)
-                    .showMaterialBanner(MaterialBanner(content: Text(newValue), actions: [
+                    .showMaterialBanner(
+                        MaterialBanner(content: Text(newValue), actions: [
                   TextButton(
                       onPressed: () {
-                        ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                        ScaffoldMessenger.of(context)
+                            .hideCurrentMaterialBanner();
                       },
                       child: const Text("Close"))
                 ]));
@@ -129,7 +138,8 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
           selectedIndex: _currentView,
           onTap: (int index) {
             setState(() => _currentView = index);
-            _pageController.animateToPage(index, duration: Duration(milliseconds: 120), curve: Curves.ease);
+            _pageController.animateToPage(index,
+                duration: Duration(milliseconds: 120), curve: Curves.ease);
           },
           items: <BottomBarItem>[
             BottomBarItem(

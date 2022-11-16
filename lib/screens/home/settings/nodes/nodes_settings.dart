@@ -11,7 +11,8 @@ class NodesSettingsScreens extends ConsumerStatefulWidget {
   const NodesSettingsScreens({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<NodesSettingsScreens> createState() => _NodesSettingsScreensState();
+  ConsumerState<NodesSettingsScreens> createState() =>
+      _NodesSettingsScreensState();
 }
 
 class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
@@ -73,7 +74,8 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
             return Wrap(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                   child: InkWell(
                     onTap: () {
                       showDialog(
@@ -86,7 +88,8 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                     child: Card(
                       color: Colors.grey[900]?.withOpacity(0.9),
                       child: ListTile(
-                        title: Text("${nodes[index].host}", maxLines: 1, overflow: TextOverflow.ellipsis),
+                        title: Text("${nodes[index].host}",
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
                         subtitle: Text("Height: ${nodes[index].height}"),
                         trailing: nodes[index].isActive == true
                             ? Column(
@@ -96,8 +99,10 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                   Container(
                                     height: 12,
                                     width: 12,
-                                    decoration:
-                                        BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(12)),
+                                    decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
                                   ),
                                   const Text("Active")
                                 ],
@@ -109,8 +114,10 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                     barrierColor: barrierColor,
                                     builder: (context) {
                                       return AlertDialog(
-                                        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                                        content: const Text("Do you want to remove this node ?"),
+                                        backgroundColor: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        content: const Text(
+                                            "Do you want to remove this node ?"),
                                         actions: [
                                           TextButton(
                                               onPressed: () {
@@ -119,7 +126,9 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                               child: const Text("Cancel")),
                                           TextButton(
                                               onPressed: () {
-                                                NodeChannel().removeNode(nodes[index]).then((value) {
+                                                NodeChannel()
+                                                    .removeNode(nodes[index])
+                                                    .then((value) {
                                                   load();
                                                 });
                                                 Navigator.pop(context);
@@ -175,12 +184,8 @@ class _NodeDetailsState extends State<NodeDetails> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      contentPadding: const EdgeInsets.only(
-        top: 2,
-        left: 12,
-        right: 12,
-        bottom: 6
-      ),
+      contentPadding:
+          const EdgeInsets.only(top: 2, left: 12, right: 12, bottom: 6),
       content: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: 344,
@@ -194,15 +199,19 @@ class _NodeDetailsState extends State<NodeDetails> {
                 ),
               ),
               AnimatedOpacity(
-                opacity: error!=null ? 1 : 0,
+                opacity: error != null ? 1 : 0,
                 duration: const Duration(milliseconds: 300),
                 child: Container(
                   alignment: Alignment.center,
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   width: double.infinity,
                   color: Colors.red,
-                  child: Text("$error",style: Theme.of(context).textTheme.subtitle2?.copyWith(fontSize: 13),
-                  maxLines: 1),
+                  child: Text("$error",
+                      style: Theme.of(context)
+                          .textTheme
+                          .subtitle2
+                          ?.copyWith(fontSize: 13),
+                      maxLines: 1),
                 ),
               ),
               ListTile(
@@ -229,16 +238,20 @@ class _NodeDetailsState extends State<NodeDetails> {
           )),
       actions: [
         TextButton(
-            onPressed: !loading ?  () {
-              testRpc();
-            }: null,
+            onPressed: !loading
+                ? () {
+                    testRpc();
+                  }
+                : null,
             child: const Text("Test Network")),
         TextButton(
-            onPressed: !loading ? () {
-              if (node != null) {
-                setAsCurrentNode(node!);
-              }
-            } : null,
+            onPressed: !loading
+                ? () {
+                    if (node != null) {
+                      setAsCurrentNode(node!);
+                    }
+                  }
+                : null,
             child: const Text("Set Node")),
         TextButton(
             onPressed: () {
@@ -256,7 +269,8 @@ class _NodeDetailsState extends State<NodeDetails> {
         loading = true;
         error = null;
       });
-      Node? refreshedNode = await NodeChannel().testRpc(widgetNode.host, widgetNode.port ?? 80, widgetNode.username, widgetNode.password);
+      Node? refreshedNode = await NodeChannel().testRpc(widgetNode.host,
+          widgetNode.port ?? 80, widgetNode.username, widgetNode.password);
       if (refreshedNode != null) {
         setState(() {
           loading = false;
@@ -295,7 +309,8 @@ class _NodeDetailsState extends State<NodeDetails> {
   }
 }
 
-final nodeRemoteConnectionProvider = StateNotifierProvider<ConnectToNodeState, Node?>((ref) {
+final nodeRemoteConnectionProvider =
+    StateNotifierProvider<ConnectToNodeState, Node?>((ref) {
   return ConnectToNodeState(ref);
 });
 
@@ -304,9 +319,12 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    TextEditingController nodeTextController = useTextEditingController(text: "");
-    TextEditingController userNameTextController = useTextEditingController(text: "");
-    TextEditingController passWordTextController = useTextEditingController(text: "");
+    TextEditingController nodeTextController =
+        useTextEditingController(text: "");
+    TextEditingController userNameTextController =
+        useTextEditingController(text: "");
+    TextEditingController passWordTextController =
+        useTextEditingController(text: "");
     var isLoading = useState(false);
     var nodeStatus = useState<String?>(null);
 
@@ -317,14 +335,18 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
           title: Text("Add Node"),
           centerTitle: true,
           bottom: isLoading.value
-              ? const PreferredSize(preferredSize: Size.fromHeight(1), child: LinearProgressIndicator(minHeight: 1))
+              ? const PreferredSize(
+                  preferredSize: Size.fromHeight(1),
+                  child: LinearProgressIndicator(minHeight: 1))
               : null,
         ),
         SliverToBoxAdapter(
           child: ListTile(
             title: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("NODE", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+              child: Text("NODE",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
             ),
             subtitle: TextField(
               controller: nodeTextController,
@@ -348,7 +370,9 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
           child: ListTile(
             title: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("USERNAME", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+              child: Text("USERNAME",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
             ),
             subtitle: TextField(
               controller: userNameTextController,
@@ -370,7 +394,9 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
           child: ListTile(
             title: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("PASSWORD", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+              child: Text("PASSWORD",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
             ),
             subtitle: TextField(
               controller: passWordTextController,
@@ -398,13 +424,17 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    connect(nodeTextController.text, userNameTextController.text, passWordTextController.text,
-                        isLoading, nodeStatus, context);
+                    connect(
+                        nodeTextController.text,
+                        userNameTextController.text,
+                        passWordTextController.text,
+                        isLoading,
+                        nodeStatus,
+                        context);
                   },
-                  style: Theme.of(context)
-                      .elevatedButtonTheme
-                      .style
-                      ?.copyWith(backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white)),
+                  style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                      backgroundColor: MaterialStateColor.resolveWith(
+                          (states) => Colors.white)),
                   child: Text("Add Node"),
                 )
               ],
@@ -415,8 +445,13 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
     );
   }
 
-  Future connect(String host, String username, String password, ValueNotifier<bool> isLoading,
-      ValueNotifier<String?> nodeStatus, BuildContext context) async {
+  Future connect(
+      String host,
+      String username,
+      String password,
+      ValueNotifier<bool> isLoading,
+      ValueNotifier<String?> nodeStatus,
+      BuildContext context) async {
     int port = 38081;
     Uri uri = Uri.parse(host);
     if (uri.hasPort) {
@@ -424,7 +459,8 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
     }
     try {
       isLoading.value = true;
-      Node? node = await NodeChannel().addNode(uri.host, port, username, password);
+      Node? node =
+          await NodeChannel().addNode(uri.host, port, username, password);
       if (node != null) {
         nodeStatus.value = "Connected to ${node.host}\nHeight : ${node.height}";
       }
@@ -432,7 +468,8 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
       await Future.delayed(const Duration(milliseconds: 600));
       Navigator.pop(context);
     } on PlatformException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${e.message}")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("${e.message}")));
       Navigator.pop(context);
     } catch (e) {
       print(e);

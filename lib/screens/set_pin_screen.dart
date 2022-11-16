@@ -22,7 +22,9 @@ class _SetPinScreenState extends State<SetPinScreen> {
         if (controller.page == 0) {
           return Future.value(true);
         } else {
-          controller.animateToPage(0, duration: const Duration(milliseconds: 240), curve: Curves.linear);
+          controller.animateToPage(0,
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.linear);
           return Future.value(false);
         }
       },
@@ -32,7 +34,8 @@ class _SetPinScreenState extends State<SetPinScreen> {
             children: [
               Hero(
                 tag: "anon_logo",
-                child: SizedBox(width: 180, child: Image.asset("assets/anon_logo.png")),
+                child: SizedBox(
+                    width: 180, child: Image.asset("assets/anon_logo.png")),
               ),
               const Text("Enter your PIN"),
               Expanded(
@@ -41,7 +44,8 @@ class _SetPinScreenState extends State<SetPinScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 12),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 48, horizontal: 12),
                       child: NumberPadWidget(
                         maxPinSize: maxPinSize,
                         minPinSize: minPinSize,
@@ -50,12 +54,14 @@ class _SetPinScreenState extends State<SetPinScreen> {
                             key = pin;
                           });
                           controller.animateToPage(1,
-                              duration: const Duration(milliseconds: 240), curve: Curves.linear);
+                              duration: const Duration(milliseconds: 240),
+                              curve: Curves.linear);
                         },
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 12),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 48, horizontal: 12),
                       child: NumberPadWidget(
                           maxPinSize: maxPinSize,
                           value: key,
@@ -88,7 +94,12 @@ class NumberPadWidget extends StatefulWidget {
   final void Function(String key)? onKeyPress;
 
   const NumberPadWidget(
-      {Key? key, this.maxPinSize = 10, this.minPinSize = 4, this.value, required this.onSubmit, this.onKeyPress})
+      {Key? key,
+      this.maxPinSize = 10,
+      this.minPinSize = 4,
+      this.value,
+      required this.onSubmit,
+      this.onKeyPress})
       : super(key: key);
 
   @override
@@ -155,7 +166,10 @@ class _NumberPadWidgetState extends State<NumberPadWidget> {
           offset: !valueMatch ? const Offset(0, 0) : const Offset(-32, 0),
           duration: const Duration(milliseconds: 100),
           child: Text("Pin does not match",
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.redAccent)),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(color: Colors.redAccent)),
         )
       ],
     );
@@ -184,7 +198,10 @@ class Circle extends StatelessWidget {
       decoration: BoxDecoration(
           color: Theme.of(context).textTheme.bodySmall?.color,
           shape: BoxShape.circle,
-          border: Border.all(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, width: 1)),
+          border: Border.all(
+              color:
+                  Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+              width: 1)),
     );
   }
 }

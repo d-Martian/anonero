@@ -1,5 +1,5 @@
 class TxState {
-  String? errorString ="";
+  String? errorString = "";
   int? fee;
   int? amount;
   int? txCount;

@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -9,7 +8,8 @@ class AppHaptics {
 
   static void buttonPress() {
     // Android/Fuchsia expect haptics on all button presses, iOS does not.
-    if (defaultTargetPlatform != TargetPlatform.android || defaultTargetPlatform != TargetPlatform.fuchsia) {
+    if (defaultTargetPlatform != TargetPlatform.android ||
+        defaultTargetPlatform != TargetPlatform.fuchsia) {
       lightImpact();
     }
   }

@@ -16,7 +16,8 @@ class AddressChannel {
     await platform.invokeMethod("getSubAddresses");
   }
 
-  Future setSubAddressLabel(int addressIndex, int accountIndex, String label) async {
+  Future setSubAddressLabel(
+      int addressIndex, int accountIndex, String label) async {
     await platform.invokeMethod("renameAddress", {
       "label": label,
       "addressIndex": addressIndex,

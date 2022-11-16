@@ -18,7 +18,10 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
   @override
   Widget build(BuildContext context) {
     Wallet? wallet = ref.watch(viewPrivateWalletProvider);
-    TextStyle? titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).primaryColor);
+    TextStyle? titleStyle = Theme.of(context)
+        .textTheme
+        .titleLarge
+        ?.copyWith(color: Theme.of(context).primaryColor);
     return WillPopScope(
       onWillPop: () async {
         ref.read(viewPrivateWalletProvider.notifier).clear();
@@ -27,7 +30,8 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
       child: Scaffold(
         body: wallet != null
             ? Padding(
-                padding: const EdgeInsets.only(top: 14,right: 18,left: 18,bottom: 0),
+                padding: const EdgeInsets.only(
+                    top: 14, right: 18, left: 18, bottom: 0),
                 child: CustomScrollView(
                   slivers: [
                     SliverAppBar(
@@ -36,7 +40,9 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                           preferredSize: const Size.fromHeight(60),
                           child: Hero(
                             tag: "anon_logo",
-                            child: SizedBox(width: 160, child: Image.asset("assets/anon_logo.png")),
+                            child: SizedBox(
+                                width: 160,
+                                child: Image.asset("assets/anon_logo.png")),
                           )),
                     ),
                     SliverToBoxAdapter(
@@ -44,7 +50,8 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                         title: Text("PRIMARY ADDRESS", style: titleStyle),
                         subtitle: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: SelectableText("${wallet.address}", style: Theme.of(context).textTheme.bodyLarge),
+                          child: SelectableText("${wallet.address}",
+                              style: Theme.of(context).textTheme.bodyLarge),
                         ),
                       ),
                     ),
@@ -61,15 +68,16 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Wrap(
-                              children: (wallet.seed)
-                              .map((e) {
+                              children: (wallet.seed).map((e) {
                                 return Container(
                                   padding: const EdgeInsets.all(4),
                                   margin: const EdgeInsets.all(4),
                                   decoration: const BoxDecoration(
-                                    color: Colors.white10
-                                  ),
-                                  child: Text("${e}", style: Theme.of(context).textTheme.bodyMedium),
+                                      color: Colors.white10),
+                                  child: Text("${e}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium),
                                 );
                               }).toList(),
                             ),
@@ -87,7 +95,8 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                         title: Text("VIEW-KEY", style: titleStyle),
                         subtitle: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: SelectableText(wallet.secretViewKey, style: Theme.of(context).textTheme.bodyLarge),
+                          child: SelectableText(wallet.secretViewKey,
+                              style: Theme.of(context).textTheme.bodyLarge),
                         ),
                       ),
                     ),
@@ -101,7 +110,8 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                         title: Text("SPEND-KEY", style: titleStyle),
                         subtitle: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: SelectableText(wallet.spendKey, style: Theme.of(context).textTheme.bodyLarge),
+                          child: SelectableText(wallet.spendKey,
+                              style: Theme.of(context).textTheme.bodyLarge),
                         ),
                       ),
                     )
@@ -136,7 +146,8 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
         builder: (context) {
           return HookBuilder(
             builder: (context) {
-              const inputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.transparent));
+              const inputBorder = UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.transparent));
               var error = useState<String?>(null);
               useEffect(() {
                 focusNode.requestFocus();
@@ -144,10 +155,10 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
               }, []);
               return AlertDialog(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)
-                ),
+                    borderRadius: BorderRadius.circular(8)),
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
                 content: SizedBox(
                   width: MediaQuery.of(context).size.width / 1.3,
                   child: Column(
@@ -189,7 +200,9 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                   TextButton(
                       onPressed: () async {
                         try {
-                          await ref.read(viewPrivateWalletProvider.notifier).getWallet(controller.text);
+                          await ref
+                              .read(viewPrivateWalletProvider.notifier)
+                              .getWallet(controller.text);
                           AppHaptics.lightImpact();
                           Navigator.pop(context);
                         } on PlatformException catch (e, s) {

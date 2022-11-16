@@ -27,21 +27,26 @@ class ReceiveWidget extends ConsumerWidget {
                 preferredSize: const Size.fromHeight(110),
                 child: Hero(
                   tag: "anon_logo",
-                  child: SizedBox(width: 160, child: Image.asset("assets/anon_logo.png")),
+                  child: SizedBox(
+                      width: 160, child: Image.asset("assets/anon_logo.png")),
                 )),
             actions: [
               IconButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) {
-                      return const SubAddressesList();
-                    },fullscreenDialog: true ));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) {
+                              return const SubAddressesList();
+                            },
+                            fullscreenDialog: true));
                   },
                   icon: const Icon(Icons.history))
             ],
           ),
           SliverFillRemaining(
             fillOverscroll: true,
-            child:  Container(
+            child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -51,7 +56,8 @@ class ReceiveWidget extends ConsumerWidget {
                   QrImage(
                     backgroundColor: Colors.black,
                     gapless: true,
-                    dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square),
+                    dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square),
                     eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square),
                     foregroundColor: Colors.white,
                     data: address,
@@ -59,7 +65,8 @@ class ReceiveWidget extends ConsumerWidget {
                     size: 280.0,
                   ),
                   ListTile(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 24),
                     title: GestureDetector(
                       onTap: () {
                         showDialog(
@@ -73,8 +80,10 @@ class ReceiveWidget extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
                           "${subAddress?.getLabel()} ",
-                          style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).primaryColor),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: Theme.of(context).primaryColor),
                         ),
                       ),
                     ),

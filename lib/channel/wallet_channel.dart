@@ -20,8 +20,8 @@ class WalletChannel {
   }
 
   Future<Wallet> create(String password, String seedPhrase) async {
-    dynamic value =
-        await platform.invokeMethod("create", {"name": "default", "password": password, "seedPhrase": seedPhrase});
+    dynamic value = await platform.invokeMethod("create",
+        {"name": "default", "password": password, "seedPhrase": seedPhrase});
     return Wallet.fromJson(value);
   }
 
@@ -34,7 +34,8 @@ class WalletChannel {
   }
 
   Future<Wallet?> openWallet(String password) async {
-    dynamic value = await platform.invokeMethod("openWallet", {"password": password});
+    dynamic value =
+        await platform.invokeMethod("openWallet", {"password": password});
     return Wallet.fromJson(value);
   }
 
@@ -44,7 +45,8 @@ class WalletChannel {
   }
 
   Future<bool> setTxUserNotes(String txId, String notes) async {
-    bool value = await platform.invokeMethod("setTxUserNotes", {"txId": txId, "message": notes});
+    bool value = await platform
+        .invokeMethod("setTxUserNotes", {"txId": txId, "message": notes});
     return value;
   }
 
@@ -64,7 +66,8 @@ class WalletChannel {
   }
 
   Future<Wallet> getWalletPrivate(String seedPassphrase) async {
-    dynamic value = await platform.invokeMethod("viewWalletInfo", {"seedPassphrase": seedPassphrase});
+    dynamic value = await platform
+        .invokeMethod("viewWalletInfo", {"seedPassphrase": seedPassphrase});
     return Wallet.fromJson(value);
   }
 }
