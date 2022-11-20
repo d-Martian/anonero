@@ -10,6 +10,7 @@ import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import kotlinx.coroutines.*
 import timber.log.Timber
 import xmr.anon_wallet.wallet.utils.AnonPreferences
@@ -22,7 +23,7 @@ import kotlin.math.roundToInt
 object AnonWallet {
     const val NOCRAZYPASS_FLAGFILE = ".nocrazypass"
     const val NOTIFICATION_CHANNEL_ID = "new_tx"
-    private lateinit var application: Application;
+    private lateinit var application: Application
     lateinit var walletDir: File
     lateinit var nodesFile: File
     private var currentWallet: Wallet? = null
@@ -31,7 +32,7 @@ object AnonWallet {
     val ONE_XMR = 10.0.pow(XMR_DECIMALS.toDouble()).roundToInt()
 
     @JvmName("setApplication1")
-    fun setApplication(flutterActivity: FlutterActivity) {
+    fun setApplication(flutterActivity: FlutterFragmentActivity) {
         val prefs = AnonPreferences(flutterActivity)
         //TODO
 //        if(prefs.proxyServer == null || prefs.proxyPort == null){
@@ -68,7 +69,7 @@ object AnonWallet {
         return walletScope
     }
 
-    private fun attachScope(flutterActivity: FlutterActivity) {
+    private fun attachScope(flutterActivity: FlutterFragmentActivity) {
         with(flutterActivity) {
             lifecycle.addObserver(object : LifecycleEventObserver {
                 override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {

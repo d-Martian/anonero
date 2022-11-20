@@ -2,7 +2,6 @@ package xmr.anon_wallet.wallet.plugins.qrScanner
 
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -13,6 +12,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -29,23 +29,24 @@ import io.flutter.view.TextureRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.touchcapture.qr.flutterqr.QrShared.activity
+import xmr.anon_wallet.wallet.MainActivity
+
 import xmr.anon_wallet.wallet.channels.AnonMethodChannel
 import java.util.concurrent.Executors
 
-class AnonQRCameraPlugin(private val context: Context, messenger: BinaryMessenger, lifecycle: Lifecycle) :
-    FlutterPlugin, AnonMethodChannel(messenger, "anon_camera", lifecycle), EventChannel.StreamHandler {
+class AnonQRCameraPlugin(
+    private val activity: MainActivity, messenger: BinaryMessenger, lifecycle: Lifecycle
+) : FlutterPlugin, AnonMethodChannel(messenger, "anon_camera", lifecycle), EventChannel.StreamHandler {
 
 
     private val qrEventChannel = EventChannel(
-        messenger,
-        "anon_camera:events"
+        messenger, "anon_camera:events"
     )
     private var eventSink: EventSink? = null
     private val cameraExecutor = Executors.newSingleThreadExecutor()
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     private var registry: TextureRegistry? = null
-    private var cameraProviderFuture: ListenableFuture<ProcessCameraProvider> = ProcessCameraProvider.getInstance(context)
+    private var cameraProviderFuture: ListenableFuture<ProcessCameraProvider> = ProcessCameraProvider.getInstance(activity)
     private var camera: Camera? = null
     private var preview: Preview? = null
     private var cameraProvider: ProcessCameraProvider? = null
@@ -66,7 +67,7 @@ class AnonQRCameraPlugin(private val context: Context, messenger: BinaryMessenge
             "startCam" -> startCam(call, result)
             "stopCam" -> stopCamera()
             "checkPermissionState" -> checkPermissionState(call, result)
-            "requestPermission" -> requestPermission(call, result)
+            "requestPermission" -> requestPermission()
         }
     }
 
@@ -74,24 +75,20 @@ class AnonQRCameraPlugin(private val context: Context, messenger: BinaryMessenge
         result.success(isPermissionGranted())
     }
 
-    private fun requestPermission(call: MethodCall, result: Result) {
-        activity?.let {
-            if (ContextCompat.checkSelfPermission(
-                    it, Manifest.permission.CAMERA
-                ) ==
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                startCamera()
-            } else if (shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)) {
-                it.startActivity(Intent().apply {
-                    action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                    data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
-                })
-            } else {
-                it.requestPermissions(REQUIRED_PERMISSIONS, 2)
-            }
+    private fun requestPermission() {
+        if (ContextCompat.checkSelfPermission(
+                activity, Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            startCamera()
+        } else if (shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
+            activity.startActivity(Intent().apply {
+                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+            })
+        } else {
+            ActivityCompat.requestPermissions(activity, REQUIRED_PERMISSIONS, 2)
         }
-
     }
 
     fun onRequestPermissionsResult() {
@@ -167,11 +164,11 @@ class AnonQRCameraPlugin(private val context: Context, messenger: BinaryMessenge
 
             }
 
-        }, ContextCompat.getMainExecutor(context))
+        }, ContextCompat.getMainExecutor(activity))
     }
 
     private fun isPermissionGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(activity, it) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun stopCamera() {
