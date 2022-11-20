@@ -1,4 +1,4 @@
-package xmr.anon_wallet.wallet.plugins.qrScanner;
+package xmr.anon_wallet.wallet.plugins.qrScanner
 
 
 import android.Manifest
@@ -41,10 +41,10 @@ class AnonQRCameraPlugin(private val context: Context, messenger: BinaryMessenge
         messenger,
         "anon_camera:events"
     )
-    private var eventSink: EventSink? = null;
+    private var eventSink: EventSink? = null
     private val cameraExecutor = Executors.newSingleThreadExecutor()
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-    private var registry: TextureRegistry? = null;
+    private var registry: TextureRegistry? = null
     private var cameraProviderFuture: ListenableFuture<ProcessCameraProvider> = ProcessCameraProvider.getInstance(context)
     private var camera: Camera? = null
     private var preview: Preview? = null
@@ -186,7 +186,7 @@ class AnonQRCameraPlugin(private val context: Context, messenger: BinaryMessenge
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        eventSink = events;
+        eventSink = events
     }
 
     override fun onCancel(arguments: Any?) {

@@ -5,30 +5,32 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.os.Process
 import android.os.PowerManager
 import android.os.PowerManager.WakeLock
+import android.os.Process
 import android.view.WindowManager
 import androidx.annotation.NonNull
 import com.m2049r.xmrwallet.model.WalletManager
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.channels.*
 import xmr.anon_wallet.wallet.model.walletToHashMap
+import xmr.anon_wallet.wallet.plugins.qrScanner.AnonQRCameraPlugin
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
 
     override fun onStart() {
         AnonWallet.setApplication(this)
         super.onStart()
     }
 
-    private var wakeLock: WakeLock? = null;
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO);
+    private var wakeLock: WakeLock? = null
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private  var cameraPlugin : AnonQRCameraPlugin? = null
 
     @SuppressLint("WakelockTimeout")
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
@@ -44,11 +46,21 @@ class MainActivity : FlutterActivity() {
             }
         }
         initializeProxySettings()
+        cameraPlugin = AnonQRCameraPlugin(this, binaryMessenger, lifecycle)
+        cameraPlugin?.let {
+            flutterEngine.plugins.add(it)
+        }
+    }
+
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        cameraPlugin?.onRequestPermissionsResult()
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private fun initializeProxySettings() {
         val prefs = AnonPreferences(this)
-        if(prefs.firstRun == true){
+        if (prefs.firstRun == true) {
             prefs.proxyServer = "127.0.0.1"
             prefs.proxyPort = "9050"
             prefs.firstRun = false
@@ -117,6 +129,8 @@ class MainActivity : FlutterActivity() {
          * Spend specific Methods
          */
         SpendMethodChannel(binaryMessenger, lifecycle)
+
+
     }
 
 }
