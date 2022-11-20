@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,8 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 class QRScannerView extends StatefulWidget {
   final Function(String value) onScanCallback;
 
-  const QRScannerView({Key? key, required this.onScanCallback}) : super(key: key);
+  const QRScannerView({Key? key, required this.onScanCallback})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _QRScannerViewState();
@@ -33,17 +35,21 @@ class _QRScannerViewState extends State<QRScannerView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation
+          .miniCenterDocked,
       floatingActionButton: FloatingActionButton.extended(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8))),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
-        splashColor: Theme.of(context).primaryColor,
+        splashColor: Theme
+            .of(context)
+            .primaryColor,
         onPressed: () {
           Navigator.pop(context);
         },
-        label: Text("Close"),
+        label: const Text("Close"),
         icon: const Icon(Icons.close),
       ),
       body: _buildQrView(context),
@@ -52,42 +58,13 @@ class _QRScannerViewState extends State<QRScannerView> {
 
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
-    var scanArea =
-        (MediaQuery.of(context).size.width < 400 || MediaQuery.of(context).size.height < 400) ? 150.0 : 300.0;
-    // To ensure the Scanner view is properly sizes after rotation
-    // we need to listen for Flutter SizeChanged notification and update controller
-    return QRView(
-      key: qrKey,
-      onQRViewCreated: (controller)=>_onQRViewCreated(controller,context),
-      overlay: QrScannerOverlayShape(
-          borderColor: Colors.red, borderRadius: 10, borderLength: 30, borderWidth: 10, cutOutSize: scanArea),
-      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
-    );
-  }
-
-  void _onQRViewCreated(QRViewController controller, BuildContext context) {
-    setState(() {
-      this.controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) {
-      if (scanData.code != null) {
-        this.controller?.stopCamera();
-        widget.onScanCallback(scanData.code!);
-        Navigator.pop(context);
+    return CameraView(
+      callBack: (value){
         AppHaptics.lightImpact();
-      }
-      setState(() {
-        result = scanData;
-      });
-    });
-  }
-
-  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    if (!p) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
-      );
-    }
+        Navigator.pop(context);
+        widget.onScanCallback(value);
+      },
+    );
   }
 
   @override
