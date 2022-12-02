@@ -45,7 +45,8 @@ class _SubAddressEditDialogState extends State<SubAddressEditDialog> {
           decoration: const InputDecoration(
               contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
               fillColor: Color(0xff1E1E1E),
-              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)))),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)))),
           style: const TextStyle(),
         ),
       ),
@@ -56,22 +57,26 @@ class _SubAddressEditDialogState extends State<SubAddressEditDialog> {
             },
             child: Text(
               "Cancel",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
             )),
         TextButton(
             onPressed: () {
               if (widget.subAddress.addressIndex != null) {
                 AddressChannel().setSubAddressLabel(
-                    widget.subAddress.addressIndex!, widget.subAddress.accountIndex!, labelEditingController.text);
+                    widget.subAddress.addressIndex!,
+                    widget.subAddress.accountIndex!,
+                    labelEditingController.text);
                 AppHaptics.lightImpact();
                 Navigator.pop(context);
               }
             },
             child: Text("Confirm",
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w800)))
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.w800)))
       ],
     );
   }

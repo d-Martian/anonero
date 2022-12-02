@@ -1,4 +1,3 @@
-
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/node.dart';
@@ -28,7 +27,7 @@ final nextButtonValidation = Provider<bool>((ref) {
   if (navState == 1) {
     return seedPhrase.isNotEmpty;
   }
-  if(navState == 2){
+  if (navState == 2) {
     return false;
   }
   return true;

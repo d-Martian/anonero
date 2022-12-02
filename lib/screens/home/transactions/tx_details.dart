@@ -19,27 +19,31 @@ class TxDetails extends ConsumerStatefulWidget {
 }
 
 class _TxDetailsState extends ConsumerState<TxDetails> {
-  String? txKey ;
+  String? txKey;
   bool loading = false;
   GlobalKey<ScaffoldState> scaffold = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    TextStyle? titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).primaryColor);
-    Transaction transaction = ref.watch(getSpecificTransaction(widget.transaction));
-    Transfer? transfer = transaction.transfers.length == 1 ? transaction.transfers[0] : null;
+    TextStyle? titleStyle = Theme.of(context)
+        .textTheme
+        .titleMedium
+        ?.copyWith(color: Theme.of(context).primaryColor);
+    Transaction transaction =
+        ref.watch(getSpecificTransaction(widget.transaction));
+    Transfer? transfer =
+        transaction.transfers.length == 1 ? transaction.transfers[0] : null;
     InlineSpan destination = const TextSpan(text: "");
     if (transfer == null) {
       if (transaction.subAddress != null) {
         destination = TextSpan(
-          style: const TextStyle(
-            height: 1.5
-          ),
+          style: const TextStyle(height: 1.5),
           text: "",
           children: <TextSpan>[
             TextSpan(
               text: "[${transaction.subAddress!.label}]",
-              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600, color: Colors.white),
             ),
             TextSpan(
               text: "  ${transaction.subAddress!.address}",
@@ -67,7 +71,8 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
         slivers: [
           SliverToBoxAdapter(
             child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+                margin:
+                    const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
                 child: TransactionItem(
                   transaction: transaction,
                 )),
@@ -93,7 +98,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
               margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               child: ListTile(
                 onTap: () {
-                  showPassphraseDialog(context,transaction);
+                  showPassphraseDialog(context, transaction);
                 },
                 trailing: Icon(Icons.edit),
                 title: Text(
@@ -120,33 +125,41 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
             ),
           ),
           SliverToBoxAdapter(
-            child: txKey != null ?  Container(
-              margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-              child: ListTile(
-                title: Text(
-                  "TRANSACTION KEY",
-                  style: titleStyle,
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: SelectableText(txKey ?? '-'),
-                ),
-              ),
-            ): SizedBox(),
-          ), SliverToBoxAdapter(
-            child: transaction.fee != null ?  Container(
-              margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-              child: ListTile(
-                title: Text(
-                  "TRANSACTION FEE",
-                  style: titleStyle,
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: SelectableText(formatMonero(transaction.fee) ?? '-'),
-                ),
-              ),
-            ): SizedBox(),
+            child: txKey != null
+                ? Container(
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 10),
+                    child: ListTile(
+                      title: Text(
+                        "TRANSACTION KEY",
+                        style: titleStyle,
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: SelectableText(txKey ?? '-'),
+                      ),
+                    ),
+                  )
+                : SizedBox(),
+          ),
+          SliverToBoxAdapter(
+            child: transaction.fee != null
+                ? Container(
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 10),
+                    child: ListTile(
+                      title: Text(
+                        "TRANSACTION FEE",
+                        style: titleStyle,
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: SelectableText(
+                            formatMonero(transaction.fee) ?? '-'),
+                      ),
+                    ),
+                  )
+                : SizedBox(),
           ),
           SliverToBoxAdapter(
             child: Container(
@@ -158,7 +171,8 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text("${transaction.blockheight == 0 ? 'Pending' : transaction.blockheight ?? '-'}"),
+                  child: Text(
+                      "${transaction.blockheight == 0 ? 'Pending' : transaction.blockheight ?? '-'}"),
                 ),
               ),
             ),
@@ -191,8 +205,10 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
     });
   }
 
-  void showPassphraseDialog(BuildContext dialogContext, Transaction transaction) {
-    TextEditingController controller = TextEditingController(text: transaction.notes ?? "");
+  void showPassphraseDialog(
+      BuildContext dialogContext, Transaction transaction) {
+    TextEditingController controller =
+        TextEditingController(text: transaction.notes ?? "");
     FocusNode focusNode = FocusNode();
     showDialog(
         context: dialogContext,
@@ -201,16 +217,19 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
         builder: (_) {
           return HookBuilder(
             builder: (_) {
-              const inputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.transparent));
+              const inputBorder = UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.transparent));
               var error = useState<String?>(null);
               useEffect(() {
                 focusNode.requestFocus();
                 return null;
               }, []);
               return AlertDialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
                 content: SizedBox(
                   width: MediaQuery.of(context).size.width / 1.3,
                   child: Column(
@@ -287,7 +306,8 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
         setState(() {
           loading = true;
         });
-        bool key = await WalletChannel().setTxUserNotes(widget.transaction.hash!, notes);
+        bool key = await WalletChannel()
+            .setTxUserNotes(widget.transaction.hash!, notes);
         setState(() {
           loading = false;
           widget.transaction.notes = notes;

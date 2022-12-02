@@ -13,7 +13,8 @@ import '../../../models/transaction.dart';
 class SubAddressDetails extends ConsumerStatefulWidget {
   final SubAddress subAddress;
 
-  const SubAddressDetails({Key? key, required this.subAddress}) : super(key: key);
+  const SubAddressDetails({Key? key, required this.subAddress})
+      : super(key: key);
 
   @override
   ConsumerState<SubAddressDetails> createState() => _SubAddressDetailsState();
@@ -33,7 +34,10 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                   Clipboard.setData(ClipboardData(text: subAddress.address));
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text("address copied",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Colors.white)),
                     backgroundColor: Colors.grey[900],
                     behavior: SnackBarBehavior.floating,
                   ));
@@ -60,12 +64,18 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
               child: ListTile(
                 title: Text(
                   subAddress.label ?? '',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).primaryColor),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Theme.of(context).primaryColor),
                 ),
                 subtitle: Text(subAddress.address ?? ''),
                 trailing: Text(
                   formatMonero(subAddress.totalAmount),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).primaryColor),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Theme.of(context).primaryColor),
                 ),
               ),
             ),
@@ -79,7 +89,9 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => TxDetails(transaction: transactions[index]), fullscreenDialog: true));
+                          builder: (context) =>
+                              TxDetails(transaction: transactions[index]),
+                          fullscreenDialog: true));
                 },
                 child: TransactionItem(
                   transaction: transactions[index],
@@ -93,7 +105,10 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                     margin: const EdgeInsets.symmetric(vertical: 18),
                     child: Center(
                       child: Text("No transactions yet..",
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: Colors.white70)),
                     ),
                   )
                 : SizedBox(),

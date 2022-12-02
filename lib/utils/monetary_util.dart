@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-String formatMonero(num? value,{int minimumFractions=4}) {
+String formatMonero(num? value, {int minimumFractions = 4}) {
   if (value == null) {
     return "";
   }

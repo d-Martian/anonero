@@ -8,11 +8,15 @@ class SpendReview extends ConsumerWidget {
   final VoidCallback onConfirm;
   final VoidCallback close;
 
-  const SpendReview({Key? key, required this.onConfirm, required this.close}) : super(key: key);
+  const SpendReview({Key? key, required this.onConfirm, required this.close})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    TextStyle? titleTheme = Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).primaryColor);
+    TextStyle? titleTheme = Theme.of(context)
+        .textTheme
+        .titleLarge
+        ?.copyWith(color: Theme.of(context).primaryColor);
     String address = ref.watch(addressStateProvider);
     String notes = ref.watch(notesStateProvider);
     TxState txState = ref.watch(transactionStateProvider);
@@ -26,13 +30,16 @@ class SpendReview extends ConsumerWidget {
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              leading: BackButton(onPressed: close,),
+              leading: BackButton(
+                onPressed: close,
+              ),
               toolbarHeight: 120,
               bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(60),
                   child: Hero(
                     tag: "anon_logo",
-                    child: SizedBox(width: 160, child: Image.asset("assets/anon_logo.png")),
+                    child: SizedBox(
+                        width: 160, child: Image.asset("assets/anon_logo.png")),
                   )),
             ),
             SliverToBoxAdapter(
@@ -52,10 +59,14 @@ class SpendReview extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Container(
                 alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 child: Text(
                   "Error ${txState.errorString}",
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.red),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(color: Colors.red),
                 ),
               ),
             ),
@@ -78,13 +89,16 @@ class SpendReview extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            leading: BackButton(onPressed: close,),
+            leading: BackButton(
+              onPressed: close,
+            ),
             toolbarHeight: 120,
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),
                 child: Hero(
                   tag: "anon_logo",
-                  child: SizedBox(width: 160, child: Image.asset("assets/anon_logo.png")),
+                  child: SizedBox(
+                      width: 160, child: Image.asset("assets/anon_logo.png")),
                 )),
           ),
           SliverToBoxAdapter(
@@ -131,7 +145,8 @@ class SpendReview extends ConsumerWidget {
               child: SpendListItem(
                 title: "Fee",
                 isLoading: loading,
-                subTitle: "${formatMonero((fees ?? 0), minimumFractions: 8)} XMR",
+                subTitle:
+                    "${formatMonero((fees ?? 0), minimumFractions: 8)} XMR",
               ),
             ),
           ),
@@ -141,7 +156,8 @@ class SpendReview extends ConsumerWidget {
               child: SpendListItem(
                 title: "Total",
                 isLoading: loading,
-                subTitle: "${formatMonero((fees ?? 0) + (amount ?? 0), minimumFractions: 8)} XMR",
+                subTitle:
+                    "${formatMonero((fees ?? 0) + (amount ?? 0), minimumFractions: 8)} XMR",
               ),
             ),
           ),
@@ -153,21 +169,24 @@ class SpendReview extends ConsumerWidget {
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                   child: ElevatedButton(
                     onPressed: !loading
                         ? () {
                             onConfirm();
                           }
                         : null,
-                    style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                        backgroundColor:
-                            MaterialStateColor.resolveWith((states) => loading ? Colors.white54 : Colors.white)),
+                    style: Theme.of(context)
+                        .elevatedButtonTheme
+                        .style
+                        ?.copyWith(
+                            backgroundColor: MaterialStateColor.resolveWith(
+                                (states) =>
+                                    loading ? Colors.white54 : Colors.white)),
                     child: Text("CONFIRM",
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: Colors.black, fontWeight: FontWeight.w800)),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.black, fontWeight: FontWeight.w800)),
                   ),
                 ),
               ],
@@ -184,14 +203,21 @@ class SpendListItem extends StatelessWidget {
   final String subTitle;
   final bool isLoading;
 
-  const SpendListItem({Key? key, required this.title, this.isLoading = false, required this.subTitle})
+  const SpendListItem(
+      {Key? key,
+      required this.title,
+      this.isLoading = false,
+      required this.subTitle})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title:
-          Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).primaryColor)),
+      title: Text(title,
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge
+              ?.copyWith(color: Theme.of(context).primaryColor)),
       trailing: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: isLoading
@@ -202,7 +228,10 @@ class SpendListItem extends StatelessWidget {
               )
             : Text(
                 subTitle,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(fontSize: 18),
               ),
       ),
     );

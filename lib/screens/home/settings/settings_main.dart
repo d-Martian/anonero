@@ -20,7 +20,10 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-    TextStyle? titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).primaryColor);
+    TextStyle? titleStyle = Theme.of(context)
+        .textTheme
+        .titleLarge
+        ?.copyWith(color: Theme.of(context).primaryColor);
     Color? dividerColor = Colors.grey[700];
     return Scaffold(
       body: CustomScrollView(
@@ -36,7 +39,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   child: Text("Connection", style: titleStyle),
                 ),
                 Divider(color: dividerColor, height: 2),
@@ -60,7 +64,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }, []);
                   return ListTile(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ProxySettings()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProxySettings()));
                     },
                     title: const Text("Proxy"),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 34),
@@ -69,21 +76,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                                Text(
+                              Text(
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
-                                    ?.copyWith(color: isConnected ? Colors.green : dividerColor,fontSize:11,wordSpacing: 0),
-                                  isConnected ?   "Connected : ${proxy.serverUrl}:${proxy.port}" : "Disconnected : ${proxy.serverUrl}:${proxy.port}",
+                                    ?.copyWith(
+                                        color: isConnected
+                                            ? Colors.green
+                                            : dividerColor,
+                                        fontSize: 11,
+                                        wordSpacing: 0),
+                                isConnected
+                                    ? "Connected : ${proxy.serverUrl}:${proxy.port}"
+                                    : "Disconnected : ${proxy.serverUrl}:${proxy.port}",
                               ),
                             ],
                           )
-                        : Text("Disabled", style: Theme.of(context).textTheme.bodySmall?.copyWith(color: dividerColor)),
+                        : Text("Disabled",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: dividerColor)),
                   );
                 }),
                 Divider(color: dividerColor, height: 2),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   child: Text("Security", style: titleStyle),
                 ),
                 Divider(color: dividerColor, height: 2),
@@ -99,7 +118,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 34),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ViewWalletSeed()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ViewWalletSeed()));
                   },
                   title: const Text("View Seed"),
                 ),

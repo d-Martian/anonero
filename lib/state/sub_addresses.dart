@@ -4,10 +4,13 @@ import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final getSubAddressesProvider = StreamProvider<List<SubAddress>>((ref) => WalletEventsChannel().subAddresses());
-final subAddressStateProvider = StateProvider((ref) => ref.watch(getSubAddressesProvider).value);
+final getSubAddressesProvider = StreamProvider<List<SubAddress>>(
+    (ref) => WalletEventsChannel().subAddresses());
+final subAddressStateProvider =
+    StateProvider((ref) => ref.watch(getSubAddressesProvider).value);
 
-final subAddressDetails = Provider.family<List<Transaction>, SubAddress>((ref, address) {
+final subAddressDetails =
+    Provider.family<List<Transaction>, SubAddress>((ref, address) {
   List<Transaction> transactions = ref.watch(walletTransactions);
   List<Transaction> selectedTxs = [];
   for (var element in transactions) {
@@ -20,7 +23,8 @@ final subAddressDetails = Provider.family<List<Transaction>, SubAddress>((ref, a
   return selectedTxs;
 });
 
-final getSpecificSubAddress = Provider.family<SubAddress, SubAddress>((ref, address) {
+final getSpecificSubAddress =
+    Provider.family<SubAddress, SubAddress>((ref, address) {
   List<SubAddress>? subAddresses = ref.watch(subAddressStateProvider);
   if (subAddresses == null) {
     return address;

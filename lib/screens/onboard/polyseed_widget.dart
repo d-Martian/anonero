@@ -23,56 +23,63 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-  	child: Container( 
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Hero(tag: "anon_logo", child: SizedBox(width: 180, child: Image.asset("assets/anon_logo.png"))),
-                ],
+      child: Container(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Container(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Hero(
+                        tag: "anon_logo",
+                        child: SizedBox(
+                            width: 180,
+                            child: Image.asset("assets/anon_logo.png"))),
+                  ],
+                ),
               ),
             ),
-          ),
-          SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('${index + 1}.'),
-                      Container(
-                        width: 80,
-                        child: Text(
-                          seeds[index],
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 14),
-                          textAlign: TextAlign.start,
-                        ),
-                      )
-                    ],
-                  ),
-                );
-              },
-              childCount: seeds.length,
-            ),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 15,
-              crossAxisSpacing: 8,
-              childAspectRatio: 2.8,
-            ),
-          )
-        ],
-      ),
+            SliverGrid(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('${index + 1}.'),
+                        Container(
+                          width: 80,
+                          child: Text(
+                            seeds[index],
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(fontSize: 14),
+                            textAlign: TextAlign.start,
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+                },
+                childCount: seeds.length,
+              ),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 15,
+                crossAxisSpacing: 8,
+                childAspectRatio: 2.8,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

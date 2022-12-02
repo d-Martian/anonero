@@ -70,7 +70,11 @@ class Node {
       if (password != null && (password?.isNotEmpty ?? false)) {
         params["password"] = password!;
       }
-      Uri uri = Uri(scheme: "http", host: host, port: port,queryParameters: params.isNotEmpty ? params : null);
+      Uri uri = Uri(
+          scheme: "http",
+          host: host,
+          port: port,
+          queryParameters: params.isNotEmpty ? params : null);
       return uri.toString();
     }
     return "";

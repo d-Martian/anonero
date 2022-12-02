@@ -35,24 +35,23 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
                 slivers: [
                   SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        childCount: data.value.length,
-                            (context, index) {
-                          SubAddress addr = data.value[index];
-                          return SubAddressItem(addr);
-                        },
-                      ))
+                    childCount: data.value.length,
+                    (context, index) {
+                      SubAddress addr = data.value[index];
+                      return SubAddressItem(addr);
+                    },
+                  ))
                 ],
               );
             },
             error: (error) => Center(child: Text("Error $error")),
-            loading: (c) =>
-            const Center(
-              child: SizedBox(
-                height: 12,
-                width: 12,
-                child: CircularProgressIndicator(),
-              ),
-            )));
+            loading: (c) => const Center(
+                  child: SizedBox(
+                    height: 12,
+                    width: 12,
+                    child: CircularProgressIndicator(),
+                  ),
+                )));
   }
 }
 
@@ -66,14 +65,14 @@ class SubAddressItem extends StatelessWidget {
     return Hero(
       tag: "sub:${subAddress.squashedAddress}",
       child: ListTile(
-        onTap: (){
-          Navigator.push(context, MaterialPageRoute(builder: (c){
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (c) {
             return SubAddressDetails(
               subAddress: subAddress,
             );
           }));
         },
-        onLongPress: (){
+        onLongPress: () {
           showDialog(
               barrierColor: barrierColor,
               context: context,
@@ -83,21 +82,15 @@ class SubAddressItem extends StatelessWidget {
         },
         title: Text(
           subAddress.getLabel(),
-          style: Theme
-              .of(context)
+          style: Theme.of(context)
               .textTheme
               .titleMedium
-              ?.copyWith(color: Theme
-              .of(context)
-              .primaryColor),
+              ?.copyWith(color: Theme.of(context).primaryColor),
         ),
         subtitle: Text("${subAddress.squashedAddress}"),
         trailing: Text(
           formatMonero(subAddress.totalAmount),
-          style: Theme
-              .of(context)
-              .textTheme
-              .titleMedium,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
       ),
     );
