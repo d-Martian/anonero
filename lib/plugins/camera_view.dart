@@ -38,6 +38,8 @@ class _CameraViewState extends State<CameraView> {
     });
     if (permission == true) {
       platform.invokeMethod<Map>("startCam");
+    }else{
+      platform.invokeMethod<Map>("requestPermission");
     }
     eventChannel.receiveBroadcastStream().listen((event) {
       if (event['id'] != null) {
