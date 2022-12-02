@@ -10,6 +10,7 @@ import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
+import 'package:anon_wallet/utils/parsers.dart';
 import 'package:anon_wallet/widgets/bottom_bar.dart';
 import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +63,8 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
                 );
               });
         } else {
-          _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
+          _pageController.animateToPage(0,
+              duration: const Duration(milliseconds: 220), curve: Curves.ease);
         }
         return false;
       },
@@ -83,9 +85,24 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
                               return QRScannerView(
                                 onScanCallback: (value) {
                                   AppHaptics.lightImpact();
-                                  ref.read(addressStateProvider.state).state = value;
+                                  var parsedAddress =
+                                      Parser.parseAddress(value);
+                                  if (parsedAddress[0] != null) {
+                                    ref.read(addressStateProvider.state).state =
+                                        parsedAddress[0];
+                                  }
+                                  if (parsedAddress[1] != null) {
+                                    ref.read(amountStateProvider.state).state =
+                                        parsedAddress[1];
+                                  }
+                                  if (parsedAddress[2] != null) {
+                                    ref.read(notesStateProvider.state).state =
+                                        parsedAddress[2];
+                                  }
                                   _pageController.animateToPage(2,
-                                      duration: const Duration(milliseconds: 220), curve: Curves.ease);
+                                      duration:
+                                          const Duration(milliseconds: 220),
+                                      curve: Curves.ease);
                                 },
                               );
                             },
@@ -96,7 +113,9 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
               },
             ),
             ReceiveWidget(() {
-              _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
+              _pageController.animateToPage(0,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.ease);
             }),
             const SpendScreen(),
             const SettingsScreen(),
@@ -107,13 +126,16 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
         ),
         floatingActionButton: Consumer(
           builder: (context, ref, child) {
-            ref.listen<String?>(nodeErrorState, (String? previousCount, String? newValue) {
+            ref.listen<String?>(nodeErrorState,
+                (String? previousCount, String? newValue) {
               if (newValue != null && scaffoldState.currentContext != null) {
                 ScaffoldMessenger.of(scaffoldState.currentContext!)
-                    .showMaterialBanner(MaterialBanner(content: Text(newValue), actions: [
+                    .showMaterialBanner(
+                        MaterialBanner(content: Text(newValue), actions: [
                   TextButton(
                       onPressed: () {
-                        ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                        ScaffoldMessenger.of(context)
+                            .hideCurrentMaterialBanner();
                       },
                       child: const Text("Close"))
                 ]));
@@ -129,7 +151,8 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
           selectedIndex: _currentView,
           onTap: (int index) {
             setState(() => _currentView = index);
-            _pageController.animateToPage(index, duration: Duration(milliseconds: 120), curve: Curves.ease);
+            _pageController.animateToPage(index,
+                duration: Duration(milliseconds: 120), curve: Curves.ease);
           },
           items: <BottomBarItem>[
             BottomBarItem(

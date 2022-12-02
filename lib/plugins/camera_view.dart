@@ -38,7 +38,7 @@ class _CameraViewState extends State<CameraView> {
     });
     if (permission == true) {
       platform.invokeMethod<Map>("startCam");
-    }else{
+    } else {
       platform.invokeMethod<Map>("requestPermission");
     }
     eventChannel.receiveBroadcastStream().listen((event) {
@@ -59,7 +59,7 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   Widget build(BuildContext context) {
-    if(permissionGranted ==false){
+    if (permissionGranted == false) {
       return Scaffold(
         body: Container(
           width: double.infinity,
@@ -70,13 +70,17 @@ class _CameraViewState extends State<CameraView> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text("To capture QR code, allow ANON to access your camera",style: Theme.of(context).textTheme.titleSmall,
-                textAlign: TextAlign.center),
+                child: Text(
+                    "To capture QR code, allow ANON to access your camera",
+                    style: Theme.of(context).textTheme.titleSmall,
+                    textAlign: TextAlign.center),
               ),
               const Padding(padding: EdgeInsets.all(6)),
-              TextButton(onPressed: (){
-                platform.invokeMethod<Map>("requestPermission");
-              }, child: Text("Allow camera"))
+              TextButton(
+                  onPressed: () {
+                    platform.invokeMethod<Map>("requestPermission");
+                  },
+                  child: Text("Allow camera"))
             ],
           ),
         ),
@@ -98,7 +102,8 @@ class _CameraViewState extends State<CameraView> {
                         width: width!,
                         height: height!,
                         child: Texture(
-                            textureId: id!, filterQuality: FilterQuality.medium),
+                            textureId: id!,
+                            filterQuality: FilterQuality.medium),
                       ),
                     )
                   : Column(
@@ -120,11 +125,12 @@ class _CameraViewState extends State<CameraView> {
           height: double.infinity,
           margin: const EdgeInsets.all(68),
           child: SvgPicture.asset("assets/scanner_frame.svg",
-          color: Colors.white24),
+              color: Colors.white24),
         )
       ],
     );
   }
+
   @override
   void dispose() {
     platform.invokeMethod<Map>("stopCam");

@@ -13,6 +13,8 @@ class QRScannerView extends StatefulWidget {
 }
 
 class _QRScannerViewState extends State<QRScannerView> {
+  bool isScanned = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,10 +40,13 @@ class _QRScannerViewState extends State<QRScannerView> {
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
     return CameraView(
-      callBack: (value) {
-        AppHaptics.lightImpact();
-        Navigator.pop(context);
-        widget.onScanCallback(value);
+      callBack: (value) async {
+        if (!isScanned) {
+          AppHaptics.lightImpact();
+          Navigator.pop(context);
+          widget.onScanCallback(value);
+          isScanned = true;
+        }
       },
     );
   }
