@@ -1,9 +1,7 @@
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
+import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
-import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
-import 'package:anon_wallet/utils/parsers.dart';
-import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -49,6 +47,7 @@ class _SpendFormState extends ConsumerState<SpendForm> {
         amountEditingController.text = next;
       }
     });
+
     OutlineInputBorder enabledBorder = OutlineInputBorder(
         borderSide: BorderSide(width: 1, color: Theme.of(context).primaryColor),
         borderRadius: BorderRadius.circular(12));
@@ -116,41 +115,10 @@ class _SpendFormState extends ConsumerState<SpendForm> {
                                   border: unFocusedBorder,
                                   suffixIcon: IconButton(
                                       onPressed: () {
-                                        showBottomSheet(
-                                            context: context,
-                                            builder: (context) {
-                                              return QRScannerView(
-                                                onScanCallback: (value) {
-                                                  AppHaptics.lightImpact();
-                                                  var parsedAddress =
-                                                      Parser.parseAddress(
-                                                          value);
-                                                  if (parsedAddress[0] !=
-                                                      null) {
-                                                    ref
-                                                        .read(
-                                                            addressStateProvider
-                                                                .state)
-                                                        .state = parsedAddress[0];
-                                                  }
-                                                  if (parsedAddress[1] !=
-                                                      null) {
-                                                    ref
-                                                        .read(
-                                                            amountStateProvider
-                                                                .state)
-                                                        .state = parsedAddress[1];
-                                                  }
-                                                  if (parsedAddress[2] !=
-                                                      null) {
-                                                    ref
-                                                        .read(notesStateProvider
-                                                            .state)
-                                                        .state = parsedAddress[2];
-                                                  }
-                                                },
-                                              );
-                                            });
+                                        context
+                                            .findRootAncestorStateOfType<
+                                                WalletHomeState>()
+                                            ?.showModalScanner(context);
                                       },
                                       icon: const Icon(Icons.qr_code)),
                                   enabledBorder: unFocusedBorder,

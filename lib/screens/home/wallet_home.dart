@@ -1,16 +1,9 @@
-import 'dart:io';
-
-import 'package:anon_wallet/channel/wallet_events_channel.dart';
-import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/screens/home/receive_screen.dart';
 import 'package:anon_wallet/screens/home/settings/settings_main.dart';
 import 'package:anon_wallet/screens/home/spend/spend_screen.dart';
-import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
-import 'package:anon_wallet/utils/app_haptics.dart';
-import 'package:anon_wallet/utils/parsers.dart';
 import 'package:anon_wallet/widgets/bottom_bar.dart';
 import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:flutter/material.dart';
@@ -21,13 +14,14 @@ class WalletHome extends ConsumerStatefulWidget {
   const WalletHome({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<WalletHome> createState() => _WalletHomeState();
+  ConsumerState<WalletHome> createState() => WalletHomeState();
 }
 
-class _WalletHomeState extends ConsumerState<WalletHome> {
+class WalletHomeState extends ConsumerState<WalletHome> {
   int _currentView = 0;
   final PageController _pageController = PageController();
   GlobalKey scaffoldState = GlobalKey<ScaffoldState>();
+  PersistentBottomSheetController? _bottomSheetController;
 
   @override
   void initState() {
@@ -39,6 +33,11 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        if (_bottomSheetController != null) {
+          _bottomSheetController!.close();
+          _bottomSheetController = null;
+          return false;
+        }
         if (_pageController.page == 0) {
           return await showDialog(
               context: context,
@@ -76,38 +75,8 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
             Builder(
               builder: (context) {
                 return TransactionsList(
-                  onScanClick: () {
-                    showBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Consumer(
-                            builder: (context, ref, c) {
-                              return QRScannerView(
-                                onScanCallback: (value) {
-                                  AppHaptics.lightImpact();
-                                  var parsedAddress =
-                                      Parser.parseAddress(value);
-                                  if (parsedAddress[0] != null) {
-                                    ref.read(addressStateProvider.state).state =
-                                        parsedAddress[0];
-                                  }
-                                  if (parsedAddress[1] != null) {
-                                    ref.read(amountStateProvider.state).state =
-                                        parsedAddress[1];
-                                  }
-                                  if (parsedAddress[2] != null) {
-                                    ref.read(notesStateProvider.state).state =
-                                        parsedAddress[2];
-                                  }
-                                  _pageController.animateToPage(2,
-                                      duration:
-                                          const Duration(milliseconds: 220),
-                                      curve: Curves.ease);
-                                },
-                              );
-                            },
-                          );
-                        });
+                  onScanClick: () async {
+                    showModalScanner(context);
                   },
                 );
               },
@@ -121,6 +90,10 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
             const SettingsScreen(),
           ],
           onPageChanged: (index) {
+            if (_bottomSheetController != null) {
+              _bottomSheetController!.close();
+              _bottomSheetController = null;
+            }
             setState(() => _currentView = index);
           },
         ),
@@ -179,5 +152,9 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
         ),
       ),
     );
+  }
+
+  void showModalScanner(BuildContext context) {
+    _bottomSheetController = showQRBottomSheet(context);
   }
 }
