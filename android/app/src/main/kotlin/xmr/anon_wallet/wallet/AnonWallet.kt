@@ -32,7 +32,7 @@ object AnonWallet {
     val ONE_XMR = 10.0.pow(XMR_DECIMALS.toDouble()).roundToInt()
 
     @JvmName("setApplication1")
-    fun setApplication(flutterActivity: FlutterFragmentActivity) {
+    fun setApplication(flutterActivity: FlutterActivity) {
         val prefs = AnonPreferences(flutterActivity)
         //TODO
 //        if(prefs.proxyServer == null || prefs.proxyPort == null){
@@ -69,7 +69,7 @@ object AnonWallet {
         return walletScope
     }
 
-    private fun attachScope(flutterActivity: FlutterFragmentActivity) {
+    private fun attachScope(flutterActivity: FlutterActivity) {
         with(flutterActivity) {
             lifecycle.addObserver(object : LifecycleEventObserver {
                 override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {

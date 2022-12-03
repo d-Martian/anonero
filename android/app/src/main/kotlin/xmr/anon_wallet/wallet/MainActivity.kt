@@ -8,10 +8,11 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.PowerManager.WakeLock
 import android.os.Process
+import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.NonNull
 import com.m2049r.xmrwallet.model.WalletManager
-import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
 import kotlinx.coroutines.*
@@ -21,7 +22,7 @@ import xmr.anon_wallet.wallet.plugins.qrScanner.AnonQRCameraPlugin
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 
 
-class MainActivity : FlutterFragmentActivity() {
+class MainActivity : FlutterActivity() {
 
     override fun onStart() {
         AnonWallet.setApplication(this)
@@ -51,7 +52,6 @@ class MainActivity : FlutterFragmentActivity() {
             flutterEngine.plugins.add(it)
         }
     }
-
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         cameraPlugin?.onRequestPermissionsResult()
