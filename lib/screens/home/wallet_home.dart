@@ -156,10 +156,13 @@ class WalletHomeState extends ConsumerState<WalletHome> {
   }
 
   void showModalScanner(BuildContext context) {
-    _bottomSheetController = showQRBottomSheet(context);
+    String? result;
+    _bottomSheetController = showQRBottomSheet(context,onScanCallback: (value) {
+      result = value;
+    },);
     _bottomSheetController?.closed.then((value) async {
-      await Future.delayed(Duration(milliseconds: 400));
-        if(ref.read(addressStateProvider).isNotEmpty){
+      await Future.delayed(const Duration(milliseconds: 400));
+        if(result != null && result!.isNotEmpty){
           _pageController.jumpToPage(2);
         }
     });
