@@ -229,10 +229,6 @@ class _SpendFormState extends ConsumerState<SpendForm> {
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               const Padding(padding: EdgeInsets.all(4)),
-                              Text(
-                                "UnConfirmed Balance: ${formatMonero(mainBalance, minimumFractions: 8)} XMR",
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
                             ],
                           );
                         },
