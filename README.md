@@ -14,10 +14,10 @@
          
                 git clone https://gitea.com/anonero/monero.git &&
                 cd monero &&
-                git checkout release-v0.18.1.0-monerujo &&
+                git checkout release-v0.18.0.0-monerujo &&
                 git submodule update --init --force &&
                 cd ../ &&
                 make &&
                 cd ../../
 
-        - Install & run APK: `flutter run --profile`
+        - Install & run APK: flutter run --flavor MainNet --release
