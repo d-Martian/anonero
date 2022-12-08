@@ -1,7 +1,3 @@
-import 'dart:io';
-
-import 'package:anon_wallet/channel/wallet_events_channel.dart';
-import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/screens/home/receive_screen.dart';
 import 'package:anon_wallet/screens/home/settings/settings_main.dart';
 import 'package:anon_wallet/screens/home/spend/spend_screen.dart';
@@ -9,7 +5,6 @@ import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
-import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:anon_wallet/widgets/bottom_bar.dart';
 import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:flutter/material.dart';
@@ -20,13 +15,14 @@ class WalletHome extends ConsumerStatefulWidget {
   const WalletHome({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<WalletHome> createState() => _WalletHomeState();
+  ConsumerState<WalletHome> createState() => WalletHomeState();
 }
 
-class _WalletHomeState extends ConsumerState<WalletHome> {
+class WalletHomeState extends ConsumerState<WalletHome> {
   int _currentView = 0;
   final PageController _pageController = PageController();
   GlobalKey scaffoldState = GlobalKey<ScaffoldState>();
+  PersistentBottomSheetController? _bottomSheetController;
 
   @override
   void initState() {
@@ -38,6 +34,11 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        if (_bottomSheetController != null) {
+          _bottomSheetController!.close();
+          _bottomSheetController = null;
+          return false;
+        }
         if (_pageController.page == 0) {
           return await showDialog(
               context: context,
@@ -62,7 +63,8 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
                 );
               });
         } else {
-          _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
+          _pageController.animateToPage(0,
+              duration: const Duration(milliseconds: 220), curve: Curves.ease);
         }
         return false;
       },
@@ -74,46 +76,40 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
             Builder(
               builder: (context) {
                 return TransactionsList(
-                  onScanClick: () {
-                    showBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Consumer(
-                            builder: (context, ref, c) {
-                              return QRScannerView(
-                                onScanCallback: (value) {
-                                  AppHaptics.lightImpact();
-                                  ref.read(addressStateProvider.state).state = value;
-                                  _pageController.animateToPage(2,
-                                      duration: const Duration(milliseconds: 220), curve: Curves.ease);
-                                },
-                              );
-                            },
-                          );
-                        });
+                  onScanClick: () async {
+                    showModalScanner(context);
                   },
                 );
               },
             ),
             ReceiveWidget(() {
-              _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
+              _pageController.animateToPage(0,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.ease);
             }),
             const SpendScreen(),
             const SettingsScreen(),
           ],
           onPageChanged: (index) {
+            if (_bottomSheetController != null) {
+              _bottomSheetController!.close();
+              _bottomSheetController = null;
+            }
             setState(() => _currentView = index);
           },
         ),
         floatingActionButton: Consumer(
           builder: (context, ref, child) {
-            ref.listen<String?>(nodeErrorState, (String? previousCount, String? newValue) {
+            ref.listen<String?>(nodeErrorState,
+                (String? previousCount, String? newValue) {
               if (newValue != null && scaffoldState.currentContext != null) {
                 ScaffoldMessenger.of(scaffoldState.currentContext!)
-                    .showMaterialBanner(MaterialBanner(content: Text(newValue), actions: [
+                    .showMaterialBanner(
+                        MaterialBanner(content: Text(newValue), actions: [
                   TextButton(
                       onPressed: () {
-                        ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                        ScaffoldMessenger.of(context)
+                            .hideCurrentMaterialBanner();
                       },
                       child: const Text("Close"))
                 ]));
@@ -129,7 +125,8 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
           selectedIndex: _currentView,
           onTap: (int index) {
             setState(() => _currentView = index);
-            _pageController.animateToPage(index, duration: Duration(milliseconds: 120), curve: Curves.ease);
+            _pageController.animateToPage(index,
+                duration: Duration(milliseconds: 120), curve: Curves.ease);
           },
           items: <BottomBarItem>[
             BottomBarItem(
@@ -156,5 +153,21 @@ class _WalletHomeState extends ConsumerState<WalletHome> {
         ),
       ),
     );
+  }
+
+  void showModalScanner(BuildContext context) {
+    String? result;
+    _bottomSheetController = showQRBottomSheet(
+      context,
+      onScanCallback: (value) {
+        result = value;
+      },
+    );
+    _bottomSheetController?.closed.then((value) async {
+      await Future.delayed(const Duration(milliseconds: 400));
+      if (result != null && result!.isNotEmpty) {
+        _pageController.jumpToPage(2);
+      }
+    });
   }
 }

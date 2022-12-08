@@ -50,7 +50,9 @@ class ViewWalletPrivateDetailsStateNotifier extends StateNotifier<Wallet?> {
   }
 }
 
-final proxyStateProvider = StateNotifierProvider<ProxyStateNotifier, Proxy>((ref) => ProxyStateNotifier(Proxy()));
+final proxyStateProvider = StateNotifierProvider<ProxyStateNotifier, Proxy>(
+    (ref) => ProxyStateNotifier(Proxy()));
 
-final viewPrivateWalletProvider = StateNotifierProvider<ViewWalletPrivateDetailsStateNotifier, Wallet?>(
-    (ref) => ViewWalletPrivateDetailsStateNotifier(null));
+final viewPrivateWalletProvider =
+    StateNotifierProvider<ViewWalletPrivateDetailsStateNotifier, Wallet?>(
+        (ref) => ViewWalletPrivateDetailsStateNotifier(null));

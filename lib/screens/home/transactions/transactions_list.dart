@@ -57,7 +57,8 @@ class _TransactionsListState extends State<TransactionsList> {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem<int>(value: 0, child: Text('Resync blockchain')),
+                  const PopupMenuItem<int>(
+                      value: 0, child: Text('Resync blockchain')),
                 ],
               ),
             ],
@@ -159,8 +160,11 @@ class _TransactionsListState extends State<TransactionsList> {
         builder: (context, ref, c) {
           return InkWell(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => TxDetails(transaction: transaction), fullscreenDialog: true));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TxDetails(transaction: transaction),
+                      fullscreenDialog: true));
             },
             child: TransactionItem(transaction: transaction),
           );

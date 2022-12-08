@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class SubAddress {
@@ -10,7 +9,12 @@ class SubAddress {
   String? label;
   String? displayLabel;
 
-  SubAddress({this.accountIndex, this.address, this.squashedAddress, this.addressIndex, this.label});
+  SubAddress(
+      {this.accountIndex,
+      this.address,
+      this.squashedAddress,
+      this.addressIndex,
+      this.label});
 
   SubAddress.fromJson(dynamic json) {
     try {
@@ -20,7 +24,7 @@ class SubAddress {
       addressIndex = json['addressIndex'];
       totalAmount = json['totalAmount'];
       label = json['label'];
-    } catch (e,s) {
+    } catch (e, s) {
       debugPrintStack(stackTrace: s);
       print(e);
     }
@@ -52,7 +56,12 @@ class SubAdress {
   int? addressIndex;
   String? label;
 
-  SubAdress({this.accountIndex, this.address, this.squashedAddress, this.addressIndex, this.label});
+  SubAdress(
+      {this.accountIndex,
+      this.address,
+      this.squashedAddress,
+      this.addressIndex,
+      this.label});
 
   SubAdress.fromJson(Map<String, dynamic> json) {
     accountIndex = json['accountIndex'];

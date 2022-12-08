@@ -7,7 +7,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class SpendProgressWidget extends ConsumerWidget {
   final VoidCallback onCloseCallBack;
 
-  const SpendProgressWidget({Key? key, required this.onCloseCallBack}) : super(key: key);
+  const SpendProgressWidget({Key? key, required this.onCloseCallBack})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +26,8 @@ class SpendProgressWidget extends ConsumerWidget {
                 preferredSize: const Size.fromHeight(60),
                 child: Hero(
                   tag: "anon_logo",
-                  child: SizedBox(width: 160, child: Image.asset("assets/anon_logo.png")),
+                  child: SizedBox(
+                      width: 160, child: Image.asset("assets/anon_logo.png")),
                 )),
           ),
           SliverFillRemaining(
@@ -73,7 +75,8 @@ class SpendProgressWidget extends ConsumerWidget {
           ),
         ),
         const Spacer(),
-        Text("Constructing transaction", style: Theme.of(context).textTheme.titleLarge),
+        Text("Constructing transaction",
+            style: Theme.of(context).textTheme.titleLarge),
         const Spacer(),
       ],
     );

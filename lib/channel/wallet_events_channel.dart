@@ -11,8 +11,10 @@ class WalletEventsChannel {
   late StreamSubscription _events;
   final StreamController<Node?> _nodeStream = StreamController<Node?>();
   final StreamController<Wallet?> _walletStream = StreamController<Wallet?>();
-  final StreamController<bool> _walletOpenStateStream = StreamController<bool>();
-  final StreamController<List<SubAddress>> _subAddressesStream = StreamController<List<SubAddress>>();
+  final StreamController<bool> _walletOpenStateStream =
+      StreamController<bool>();
+  final StreamController<List<SubAddress>> _subAddressesStream =
+      StreamController<List<SubAddress>>();
   static final WalletEventsChannel _singleton = WalletEventsChannel._internal();
 
   Stream<Node?> nodeStream() {
@@ -36,7 +38,8 @@ class WalletEventsChannel {
   }
 
   initEventChannel() {
-    _events = channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
+    _events =
+        channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
         print("Sync:${type} ${event}");

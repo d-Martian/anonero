@@ -30,7 +30,8 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       pageController.addListener(() {
         if (pageController.page != null) {
-          ref.read(navigatorState.notifier).state = pageController.page!.toInt();
+          ref.read(navigatorState.notifier).state =
+              pageController.page!.toInt();
         }
         setState(() {
           if (pageController.page == 0) {
@@ -79,7 +80,9 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
         if (pageController.page == 0) {
           return true;
         } else {
-          pageController.previousPage(duration: const Duration(milliseconds: 200), curve: Curves.easeInOutSine);
+          pageController.previousPage(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOutSine);
           return false;
         }
       },
@@ -112,14 +115,17 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                                 ))),
                         Container(
                             padding: EdgeInsets.symmetric(vertical: 24),
-                            child: const Text("Creating your wallet please wait..."))
+                            child: const Text(
+                                "Creating your wallet please wait..."))
                       ],
                     ),
                   ),
                   Container(
                       alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 26),
-                      child: PolySeedWidget(seedWords: wallet == null ? [] : wallet.seed)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2, horizontal: 26),
+                      child: PolySeedWidget(
+                          seedWords: wallet == null ? [] : wallet.seed)),
                 ],
               ),
             ),
@@ -146,7 +152,8 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                   nextButton = "Finish";
                 }
                 return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(primary: Colors.white),
@@ -156,10 +163,8 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                           }
                         : null,
                     child: Text(nextButton,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(color: Colors.black, fontWeight: FontWeight.w700)),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Colors.black, fontWeight: FontWeight.w700)),
                   ),
                 );
               },
@@ -174,20 +179,26 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     Node? connectionState = ref.read(nodeConnectionState).value;
     print("connectionState ${connectionState}");
-    if (pageController.page == 0 && connectionState != null && connectionState.isConnected()) {
-      pageController.nextPage(duration: const Duration(milliseconds: 200), curve: Curves.easeInOutSine);
+    if (pageController.page == 0 &&
+        connectionState != null &&
+        connectionState.isConnected()) {
+      pageController.nextPage(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOutSine);
       return;
     }
     if (pageController.page == 0 && ref.read(remoteHost).trim().isNotEmpty) {
       try {
         await ref.read(nodeConnectionProvider.notifier).connect();
       } on PlatformException catch (e) {
-         ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(content: Text("${e.message}"), actions: [
-           TextButton(onPressed: (){
-             ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-           }, child: Text("Close"))
-         ]));
-
+        ScaffoldMessenger.of(context).showMaterialBanner(
+            MaterialBanner(content: Text("${e.message}"), actions: [
+          TextButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+              },
+              child: Text("Close"))
+        ]));
       }
       return;
     }
@@ -200,9 +211,13 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
           },
           fullscreenDialog: true));
       if (pin != null) {
-        pageController.nextPage(duration: const Duration(milliseconds: 200), curve: Curves.easeInOutSine);
+        pageController.nextPage(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOutSine);
         await ref.read(newWalletProvider.notifier).createWallet(pin);
-        pageController.nextPage(duration: const Duration(milliseconds: 200), curve: Curves.easeInOutSine);
+        pageController.nextPage(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOutSine);
         return;
       }
     } else {

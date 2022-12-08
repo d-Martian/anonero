@@ -3,6 +3,7 @@ import 'package:anon_wallet/screens/home/spend/spend_form.dart';
 import 'package:anon_wallet/screens/home/spend/spend_progress_widget.dart';
 import 'package:anon_wallet/screens/home/spend/spend_review.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
+import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -76,14 +77,16 @@ class _SpendScreenState extends ConsumerState<SpendScreen> {
     );
   }
 
-  onConfirmTx(BuildContext context, WidgetRef ref)  async {
+  onConfirmTx(BuildContext context, WidgetRef ref) async {
     setState(() {
       page = 3;
     });
     String amountStr = ref.read(amountStateProvider);
     String address = ref.read(addressStateProvider);
     String notes = ref.read(notesStateProvider);
-    await ref.read(transactionStateProvider.notifier).broadcast(amountStr, address, notes);
+    await ref
+        .read(transactionStateProvider.notifier)
+        .broadcast(amountStr, address, notes);
     ref.read(amountStateProvider.state).state = "";
     ref.read(addressStateProvider.state).state = "";
     ref.read(notesStateProvider.state).state = "";
@@ -93,6 +96,8 @@ class _SpendScreenState extends ConsumerState<SpendScreen> {
     String amountStr = ref.read(amountStateProvider);
     String address = ref.read(addressStateProvider);
     String notes = ref.read(notesStateProvider);
-    ref.read(transactionStateProvider.notifier).createPreview(amountStr, address, notes);
+    ref
+        .read(transactionStateProvider.notifier)
+        .createPreview(amountStr, address, notes);
   }
 }

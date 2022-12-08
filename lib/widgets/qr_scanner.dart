@@ -1,6 +1,9 @@
 import 'package:anon_wallet/plugins/camera_view.dart';
+import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
+import 'package:anon_wallet/utils/parsers.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class QRScannerView extends StatefulWidget {
   final Function(String value) onScanCallback;
@@ -13,6 +16,8 @@ class QRScannerView extends StatefulWidget {
 }
 
 class _QRScannerViewState extends State<QRScannerView> {
+  bool isScanned = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,10 +43,13 @@ class _QRScannerViewState extends State<QRScannerView> {
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
     return CameraView(
-      callBack: (value) {
-        AppHaptics.lightImpact();
-        Navigator.pop(context);
-        widget.onScanCallback(value);
+      callBack: (value) async {
+        if (!isScanned) {
+          AppHaptics.lightImpact();
+          widget.onScanCallback(value);
+          Navigator.pop(context, value);
+          isScanned = true;
+        }
       },
     );
   }
@@ -50,4 +58,32 @@ class _QRScannerViewState extends State<QRScannerView> {
   void dispose() {
     super.dispose();
   }
+}
+
+PersistentBottomSheetController showQRBottomSheet(BuildContext context,
+    {Function(String value)? onScanCallback = null}) {
+  return showBottomSheet(
+      context: context,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, c) {
+            return QRScannerView(
+              onScanCallback: (value) {
+                onScanCallback?.call(value);
+                AppHaptics.lightImpact();
+                var parsedAddress = Parser.parseAddress(value);
+                if (parsedAddress[0] != null) {
+                  ref.read(addressStateProvider.state).state = parsedAddress[0];
+                }
+                if (parsedAddress[1] != null) {
+                  ref.read(amountStateProvider.state).state = parsedAddress[1];
+                }
+                if (parsedAddress[2] != null) {
+                  ref.read(notesStateProvider.state).state = parsedAddress[2];
+                }
+              },
+            );
+          },
+        );
+      });
 }

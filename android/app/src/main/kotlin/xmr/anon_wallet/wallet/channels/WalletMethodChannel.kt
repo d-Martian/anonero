@@ -63,7 +63,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         result.success(
                             hashMapOf(
                                 "address" to wallet.address,
-                                "secretViewKey" to wallet.secretSpendKey,
+                                "secretViewKey" to wallet.secretViewKey,
                                 "seed" to wallet.getSeed(seedPassphrase),
                                 "spendKey" to wallet.secretSpendKey
                             )
@@ -360,7 +360,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                     try {
                         val txId = call.argument<String>("txId")
                         val message = call.argument<String>("message")
-                        val success = WalletManager.getInstance().wallet.setUserNote(txId,message)
+                        val success = WalletManager.getInstance().wallet.setUserNote(txId, message)
                         WalletManager.getInstance().wallet.store()
                         WalletManager.getInstance().wallet.refreshHistory()
                         sendEvent(WalletManager.getInstance().wallet.walletToHashMap())

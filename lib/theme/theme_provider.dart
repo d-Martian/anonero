@@ -31,6 +31,7 @@ const ColorScheme colorScheme = ColorScheme(
   shadow: Color(0xff000000),
 );
 const barrierColor = Color(0xab1e1e1e);
+
 class ThemeProvider extends ChangeNotifier {
   ThemeData getTheme() {
     return ThemeData(
@@ -45,14 +46,18 @@ class ThemeProvider extends ChangeNotifier {
             return const EdgeInsets.symmetric(vertical: 14, horizontal: 34);
           }),
           shape: MaterialStateProperty.resolveWith((states) {
-            if(states.contains(MaterialState.pressed)){
-              return RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
+            if (states.contains(MaterialState.pressed)) {
+              return RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10));
             }
-            return RoundedRectangleBorder(borderRadius: BorderRadius.circular(8));
+            return RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8));
           }),
         )),
         buttonTheme: ButtonThemeData(
-            padding: const EdgeInsets.all(12), colorScheme: colorScheme.copyWith(primary: Colors.white,background: Colors.white)),
+            padding: const EdgeInsets.all(12),
+            colorScheme: colorScheme.copyWith(
+                primary: Colors.white, background: Colors.white)),
         useMaterial3: false);
   }
 }

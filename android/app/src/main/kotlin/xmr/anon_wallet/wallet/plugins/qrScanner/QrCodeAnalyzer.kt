@@ -7,6 +7,7 @@ import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.multi.qrcode.QRCodeMultiReader
 import java.nio.ByteBuffer
+import java.util.*
 
 
 class QrCodeAnalyzer(
@@ -50,16 +51,29 @@ class QrCodeAnalyzer(
         )
 
         val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
+        var result: Result? = null;
         try {
-            // it throws NotFoundException
-            val result = reader.decode(binaryBitmap)
-            onQrCodesDetected(result)
+            result = reader.decode(binaryBitmap)
         } catch (e: NotFoundException) {
 //            e.printStackTrace()
         } catch (e: ChecksumException) {
 //            e.printStackTrace()
         } catch (e: Exception) {
 //            e.printStackTrace()
+        }
+        val sourceInverted = BinaryBitmap(HybridBinarizer(source.invert()))
+        try {
+            // it throws NotFoundException
+            result = reader.decode(sourceInverted)
+        } catch (e: NotFoundException) {
+//            e.printStackTrace()
+        } catch (e: ChecksumException) {
+//            e.printStackTrace()
+        } catch (e: Exception) {
+//            e.printStackTrace()
+        }
+        if (result != null) {
+            onQrCodesDetected(result)
         }
         image.close()
     }

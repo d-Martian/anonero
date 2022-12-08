@@ -9,7 +9,8 @@ class SpendValidationNotifier extends ChangeNotifier {
   bool? validAmount;
 
   Future<bool> validate(String amount, String address) async {
-    dynamic response = await SpendMethodChannel().validateAddress(amount, address);
+    dynamic response =
+        await SpendMethodChannel().validateAddress(amount, address);
     validAddress = response['address'] == true;
     validAmount = response['amount'] == true;
     notifyListeners();
@@ -31,7 +32,8 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
     broadcastState.state = "waiting";
     state = broadcastState;
     try {
-      var returnValue = await SpendMethodChannel().compose(amount, address, notes);
+      var returnValue =
+          await SpendMethodChannel().compose(amount, address, notes);
       state = TxState.fromJson(returnValue);
     } catch (e, s) {
       debugPrintStack(stackTrace: s);
@@ -43,16 +45,19 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
     var broadcastState = TxState();
     broadcastState.state = "waiting";
     state = broadcastState;
-    var returnValue = await SpendMethodChannel().composeAndBroadcast(amount, address, notes);
+    var returnValue =
+        await SpendMethodChannel().composeAndBroadcast(amount, address, notes);
     state = TxState.fromJson(returnValue);
     AppHaptics.mediumImpact();
   }
 }
 
 final transactionStateProvider =
-StateNotifierProvider<TransactionStateNotifier, TxState>((ref) => TransactionStateNotifier());
+    StateNotifierProvider<TransactionStateNotifier, TxState>(
+        (ref) => TransactionStateNotifier());
 
-final validationProvider = ChangeNotifierProvider((ref) => SpendValidationNotifier());
+final validationProvider =
+    ChangeNotifierProvider((ref) => SpendValidationNotifier());
 
 final addressStateProvider = StateProvider((ref) => "");
 final amountStateProvider = StateProvider((ref) => "");

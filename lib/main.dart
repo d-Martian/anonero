@@ -67,7 +67,9 @@ class AppMain extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return state == WalletState.walletReady ? const LockScreen() : const LandingScreen();
+    return state == WalletState.walletReady
+        ? const LockScreen()
+        : const LandingScreen();
   }
 }
 
@@ -82,9 +84,7 @@ class LockScreen extends HookWidget {
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: loading.value ? const LinearProgressIndicator() : null,
-        backgroundColor: Theme
-            .of(context)
-            .scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -93,18 +93,22 @@ class LockScreen extends HookWidget {
         children: [
           Hero(
             tag: "anon_logo",
-            child: SizedBox(width: 180, child: Image.asset("assets/anon_logo.png")),
+            child: SizedBox(
+                width: 180, child: Image.asset("assets/anon_logo.png")),
           ),
           const Text("Please enter your pin"),
           const Padding(padding: EdgeInsets.symmetric(vertical: 6)),
-          AnimatedOpacity(opacity: error.value == null ? 0 : 1, duration: Duration(milliseconds: 300), child: Text(
-            error.value ?? "",
-            style: Theme
-                .of(context)
-                .textTheme
-                .subtitle2
-                ?.copyWith(color: Colors.red),
-          ),),
+          AnimatedOpacity(
+            opacity: error.value == null ? 0 : 1,
+            duration: Duration(milliseconds: 300),
+            child: Text(
+              error.value ?? "",
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle2
+                  ?.copyWith(color: Colors.red),
+            ),
+          ),
           const Padding(padding: EdgeInsets.symmetric(vertical: 4)),
           Expanded(
             child: Container(
@@ -113,7 +117,7 @@ class LockScreen extends HookWidget {
                 builder: (context, ref, c) {
                   return NumberPadWidget(
                     maxPinSize: maxPinSize,
-                    onKeyPress: (s){
+                    onKeyPress: (s) {
                       error.value = null;
                     },
                     minPinSize: minPinSize,
@@ -130,8 +134,8 @@ class LockScreen extends HookWidget {
     );
   }
 
-  void onSubmit(String pin, BuildContext context, WidgetRef ref, ValueNotifier<String?> error,
-      ValueNotifier<bool> loading) async {
+  void onSubmit(String pin, BuildContext context, WidgetRef ref,
+      ValueNotifier<String?> error, ValueNotifier<bool> loading) async {
     try {
       error.value = null;
       loading.value = true;
@@ -140,7 +144,8 @@ class LockScreen extends HookWidget {
       WalletEventsChannel().initEventChannel();
       loading.value = false;
       if (wallet != null) {
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (c) => WalletHome()), (route) => false);
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (c) => WalletHome()), (route) => false);
       }
     } on PlatformException catch (e) {
       error.value = e.message;

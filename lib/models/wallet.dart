@@ -47,8 +47,8 @@ class Wallet {
     if (json.containsKey("seed")) {
       seed = (json['seed'] as String).split(" ");
     }
-     if (json.containsKey("spendKey")) {
-       spendKey = (json['spendKey'] as String);
+    if (json.containsKey("spendKey")) {
+      spendKey = (json['spendKey'] as String);
     }
     if (json.containsKey("transactions")) {
       json['transactions'].forEach((v) {
@@ -60,5 +60,4 @@ class Wallet {
   bool isConnected() {
     return connection.contains("ConnectionStatus_Connected");
   }
-
 }

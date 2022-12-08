@@ -20,7 +20,8 @@ class NodeChannel {
   }
 
   Future setProxy(String proxy, String port) async {
-    dynamic value = await platform.invokeMethod("setProxy", {"proxyServer": proxy, "proxyPort": port});
+    dynamic value = await platform
+        .invokeMethod("setProxy", {"proxyServer": proxy, "proxyPort": port});
   }
 
   Future<Proxy> getProxy() async {
@@ -28,15 +29,25 @@ class NodeChannel {
     return Proxy.fromJson(value);
   }
 
-  Future setNode(String host, int port, String? username, String? password) async {
-    dynamic value = await platform
-        .invokeMethod("setNode", {"host": host, "port": port, "password": password, "username": username});
+  Future setNode(
+      String host, int port, String? username, String? password) async {
+    dynamic value = await platform.invokeMethod("setNode", {
+      "host": host,
+      "port": port,
+      "password": password,
+      "username": username
+    });
     return Node.fromJson(value);
   }
 
-  Future addNode(String host, int port, String? username, String? password) async {
-    dynamic value = await platform
-        .invokeMethod("addNewNode", {"host": host, "port": port, "password": password, "username": username});
+  Future addNode(
+      String host, int port, String? username, String? password) async {
+    dynamic value = await platform.invokeMethod("addNewNode", {
+      "host": host,
+      "port": port,
+      "password": password,
+      "username": username
+    });
     return Node.fromJson(value);
   }
 
@@ -53,9 +64,14 @@ class NodeChannel {
     return null;
   }
 
-  Future<Node?> testRpc(String? host, int? port, String? username, String? password) async {
-    dynamic value = await platform
-        .invokeMethod("testRpc", {"host": host, "port": port, "password": password, "username": username});
+  Future<Node?> testRpc(
+      String? host, int? port, String? username, String? password) async {
+    dynamic value = await platform.invokeMethod("testRpc", {
+      "host": host,
+      "port": port,
+      "password": password,
+      "username": username
+    });
     return Node.fromJson(value);
   }
 
@@ -69,12 +85,20 @@ class NodeChannel {
   }
 
   Future setCurrentNode(Node node) async {
-    dynamic value = await platform.invokeMethod(
-        "setCurrentNode", {"host": node.host, "port": node.port, "password": node.password, "username": node.username});
+    dynamic value = await platform.invokeMethod("setCurrentNode", {
+      "host": node.host,
+      "port": node.port,
+      "password": node.password,
+      "username": node.username
+    });
   }
 
   Future removeNode(Node node) async {
-    dynamic value = await platform.invokeMethod(
-        "removeNode", {"host": node.host, "port": node.port, "password": node.password, "username": node.username});
+    dynamic value = await platform.invokeMethod("removeNode", {
+      "host": node.host,
+      "port": node.port,
+      "password": node.password,
+      "username": node.username
+    });
   }
 }
