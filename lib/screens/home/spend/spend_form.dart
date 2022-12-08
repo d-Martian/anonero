@@ -188,7 +188,6 @@ class _SpendFormState extends ConsumerState<SpendForm> {
                                               Theme.of(context).primaryColor)),
                               const Padding(padding: EdgeInsets.all(12)),
                               TextFormField(
-                                controller: noteEditingController,
                                 textAlign: TextAlign.start,
                                 onChanged: (value) {
                                   ref.read(notesStateProvider.state).state =

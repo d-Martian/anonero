@@ -47,7 +47,7 @@ class _QRScannerViewState extends State<QRScannerView> {
         if (!isScanned) {
           AppHaptics.lightImpact();
           widget.onScanCallback(value);
-          Navigator.pop(context,value);
+          Navigator.pop(context, value);
           isScanned = true;
         }
       },
@@ -60,7 +60,8 @@ class _QRScannerViewState extends State<QRScannerView> {
   }
 }
 
-PersistentBottomSheetController showQRBottomSheet(BuildContext context, {Function(String value)? onScanCallback = null}) {
+PersistentBottomSheetController showQRBottomSheet(BuildContext context,
+    {Function(String value)? onScanCallback = null}) {
   return showBottomSheet(
       context: context,
       builder: (context) {
