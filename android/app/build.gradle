@@ -98,11 +98,27 @@ android {
     buildTypes {
 
         release {
-            // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
+
             signingConfig signingConfigs.debug
         }
     }
+    flavorDimensions "app"
+    productFlavors {
+        mainNet {
+            dimension "app"
+            resValue 'string', 'app_title', '"Anon"'
+            buildConfigField 'String', 'NETWORK', '"main"'
+        }
+        stageNet {
+            dimension "app"
+            resValue 'string', 'app_title', '"Anon StageNet"'
+            buildConfigField 'String', 'NETWORK', '"staging"'
+            applicationIdSuffix ".staging"
+        }
+    }
+
+
 }
 
 flutter {
@@ -121,7 +137,15 @@ dependencies {
     implementation 'dnsjava:dnsjava:2.1.9'
     implementation 'org.jitsi:dnssecjava:1.2.0'
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    implementation 'com.google.zxing:core:3.5.0'
+
+    implementation 'androidx.camera:camera-core:1.1.0'
+    implementation 'androidx.camera:camera-camera2:1.1.0'
+    implementation 'androidx.camera:camera-lifecycle:1.1.0'
+    implementation 'androidx.camera:camera-view:1.1.0'
 
 }

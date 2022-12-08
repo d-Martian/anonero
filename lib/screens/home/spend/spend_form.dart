@@ -1,7 +1,7 @@
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
+import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
-import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -32,6 +32,22 @@ class _SpendFormState extends ConsumerState<SpendForm> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String>(notesStateProvider, (previous, next) {
+      if (noteEditingController.text != next) {
+        noteEditingController.text = next;
+      }
+    });
+    ref.listen<String>(addressStateProvider, (previous, next) {
+      if (addressEditingController.text != next) {
+        addressEditingController.text = next;
+      }
+    });
+    ref.listen<String>(amountStateProvider, (previous, next) {
+      if (amountEditingController.text != next) {
+        amountEditingController.text = next;
+      }
+    });
+
     OutlineInputBorder enabledBorder = OutlineInputBorder(
         borderSide: BorderSide(width: 1, color: Theme.of(context).primaryColor),
         borderRadius: BorderRadius.circular(12));
@@ -99,20 +115,10 @@ class _SpendFormState extends ConsumerState<SpendForm> {
                                   border: unFocusedBorder,
                                   suffixIcon: IconButton(
                                       onPressed: () {
-                                        showBottomSheet(
-                                            context: context,
-                                            builder: (context) {
-                                              return QRScannerView(
-                                                onScanCallback: (value) {
-                                                  addressEditingController
-                                                      .text = value;
-                                                  ref
-                                                      .read(addressStateProvider
-                                                          .state)
-                                                      .state = value;
-                                                },
-                                              );
-                                            });
+                                        context
+                                            .findRootAncestorStateOfType<
+                                                WalletHomeState>()
+                                            ?.showModalScanner(context);
                                       },
                                       icon: const Icon(Icons.qr_code)),
                                   enabledBorder: unFocusedBorder,
@@ -222,10 +228,6 @@ class _SpendFormState extends ConsumerState<SpendForm> {
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               const Padding(padding: EdgeInsets.all(4)),
-                              Text(
-                                "UnConfirmed Balance: ${formatMonero(mainBalance, minimumFractions: 8)} XMR",
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
                             ],
                           );
                         },

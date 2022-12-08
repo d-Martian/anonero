@@ -5,11 +5,13 @@ import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import anon.xmr.app.anon_wallet.BuildConfig
 import com.m2049r.xmrwallet.model.NetworkType
 import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import kotlinx.coroutines.*
 import timber.log.Timber
 import xmr.anon_wallet.wallet.utils.AnonPreferences
@@ -22,7 +24,7 @@ import kotlin.math.roundToInt
 object AnonWallet {
     const val NOCRAZYPASS_FLAGFILE = ".nocrazypass"
     const val NOTIFICATION_CHANNEL_ID = "new_tx"
-    private lateinit var application: Application;
+    private lateinit var application: Application
     lateinit var walletDir: File
     lateinit var nodesFile: File
     private var currentWallet: Wallet? = null
@@ -53,6 +55,9 @@ object AnonWallet {
     }
 
     fun getNetworkType(): NetworkType {
+        if(BuildConfig.NETWORK == "staging"){
+            return  NetworkType.NetworkType_Stagenet
+        }
         return NetworkType.NetworkType_Mainnet
     }
 

@@ -1,9 +1,9 @@
-import 'dart:io';
-
+import 'package:anon_wallet/plugins/camera_view.dart';
+import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
-import 'package:flutter/foundation.dart';
+import 'package:anon_wallet/utils/parsers.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class QRScannerView extends StatefulWidget {
   final Function(String value) onScanCallback;
@@ -16,20 +16,7 @@ class QRScannerView extends StatefulWidget {
 }
 
 class _QRScannerViewState extends State<QRScannerView> {
-  Barcode? result;
-  QRViewController? controller;
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-
-  // In order to get hot reload to work we need to pause the camera if the platform
-  // is android, or resume the camera if the platform is iOS.
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller!.pauseCamera();
-    }
-    controller!.resumeCamera();
-  }
+  bool isScanned = false;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +24,7 @@ class _QRScannerViewState extends State<QRScannerView> {
       floatingActionButtonLocation:
           FloatingActionButtonLocation.miniCenterDocked,
       floatingActionButton: FloatingActionButton.extended(
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8))),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
@@ -46,7 +33,7 @@ class _QRScannerViewState extends State<QRScannerView> {
         onPressed: () {
           Navigator.pop(context);
         },
-        label: Text("Close"),
+        label: const Text("Close"),
         icon: const Icon(Icons.close),
       ),
       body: _buildQrView(context),
@@ -55,53 +42,48 @@ class _QRScannerViewState extends State<QRScannerView> {
 
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
-    var scanArea = (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.height < 400)
-        ? 150.0
-        : 300.0;
-    // To ensure the Scanner view is properly sizes after rotation
-    // we need to listen for Flutter SizeChanged notification and update controller
-    return QRView(
-      key: qrKey,
-      onQRViewCreated: (controller) => _onQRViewCreated(controller, context),
-      overlay: QrScannerOverlayShape(
-          borderColor: Colors.red,
-          borderRadius: 10,
-          borderLength: 30,
-          borderWidth: 10,
-          cutOutSize: scanArea),
-      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
+    return CameraView(
+      callBack: (value) async {
+        if (!isScanned) {
+          AppHaptics.lightImpact();
+          widget.onScanCallback(value);
+          Navigator.pop(context, value);
+          isScanned = true;
+        }
+      },
     );
-  }
-
-  void _onQRViewCreated(QRViewController controller, BuildContext context) {
-    setState(() {
-      this.controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) {
-      if (scanData.code != null) {
-        this.controller?.stopCamera();
-        widget.onScanCallback(scanData.code!);
-        Navigator.pop(context);
-        AppHaptics.lightImpact();
-      }
-      setState(() {
-        result = scanData;
-      });
-    });
-  }
-
-  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    if (!p) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
-      );
-    }
   }
 
   @override
   void dispose() {
-    controller?.dispose();
     super.dispose();
   }
+}
+
+PersistentBottomSheetController showQRBottomSheet(BuildContext context,
+    {Function(String value)? onScanCallback = null}) {
+  return showBottomSheet(
+      context: context,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, c) {
+            return QRScannerView(
+              onScanCallback: (value) {
+                onScanCallback?.call(value);
+                AppHaptics.lightImpact();
+                var parsedAddress = Parser.parseAddress(value);
+                if (parsedAddress[0] != null) {
+                  ref.read(addressStateProvider.state).state = parsedAddress[0];
+                }
+                if (parsedAddress[1] != null) {
+                  ref.read(amountStateProvider.state).state = parsedAddress[1];
+                }
+                if (parsedAddress[2] != null) {
+                  ref.read(notesStateProvider.state).state = parsedAddress[2];
+                }
+              },
+            );
+          },
+        );
+      });
 }

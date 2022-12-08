@@ -3,6 +3,7 @@ import 'package:anon_wallet/screens/home/spend/spend_form.dart';
 import 'package:anon_wallet/screens/home/spend/spend_progress_widget.dart';
 import 'package:anon_wallet/screens/home/spend/spend_review.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
+import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
