@@ -1,4 +1,5 @@
 import 'package:anon_wallet/channel/node_channel.dart';
+import 'package:anon_wallet/screens/home/settings/export_wallet_backup.dart';
 import 'package:anon_wallet/screens/home/settings/nodes/nodes_settings.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
@@ -126,13 +127,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text("View Seed"),
                 ),
                 Divider(color: dividerColor, height: 2),
-                Opacity(
-                  opacity: 0.4,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                    onTap: () {},
-                    title: const Text("Export Wallet"),
-                  ),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 34),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ExportWalletBackUpScreen()));
+                  },
+                  title: const Text("Export Wallet"),
                 ),
                 Divider(color: dividerColor, height: 2),
                 Opacity(

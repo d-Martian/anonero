@@ -4,11 +4,11 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import android.os.PowerManager.WakeLock
 import android.os.Process
-import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.NonNull
 import com.m2049r.xmrwallet.model.WalletManager
@@ -32,6 +32,7 @@ class MainActivity : FlutterActivity() {
     private var wakeLock: WakeLock? = null
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private  var cameraPlugin : AnonQRCameraPlugin? = null
+    private  lateinit var  walletMethodChannel: WalletMethodChannel;
 
     @SuppressLint("WakelockTimeout")
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
@@ -54,10 +55,18 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        cameraPlugin?.onRequestPermissionsResult()
+        if(requestCode == AnonQRCameraPlugin.REQUEST_CODE){
+            cameraPlugin?.onRequestPermissionsResult()
+        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == WalletMethodChannel.BACKUP_EXPORT_CODE && data != null){
+            walletMethodChannel.writeExportFile(data.data)
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
     private fun initializeProxySettings() {
         val prefs = AnonPreferences(this)
         if (prefs.firstRun == true) {
@@ -116,7 +125,7 @@ class MainActivity : FlutterActivity() {
         /**
          * Wallet specific Methods
          */
-        WalletMethodChannel(binaryMessenger, lifecycle)
+        walletMethodChannel =   WalletMethodChannel(binaryMessenger, lifecycle,this)
         /**
          * Wallet specific Methods
          */
