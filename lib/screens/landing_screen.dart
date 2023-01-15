@@ -1,11 +1,6 @@
-import 'package:anon_wallet/channel/node_channel.dart';
-import 'package:anon_wallet/channel/wallet_channel.dart';
-import 'package:anon_wallet/channel/wallet_events_channel.dart';
-import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/screens/onboard/onboard_screen.dart';
 import 'package:anon_wallet/screens/onboard/onboard_state.dart';
-import 'package:anon_wallet/screens/onboard/restore/restore_screen.dart';
-import 'package:anon_wallet/screens/set_pin_screen.dart';
+import 'package:anon_wallet/screens/onboard/restore/restore_from_backup.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -118,18 +113,93 @@ class _LandingScreenState extends State<LandingScreen> {
                 ),
                 const Padding(padding: EdgeInsets.all(12)),
                 Column(
-                  children: const [
-                    // ElevatedButton(
-                    //   style: ElevatedButton.styleFrom(primary: Colors.white),
-                    //   onPressed: () {
-                    //     Navigator.push(context, MaterialPageRoute(builder: (c) => const RestoreScreen()));
-                    //   },
-                    //   child: Text("RESTORE WALLET",
-                    //       style: Theme.of(context)
-                    //           .textTheme
-                    //           .labelLarge
-                    //           ?.copyWith(color: Colors.black, fontWeight: FontWeight.w700)),
-                    // ),
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(primary: Colors.white),
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) {
+                              return SizedBox(
+                                height: 200,
+                                child: Card(
+                                  color: Colors.black,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                      side: BorderSide(
+                                          color: Theme.of(context)
+                                              .primaryColor
+                                              .withOpacity(0.5),
+                                          width: 1)),
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12, horizontal: 16),
+                                        child: Text("Restore Options",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(fontSize: 16)),
+                                      ),
+                                      Expanded(
+                                          child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          ListTile(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        RestoreFromBackup(),
+                                                  ));
+                                            },
+                                            title: Text(
+                                              "Restore from anon backup",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.copyWith(
+                                                      color: Colors.grey[200]),
+                                            ),
+                                          ),
+                                          ListTile(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                            },
+                                            title: Text(
+                                              "Restore from seed",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.copyWith(
+                                                      color: Colors.grey[200]),
+                                            ),
+                                          ),
+                                        ],
+                                      ))
+                                    ],
+                                  ),
+                                ),
+                              );
+                            });
+                      },
+                      child: Text("RESTORE WALLET",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w700)),
+                    ),
                   ],
                 )
               ],

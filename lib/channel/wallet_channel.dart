@@ -70,16 +70,4 @@ class WalletChannel {
         .invokeMethod("viewWalletInfo", {"seedPassphrase": seedPassphrase});
     return Wallet.fromJson(value);
   }
-
-  Future<String> getBackUp(String password) async{
-    String value = await platform
-        .invokeMethod("backup", {"seedPassphrase": password});
-    return value;
-  }
-
-  Future<String> shareBackUpAsFile(String backup) async{
-    String value = await platform
-        .invokeMethod("shareToFile", {"backup": backup});
-    return value;
-  }
 }

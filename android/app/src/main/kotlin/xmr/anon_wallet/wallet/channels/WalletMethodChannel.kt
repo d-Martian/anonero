@@ -55,8 +55,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "startSync" -> startSync(call, result)
             "getTxKey" -> getTxKey(call, result)
             "setTxUserNotes" -> setTxUserNotes(call, result)
-            "backup" -> backup(call, result)
-            "shareToFile" -> shareToFile(call, result)
         }
     }
 
@@ -108,7 +106,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                 "connection_error" to "${e.message}"
                             )
                         )
-                        throw  CancellationException()
+                        throw CancellationException()
                     }
                 } else {
                     result.success(false)
@@ -178,19 +176,19 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         wallet.refreshHistory()
                         sendEvent(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletListeners()
-                        if (wallet.isSynchronized) {
-                            wallet.startRefresh()
-                        }
                         if (WalletManager.getInstance().daemonAddress == null) {
                             NodeManager.setNode()
                         }
-
                         WalletManager.getInstance().daemonAddress?.let {
                             WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
                             if (WalletEventsChannel.initialized) {
+                                if(AnonPreferences(AnonWallet.getAppContext()).isRestoredFromBackup == true){
+                                    wallet.rescanBlockchainAsync()
+                                }
                                 wallet.refreshHistory()
                                 wallet.refresh()
+                                AnonPreferences(AnonWallet.getAppContext()).isRestoredFromBackup = false
                             }
                             sendEvent(wallet.walletToHashMap())
                         }
@@ -297,11 +295,9 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         wallet.refresh()
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
-
                             WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
                             sendEvent(wallet.walletToHashMap())
-                            Log.i(TAG, "openWallet: ${wallet.fullStatus}")
                         }
                         wallet.refreshHistory()
                         sendEvent(
@@ -324,26 +320,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                 if (it != null) {
                     it.printStackTrace()
                     result.error(ERRORS, it.message, it)
-                }
-            }
-        }
-    }
-
-    private fun backup(call: MethodCall, result: MethodChannel.Result) {
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val seedPassphrase = call.argument<String?>("seedPassphrase")
-                    val hash = AnonPreferences(AnonWallet.getAppContext()).passPhraseHash
-                    val hashedPass = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPassphrase)
-                    if (hashedPass == hash) {
-                        result.success(seedPassphrase?.let { BackUpHelper.createBackUp(it) })
-                    } else {
-                        result.error("1", "Invalid passphrase", "")
-                    }
-                } catch (e: Exception) {
-                    result.error("2", e.message, "")
-                    e.printStackTrace()
                 }
             }
         }
@@ -373,7 +349,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         result.success(txKey)
                     } catch (e: Exception) {
                         result.error("1", e.message, "")
-                        throw  CancellationException(e.message)
+                        throw CancellationException(e.message)
                     }
                 } else {
                     result.error("0", "invalid params", null)
@@ -396,7 +372,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         result.success(success)
                     } catch (e: Exception) {
                         result.error("1", e.message, "")
-                        throw  CancellationException(e.message)
+                        throw CancellationException(e.message)
                     }
                 } else {
                     result.error("0", "invalid params", null)
@@ -406,50 +382,11 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
     }
 
 
-    private fun shareToFile(call: MethodCall, result: MethodChannel.Result) {
-        Log.i(TAG, "shareToFile: CLEAR HERE")
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val date = Date()
-                    val sdf = SimpleDateFormat("dd_MM_yyyy' 'HH_mm_a", Locale.getDefault())
-                    val timeStamp: String = sdf.format(date)
-                    val string = call.argument<String>("backup")
-                    backupString = string
-                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TITLE, "anon_backup_${timeStamp}")
-                    }
-                    activity.startActivityForResult(intent, BACKUP_EXPORT_CODE)
-                } catch (e: Exception) {
-                    result.error("2", e.message, "")
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    fun writeExportFile(data: Uri?) {
-        if (data != null) {
-            try {
-                val os = activity.contentResolver.openOutputStream(data)
-                os?.write((backupString ?: "").toByteArray());
-                os?.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } finally {
-                backupString = null
-            }
-        }
-    }
-
     companion object {
         private const val TAG = "WalletMethodChannel"
         const val CHANNEL_NAME = "wallet.channel"
         const val WALLET_EVENT_CHANNEL = "wallet.events"
-        const val BACKUP_EXPORT_CODE = 40
-        var backupString:String? = null
+        var backupString: String? = null
     }
 
 }

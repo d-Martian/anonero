@@ -31,8 +31,8 @@ class MainActivity : FlutterActivity() {
 
     private var wakeLock: WakeLock? = null
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private  var cameraPlugin : AnonQRCameraPlugin? = null
-    private  lateinit var  walletMethodChannel: WalletMethodChannel;
+    private var cameraPlugin: AnonQRCameraPlugin? = null
+    private lateinit var backupMethodChannel: BackupMethodChannel
 
     @SuppressLint("WakelockTimeout")
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
@@ -52,21 +52,21 @@ class MainActivity : FlutterActivity() {
         cameraPlugin?.let {
             flutterEngine.plugins.add(it)
         }
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if(requestCode == AnonQRCameraPlugin.REQUEST_CODE){
+        if (requestCode == AnonQRCameraPlugin.REQUEST_CODE) {
             cameraPlugin?.onRequestPermissionsResult()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if(requestCode == WalletMethodChannel.BACKUP_EXPORT_CODE && data != null){
-            walletMethodChannel.writeExportFile(data.data)
-        }
+        backupMethodChannel.onActivityResult(requestCode,resultCode,data)
         super.onActivityResult(requestCode, resultCode, data)
     }
+
     private fun initializeProxySettings() {
         val prefs = AnonPreferences(this)
         if (prefs.firstRun == true) {
@@ -125,7 +125,7 @@ class MainActivity : FlutterActivity() {
         /**
          * Wallet specific Methods
          */
-        walletMethodChannel =   WalletMethodChannel(binaryMessenger, lifecycle,this)
+         WalletMethodChannel(binaryMessenger, lifecycle, this)
         /**
          * Wallet specific Methods
          */
@@ -138,6 +138,10 @@ class MainActivity : FlutterActivity() {
          * Spend specific Methods
          */
         SpendMethodChannel(binaryMessenger, lifecycle)
+        /**
+         * Spend specific Methods
+         */
+        backupMethodChannel = BackupMethodChannel(binaryMessenger, lifecycle, this)
 
 
     }

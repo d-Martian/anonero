@@ -1,3 +1,4 @@
+import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
@@ -31,75 +32,74 @@ class _ExportWalletBackUpScreenState
         return true;
       },
       child: Scaffold(
-        body:   CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    toolbarHeight: 120,
-                    bottom: PreferredSize(
-                        preferredSize: Size.fromHeight(60),
-                        child: Hero(
-                          tag: "anon_logo",
-                          child: SizedBox(
-                              width: 160,
-                              child: Image.asset("assets/anon_logo.png")),
-                        )),
-                  ),
-                  backup != null ?  SliverToBoxAdapter(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 8),
-                      child: Card(
-                        color: Colors.white10,
-                        elevation: 12,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          child: SelectableText(
-                            backup!,
-                            style: const TextStyle(fontSize: 14),
-                          ),
+          body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            toolbarHeight: 120,
+            bottom: PreferredSize(
+                preferredSize: Size.fromHeight(60),
+                child: Hero(
+                  tag: "anon_logo",
+                  child: SizedBox(
+                      width: 160, child: Image.asset("assets/anon_logo.png")),
+                )),
+          ),
+          backup != null
+              ? SliverToBoxAdapter(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                    child: Card(
+                      color: Colors.white10,
+                      elevation: 12,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: SelectableText(
+                          backup!,
+                          style: const TextStyle(fontSize: 14),
                         ),
                       ),
                     ),
-                  ) : const SliverToBoxAdapter(),
-                  backup != null ?
-                  SliverToBoxAdapter(
-                      child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 18, vertical: 2),
-                    child: ButtonBar(
-                      children: [
-                        TextButton(
-                          child: const Text('Export To File'),
+                  ),
+                )
+              : const SliverToBoxAdapter(),
+          backup != null
+              ? SliverToBoxAdapter(
+                  child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 2),
+                  child: ButtonBar(
+                    children: [
+                      TextButton(
+                        child: const Text('Export To File'),
+                        onPressed: () {
+                          BackUpRestoreChannel().shareBackUpAsFile(backup!);
+                        },
+                      ),
+                      Builder(builder: (context) {
+                        return TextButton(
+                          child: const Text('Copy'),
                           onPressed: () {
-                            WalletChannel().shareBackUpAsFile(backup!);
+                            Clipboard.setData(ClipboardData(text: backup));
+                            AppHaptics.lightImpact();
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: const Text("Copied",
+                                  style: TextStyle(color: Colors.white)),
+                              backgroundColor: Colors.grey[900],
+                            ));
                           },
-                        ),
-                        Builder(builder: (context) {
-                          return TextButton(
-                            child: const Text('Copy'),
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(text: backup));
-                              AppHaptics.lightImpact();
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: const Text("Copied",
-                                    style: TextStyle(color: Colors.white)),
-                                backgroundColor: Colors.grey[900],
-                              ));
-                            },
-                          );
-                        }),
-                      ],
-                    ),
-                  )) : const SliverFillRemaining(
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                ],
-              )
-
-      ),
+                        );
+                      }),
+                    ],
+                  ),
+                ))
+              : const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+        ],
+      )),
     );
   }
 
@@ -117,7 +117,7 @@ class _ExportWalletBackUpScreenState
   }
 
   void backUp(String password) async {
-    String? value = await WalletChannel().getBackUp(password);
+    String? value = await BackUpRestoreChannel().getBackUp(password);
     setState(() {
       backup = value;
     });
@@ -174,8 +174,8 @@ class _ExportWalletBackUpScreenState
                               focusedBorder: inputBorder,
                               border: inputBorder,
                               errorBorder: inputBorder)),
-                      loading.value ?
-                           const LinearProgressIndicator(
+                      loading.value
+                          ? const LinearProgressIndicator(
                               minHeight: 1,
                             )
                           : const SizedBox()

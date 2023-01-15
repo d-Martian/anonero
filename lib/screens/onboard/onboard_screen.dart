@@ -178,7 +178,6 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
   onNext(BuildContext context) async {
     FocusManager.instance.primaryFocus?.unfocus();
     Node? connectionState = ref.read(nodeConnectionState).value;
-    print("connectionState ${connectionState}");
     if (pageController.page == 0 &&
         connectionState != null &&
         connectionState.isConnected()) {

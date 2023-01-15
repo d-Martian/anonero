@@ -16,6 +16,10 @@ class AddressChannel {
     await platform.invokeMethod("getSubAddresses");
   }
 
+  Future openBackupFile() async {
+    await platform.invokeMethod("openBackupFile");
+  }
+
   Future setSubAddressLabel(
       int addressIndex, int accountIndex, String label) async {
     await platform.invokeMethod("renameAddress", {

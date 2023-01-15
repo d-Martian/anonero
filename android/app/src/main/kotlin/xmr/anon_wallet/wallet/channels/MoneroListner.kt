@@ -84,18 +84,16 @@ class MoneroHandlerThread : WalletListener {
     override fun updated() {
         Log.i(TAG, "updated:")
         val wallet = WalletManager.getInstance().wallet
+        wallet.refreshHistory()
         if (wallet != null) {
             sendEvent(wallet.walletToHashMap())
         }
         updated = true
-
     }
 
     override fun refreshed() {
 
         val wallet = WalletManager.getInstance().wallet;
-        wallet.setSynchronized()
-        wallet.store()
         val currentNode = NodeManager.getNode()
         if (currentNode != null) {
             sendEvent(currentNode.toHashMap().apply {
@@ -106,6 +104,8 @@ class MoneroHandlerThread : WalletListener {
         sendEvent(wallet.walletToHashMap())
         sendEvent(AddressMethodChannel.getSubAddressesEvent())
         updateDaemonState(wallet, wallet.blockChainHeight)
+        wallet.setSynchronized()
+        wallet.store()
     }
 
     private fun updateDaemonState(wallet: Wallet, height: Long) {
@@ -119,11 +119,11 @@ class MoneroHandlerThread : WalletListener {
                 lastDaemonStatusUpdate = t
                 // these calls really connect to the daemon - wasting time
                 daemonHeight = wallet.daemonBlockChainHeight
-                if (daemonHeight > 0) {
+                connectionStatus = if (daemonHeight > 0) {
                     // if we get a valid height, then obviously we are connected
-                    connectionStatus = Wallet.ConnectionStatus.ConnectionStatus_Connected
+                    Wallet.ConnectionStatus.ConnectionStatus_Connected
                 } else {
-                    connectionStatus = Wallet.ConnectionStatus.ConnectionStatus_Disconnected
+                    Wallet.ConnectionStatus.ConnectionStatus_Disconnected
                 }
             }
         }
