@@ -1,4 +1,5 @@
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
+import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/home/settings/view_wallet_private.dart';
@@ -138,7 +139,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   opacity: 0.4,
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                    onTap: () {},
+                    onTap: () {
+                      showWipeDialog(context);
+                    },
                     title: const Text("Wallet Wipe"),
                   ),
                 ),
@@ -159,6 +162,108 @@ class _SettingsScreenState extends State<SettingsScreen> {
         builder: (context) {
           return const BackupDialog();
         });
+
+  }
+
+  void showWipeDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        barrierColor: barrierColor,
+        barrierDismissible: true,
+        builder: (context) {
+          return const WipeDialog();
+        });
+  }
+}
+
+class WipeDialog extends HookWidget {
+  const WipeDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    TextEditingController controller = useTextEditingController();
+    FocusNode focusNode = useFocusNode();
+
+    const inputBorder =
+        UnderlineInputBorder(borderSide: BorderSide(color: Colors.transparent));
+
+    var error = useState<String?>(null);
+    var loading = useState<bool>(false);
+    useEffect(() {
+      focusNode.requestFocus();
+      return null;
+    }, []);
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width / 1.3,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Enter Passphrase to confirm",
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const Padding(padding: EdgeInsets.all(12)),
+            TextField(
+                focusNode: focusNode,
+                controller: controller,
+                textAlign: TextAlign.center,
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.text,
+                obscureText: true,
+                obscuringCharacter: "*",
+                decoration: InputDecoration(
+                    errorText: error.value,
+                    fillColor: Colors.grey[900],
+                    filled: true,
+                    focusedBorder: inputBorder,
+                    border: inputBorder,
+                    errorBorder: inputBorder)),
+            loading.value
+                ? const LinearProgressIndicator(
+                    minHeight: 1,
+                  )
+                : const SizedBox()
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel")),
+        TextButton(
+            onPressed: () async {
+              try {
+                loading.value = true;
+                focusNode.unfocus();
+                await WalletChannel().wipe(controller.text);
+                bool isSuccess =
+                    await BackUpRestoreChannel().makeBackup(controller.text);
+                AppHaptics.lightImpact();
+                if (!isSuccess) {
+                  Navigator.pop(context);
+                }
+                loading.value = false;
+              } on PlatformException catch (e, s) {
+                debugPrintStack(stackTrace: s);
+                error.value = e.message;
+                loading.value = false;
+              } catch (e, s) {
+                loading.value = false;
+                error.value = "Error $e";
+              }
+            },
+            child: const Text("Confirm"))
+      ],
+    );
   }
 }
 

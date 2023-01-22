@@ -17,6 +17,7 @@ import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.MainActivity
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel.sendEvent
 import xmr.anon_wallet.wallet.model.walletToHashMap
+import xmr.anon_wallet.wallet.restart
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 import xmr.anon_wallet.wallet.utils.BackUpHelper
@@ -55,6 +56,40 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "startSync" -> startSync(call, result)
             "getTxKey" -> getTxKey(call, result)
             "setTxUserNotes" -> setTxUserNotes(call, result)
+            "wipeWallet" -> wipeWallet(call, result)
+            "lock" -> lock(call, result)
+        }
+    }
+
+    private fun lock(call: MethodCall, result: Result) {
+        WalletManager.getInstance().wallet.close()
+        activity.restart()
+    }
+
+    private fun wipeWallet(call: MethodCall, result: Result) {
+        val seedPassphrase = call.argument<String?>("seedPassphrase")
+        val hash = AnonPreferences(AnonWallet.getAppContext()).passPhraseHash
+        val hashedPass = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPassphrase)
+        try {
+            if (hashedPass == hash) {
+                scope.launch {
+                    withContext(Dispatchers.IO){
+                        WalletManager.getInstance().wallet.close()
+                        AnonPreferences(activity).clearPreferences()
+                        //wait for preferences to clear
+                        delay(600)
+                        AnonWallet.walletDir.deleteRecursively()
+                        activity.cacheDir.deleteRecursively()
+                        withContext(Dispatchers.Main){
+                            activity.restart()
+                        }
+                    }
+                }
+            } else {
+                result.error("1", "Invalid passphrase", "")
+            }
+        } catch (e: Exception) {
+            result.error("1", "Error ${e.message}", e.message)
         }
     }
 
@@ -183,7 +218,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
                             if (WalletEventsChannel.initialized) {
-                                if(AnonPreferences(AnonWallet.getAppContext()).isRestoredFromBackup == true){
+                                if (AnonPreferences(AnonWallet.getAppContext()).isRestoredFromBackup == true) {
                                     wallet.rescanBlockchainAsync()
                                 }
                                 wallet.refreshHistory()

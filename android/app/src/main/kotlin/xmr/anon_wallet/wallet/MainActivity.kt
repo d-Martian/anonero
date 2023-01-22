@@ -1,6 +1,7 @@
 package xmr.anon_wallet.wallet
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -63,7 +64,7 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        backupMethodChannel.onActivityResult(requestCode,resultCode,data)
+        backupMethodChannel.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -125,7 +126,7 @@ class MainActivity : FlutterActivity() {
         /**
          * Wallet specific Methods
          */
-         WalletMethodChannel(binaryMessenger, lifecycle, this)
+        WalletMethodChannel(binaryMessenger, lifecycle, this)
         /**
          * Wallet specific Methods
          */
@@ -146,4 +147,11 @@ class MainActivity : FlutterActivity() {
 
     }
 
+}
+
+fun Activity.restart() {
+    val intent = this.application.packageManager.getLaunchIntentForPackage(this.application.packageName)
+    intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    startActivity(intent)
+    Runtime.getRuntime().exit(0)
 }

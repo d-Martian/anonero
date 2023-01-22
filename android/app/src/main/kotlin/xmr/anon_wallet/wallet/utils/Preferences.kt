@@ -31,6 +31,8 @@ abstract class Preferences(private var context: Context, private val name: Strin
 
     fun clearListeners() = listeners.clear()
 
+    fun  clearPreferences() = prefs.edit().clear().apply();
+
     enum class StorableType {
         String,
         Int,

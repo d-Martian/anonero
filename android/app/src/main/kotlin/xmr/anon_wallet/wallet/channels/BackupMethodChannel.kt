@@ -4,12 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
-import android.util.Log
-import androidx.core.app.ActivityCompat.finishAffinity
-import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.IntentCompat
 import androidx.lifecycle.Lifecycle
-import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -21,6 +16,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.MainActivity
+import xmr.anon_wallet.wallet.restart
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 import xmr.anon_wallet.wallet.utils.BackUpHelper
 import xmr.anon_wallet.wallet.utils.EncryptUtil
@@ -69,11 +65,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                 //wait for preferences to be saved
                 delay(800)
                 result.success(true)
-                val context = activity.applicationContext
-                val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-                intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                context.startActivity(intent)
-                Runtime.getRuntime().exit(0)
+                activity.restart()
             }
         }
     }
