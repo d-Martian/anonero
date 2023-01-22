@@ -325,11 +325,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         }
     }
 
-    ///TODO: Restore
-    private fun restoreWallet(call: MethodCall, result: Result) {
-
-    }
-
     private fun getProxy(): String {
         val prefs = AnonPreferences(AnonWallet.getAppContext());
         return if (prefs.proxyPort.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
@@ -381,12 +376,11 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         }
     }
 
-
     companion object {
         private const val TAG = "WalletMethodChannel"
         const val CHANNEL_NAME = "wallet.channel"
         const val WALLET_EVENT_CHANNEL = "wallet.events"
-        var backupString: String? = null
+        var backupPath: String? = null
     }
 
 }

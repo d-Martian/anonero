@@ -1,21 +1,18 @@
 package xmr.anon_wallet.wallet.channels
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.util.Log
-import androidx.camera.core.impl.utils.ContextUtil.getApplicationContext
+import androidx.core.app.ActivityCompat.finishAffinity
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.IntentCompat
 import androidx.lifecycle.Lifecycle
-import com.m2049r.xmrwallet.model.NetworkType
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
-import com.m2049r.xmrwallet.utils.RestoreHeight
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -24,8 +21,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.MainActivity
-import xmr.anon_wallet.wallet.model.walletToHashMap
-import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 import xmr.anon_wallet.wallet.utils.BackUpHelper
 import xmr.anon_wallet.wallet.utils.EncryptUtil
@@ -35,14 +30,13 @@ import java.util.*
 
 class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, private val activity: MainActivity) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle), PluginRegistry.ActivityResultListener {
 
-    private var currentResult: MethodChannel.Result? = null
+    private var currentResult: Result? = null
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "backup" -> backup(call, result)
             "validatePayload" -> validatePayload(call, result)
             "openBackupFile" -> openBackupFile(call, result)
-            "shareToFile" -> shareToFile(call, result)
             "parseBackup" -> parseBackup(call, result)
             "restore" -> restore(call, result)
         }
@@ -51,48 +45,35 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
     private fun openBackupFile(call: MethodCall, result: Result) {
         currentResult = result
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            type = "text/plain"
+            type = "*/*"
         }
         activity.startActivityForResult(intent, BACK_UP_READ_CODE)
     }
 
     private fun restore(call: MethodCall, result: Result) {
         this.scope.launch {
-            withContext(Dispatchers.IO){
-                if(payloadParsed == null){
+            withContext(Dispatchers.IO) {
+                if (payloadParsed == null) {
                     result.error("payload", "Invalid payload", null)
                     return@withContext;
                 }
-                val  pin = call.argument<String>("pin")
-                val walletPayload = payloadParsed!!.getJSONObject("wallet")
-                val meta = payloadParsed!!.getJSONObject("meta")
-                if (meta.getString("network").equals(AnonWallet.getNetworkType().toString())) {
-                    val seed = walletPayload.getString("seed");
-                    val restoreHeightFromPayload = walletPayload.getLong("restoreHeight")
-                    val walletName = "default"
-                    val cacheFile = File(AnonWallet.walletDir, walletName)
-                    val keysFile = File(AnonWallet.walletDir, "$walletName.keys")
-                    val addressFile = File(AnonWallet.walletDir, "$walletName.address.txt")
-                    //TODO
-                    if (addressFile.exists()) {
-                        addressFile.delete()
+                val tmpBackupDir = File(AnonWallet.getAppContext().cacheDir, "tmp_extract")
+                val anonDir = AnonWallet.walletDir
+                tmpBackupDir.listFiles()?.forEach { entry ->
+                    if (!entry.isDirectory && !entry.name.contains("anon.json")) {
+                        entry.copyTo(File(anonDir, entry.name), true)
                     }
-                    if (keysFile.exists()) {
-                        keysFile.delete()
-                    }
-                    if (cacheFile.exists()) {
-                        cacheFile.delete()
-                    }
-                    val newWalletFile = File(AnonWallet.walletDir, walletName)
-                    val wallet = WalletManager.getInstance().recoveryWallet(newWalletFile, pin, seed, mnemonicPassphrase, restoreHeightFromPayload)
-                    wallet.store()
-                    AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), mnemonicPassphrase)
-                    AnonPreferences(context = AnonWallet.getAppContext()).isRestoredFromBackup =  true
-                    WalletManager.getInstance().close(wallet)
-                    delay(900)
-                    Runtime.getRuntime().exit(0)
                 }
+                AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), mnemonicPassphrase)
+                AnonPreferences(context = AnonWallet.getAppContext()).isRestoredFromBackup = true
+                //wait for preferences to be saved
+                delay(800)
                 result.success(true)
+                val context = activity.applicationContext
+                val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                context.startActivity(intent)
+                Runtime.getRuntime().exit(0)
             }
         }
     }
@@ -109,12 +90,16 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         when (requestCode) {
             BACKUP_EXPORT_CODE -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    writeExportFile(data?.data)
+                   scope.launch {
+                       withContext(Dispatchers.IO){
+                           writeExportFile(data?.data)
+                       }
+                   }
                 }
                 if (resultCode == Activity.RESULT_CANCELED) {
+                    currentResult?.success(false)
                     //No operation
                 }
-
             }
             BACK_UP_READ_CODE -> {
                 if (resultCode == Activity.RESULT_CANCELED) {
@@ -124,19 +109,26 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         withContext(Dispatchers.IO) {
                             val sb = StringBuilder()
                             try {
-                                val inPutStream = BufferedReader(InputStreamReader(activity.contentResolver.openInputStream(data?.data!!)))
-                                var str: String?
-                                while (inPutStream.readLine().also { str = it } != null) {
-                                    sb.append(str)
+                                val destFile = File(AnonWallet.getAppContext().cacheDir, "backup.zip").apply { createNewFile() }
+                                val extractDestination = File(AnonWallet.getAppContext().cacheDir, "tmp_extract")
+                                val inPutStream = activity.contentResolver.openInputStream(data?.data!!)
+                                inPutStream?.copyTo(destFile.outputStream())
+                                inPutStream?.close()
+                                BackUpHelper.unZip(destFile, extractDestination)
+                                if (BackUpHelper.testBackUP(extractDestination)) {
+                                    File(extractDestination, "anon.json").inputStream().bufferedReader().useLines { lines -> lines.forEach { sb.append(it) } }
+                                    currentResult?.success(sb.toString())
+                                } else {
+                                    currentResult?.error("0", "Invalid backup", null)
+                                    BackUpHelper.cleanCacheDir()
                                 }
-                                inPutStream.close()
-                                currentResult?.success(sb.toString())
+
                             } catch (fnfe: FileNotFoundException) {
                                 fnfe.printStackTrace()
-                                currentResult?.error("0", "file not found", fnfe.message)
+                                currentResult?.error("1", "file not found", fnfe.message)
                             } catch (ioe: IOException) {
                                 ioe.printStackTrace()
-                                currentResult?.error("0", "io exception", ioe.message)
+                                currentResult?.error("1", "io exception", ioe.message)
                             }
                             currentResult = null;
                         }
@@ -146,9 +138,10 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             }
         }
         return true
+
     }
 
-    private fun backup(call: MethodCall, result: MethodChannel.Result) {
+    private fun backup(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
                 try {
@@ -156,33 +149,25 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     val hash = AnonPreferences(AnonWallet.getAppContext()).passPhraseHash
                     val hashedPass = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPassphrase)
                     if (hashedPass == hash) {
-                        result.success(seedPassphrase?.let { BackUpHelper.createBackUp(it) })
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                val path = BackUpHelper.createBackUp(seedPassphrase ?: "", activity.applicationContext)
+                                WalletMethodChannel.backupPath = path
+                                val date = Date()
+                                val sdf = SimpleDateFormat("dd_MM_yyyy' 'HH_mm_a", Locale.getDefault())
+                                val timeStamp: String = sdf.format(date)
+                                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                                    addCategory(Intent.CATEGORY_OPENABLE)
+                                    type = "*/*"
+                                    putExtra(Intent.EXTRA_TITLE, "anon_backup_${timeStamp}.zip")
+                                }
+                                currentResult  = result
+                                activity.startActivityForResult(intent, BACKUP_EXPORT_CODE)
+                            }
+                        }
                     } else {
                         result.error("1", "Invalid passphrase", "")
                     }
-                } catch (e: Exception) {
-                    result.error("2", e.message, "")
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    private fun shareToFile(call: MethodCall, result: MethodChannel.Result) {
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val date = Date()
-                    val sdf = SimpleDateFormat("dd_MM_yyyy' 'HH_mm_a", Locale.getDefault())
-                    val timeStamp: String = sdf.format(date)
-                    val string = call.argument<String>("backup")
-                    WalletMethodChannel.backupString = string
-                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TITLE, "anon_backup_${timeStamp}")
-                    }
-                    activity.startActivityForResult(intent, BACKUP_EXPORT_CODE)
                 } catch (e: Exception) {
                     result.error("2", e.message, "")
                     e.printStackTrace()
@@ -202,7 +187,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         val backUpPayload = backUpPayloadObj.getString("backup")
                         val payload = EncryptUtil.decrypt(passphrase, backUpPayload);
                         payloadParsed = JSONObject(payload)
-                        mnemonicPassphrase = passphrase;
+                        mnemonicPassphrase = passphrase
                         if (payloadParsed == null) {
                             result.error("0", "Unable to parse backup", "");
                             return@withContext
@@ -224,22 +209,31 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         }
     }
 
-    private fun writeExportFile(data: Uri?) {
+    private suspend fun writeExportFile(data: Uri?) {
         if (data != null) {
             try {
                 val os = activity.contentResolver.openOutputStream(data)
-                os?.write((WalletMethodChannel.backupString ?: "").toByteArray());
+                val file = File(WalletMethodChannel.backupPath)
+                os?.use {
+                    file.inputStream().copyTo(it)
+                }
                 os?.close()
+                withContext(Dispatchers.Main){
+                    currentResult?.success(true)
+                }
             } catch (e: IOException) {
                 e.printStackTrace()
+                withContext(Dispatchers.Main){
+                    currentResult?.error("0", "io exception", e.message)
+                }
             } finally {
-                WalletMethodChannel.backupString = null
+                WalletMethodChannel.backupPath = null
             }
         }
     }
 
 
-    private fun parseBackUP(call: MethodCall, result: MethodChannel.Result) {
+    private fun parseBackUP(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
                 val payload = call.argument<String>("payload");

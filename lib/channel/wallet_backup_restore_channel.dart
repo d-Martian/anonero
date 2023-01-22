@@ -11,8 +11,8 @@ class BackUpRestoreChannel {
     return _singleton;
   }
 
-  Future<String> getBackUp(String password) async {
-    String value =
+  Future<bool> makeBackup(String password) async {
+    bool value =
         await platform.invokeMethod("backup", {"seedPassphrase": password});
     return value;
   }
@@ -23,21 +23,14 @@ class BackUpRestoreChannel {
     return value;
   }
 
-  Future<String> initiateRestore(String pin) async {
-    String value = await platform.invokeMethod("restore", {"pin": pin});
-    return value;
+  Future initiateRestore() async {
+    await platform.invokeMethod("restore");
   }
 
   Future<String> openBackUpFile() async {
     String value = await platform.invokeMethod(
       "openBackupFile",
     );
-    return value;
-  }
-
-  Future<String> shareBackUpAsFile(String backup) async {
-    String value =
-        await platform.invokeMethod("shareToFile", {"backup": backup});
     return value;
   }
 }

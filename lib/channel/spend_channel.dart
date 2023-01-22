@@ -1,4 +1,3 @@
-import 'package:anon_wallet/models/sub_address.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

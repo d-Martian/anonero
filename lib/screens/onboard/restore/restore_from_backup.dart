@@ -20,7 +20,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class RestoreFromBackup extends StatefulWidget {
-  const RestoreFromBackup({Key? key}) : super(key: key);
+  final AnonBackupModel? anonBackupModel;
+
+  const RestoreFromBackup({Key? key, this.anonBackupModel}) : super(key: key);
 
   @override
   State<RestoreFromBackup> createState() => _RestoreFromBackupState();
@@ -28,7 +30,6 @@ class RestoreFromBackup extends StatefulWidget {
 
 class _RestoreFromBackupState extends State<RestoreFromBackup> {
   TextEditingController backupEditingController = TextEditingController();
-  AnonBackupModel? walletBackUpModel;
   PageController pageController = PageController();
 
   @override
@@ -38,132 +39,31 @@ class _RestoreFromBackupState extends State<RestoreFromBackup> {
       physics: const NeverScrollableScrollPhysics(),
       scrollDirection: Axis.vertical,
       children: [
-        Scaffold(
-          body: Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-            child: CustomScrollView(
-              physics: NeverScrollableScrollPhysics(),
-              slivers: [
-                const SliverPadding(padding: EdgeInsets.only(top: 60)),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Hero(
-                            tag: "anon_logo",
-                            child: SizedBox(
-                                width: 180,
-                                child: Image.asset("assets/anon_logo.png"))),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: TextField(
-                      controller: backupEditingController,
-                      textAlign: TextAlign.start,
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.text,
-                      readOnly: false,
-                      minLines: 5,
-                      maxLines: 10,
-                      obscuringCharacter: "*",
-                      decoration: InputDecoration(
-                          hintText: "Enter your backup data",
-                          // suffixIcon: IconButton(
-                          //   onPressed: () {
-                          //     Clipboard.getData("text/plain").then((value) {
-                          //       setState(() {
-                          //         backupEditingController.text = value!.text!;
-                          //       });
-                          //     });
-                          //   },
-                          //   icon: const Icon(Icons.paste),
-                          // ),
-                          fillColor: Colors.grey[900],
-                          filled: true,
-                          enabledBorder: const OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12.0)),
-                              borderSide:
-                                  BorderSide(color: Colors.transparent)),
-                          focusedBorder: const OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12.0)),
-                              borderSide:
-                                  BorderSide(color: Colors.transparent)),
-                          border: const OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12.0)),
-                              borderSide:
-                                  BorderSide(color: Colors.transparent)))),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            BackUpRestoreChannel()
-                                .openBackUpFile()
-                                .then((value) {
-                              setState(() {
-                                backupEditingController.text = value;
-                              });
-                            });
-                          },
-                          child: const Text("Open Backup File"),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          primary: backupEditingController.text.isNotEmpty
-                              ? Colors.white
-                              : Colors.grey,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 6)),
-                      onPressed: () async {
-                        String passPhrase = await showPassphraseDialog(context);
-                        Navigator.pop(context);
-                        _parseBackup(passPhrase);
-                      },
-                      child: const Text("Validate Backup"),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
         Consumer(
           builder: (context, ref, c) {
+            AnonBackupModel? walletBackUpModel = widget.anonBackupModel;
+            if (walletBackUpModel == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text("Unable to parse backup..."),
+                ),
+              );
+            }
             return BackupPreviewScreen(
                 pageController: pageController,
                 onButtonPressed: () {
                   String host =
-                      "http://${walletBackUpModel!.node!.host}:${walletBackUpModel!.node!.rpcPort}";
-                  if (walletBackUpModel?.node?.host == null) {
+                      "http://${widget.anonBackupModel!.node!.host}:${widget.anonBackupModel!.node!.rpcPort}";
+                  if (widget.anonBackupModel?.node?.host == null) {
                     host = "";
                   }
                   ref.read(remoteHost.notifier).state = host;
                   ref.read(remoteUserName.notifier).state =
-                      walletBackUpModel!.node?.username ?? "";
+                      walletBackUpModel.node?.username ?? "";
                   ref.read(remotePassword.notifier).state =
-                      walletBackUpModel!.node?.password ?? "";
-                  pageController.animateToPage(2,
-                      duration: Duration(milliseconds: 500),
+                      walletBackUpModel.node?.password ?? "";
+                  pageController.animateToPage(1,
+                      duration: const Duration(milliseconds: 500),
                       curve: Curves.easeInOut);
                 },
                 walletBackUpModel: walletBackUpModel);
@@ -175,14 +75,7 @@ class _RestoreFromBackupState extends State<RestoreFromBackup> {
             pageController.animateToPage(3,
                 curve: Curves.easeInOutQuad,
                 duration: const Duration(milliseconds: 500));
-          },
-        ),
-        SetUpPin(
-          onPinSet: (String pin) {
-            pageController.animateToPage(4,
-                curve: Curves.easeInOutQuad,
-                duration: const Duration(milliseconds: 500));
-            BackUpRestoreChannel().initiateRestore(pin);
+            await BackUpRestoreChannel().initiateRestore();
           },
         ),
         Scaffold(
@@ -219,160 +112,6 @@ class _RestoreFromBackupState extends State<RestoreFromBackup> {
           ),
         ),
       ],
-    );
-  }
-
-  Future<String> showPassphraseDialog(BuildContext context) {
-    TextEditingController controller = TextEditingController();
-    FocusNode focusNode = FocusNode();
-    Completer<String> completer = Completer();
-    showDialog(
-        context: context,
-        barrierColor: barrierColor,
-        barrierDismissible: false,
-        builder: (context) {
-          return HookBuilder(
-            builder: (context) {
-              const inputBorder = UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.transparent));
-              var error = useState<String?>(null);
-              var loading = useState<bool>(false);
-              useEffect(() {
-                focusNode.requestFocus();
-                return null;
-              }, []);
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
-                content: SizedBox(
-                  width: MediaQuery.of(context).size.width / 1.3,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Enter Passphrase",
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const Padding(padding: EdgeInsets.all(12)),
-                      TextField(
-                          focusNode: focusNode,
-                          controller: controller,
-                          textAlign: TextAlign.center,
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.text,
-                          obscureText: true,
-                          obscuringCharacter: "*",
-                          decoration: InputDecoration(
-                              errorText: error.value,
-                              fillColor: Colors.grey[900],
-                              filled: true,
-                              focusedBorder: inputBorder,
-                              border: inputBorder,
-                              errorBorder: inputBorder)),
-                      loading.value
-                          ? const LinearProgressIndicator(
-                              minHeight: 1,
-                            )
-                          : const SizedBox()
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Cancel")),
-                  TextButton(
-                      onPressed: () async {
-                        completer.complete(controller.text);
-                      },
-                      child: const Text("Confirm"))
-                ],
-              );
-            },
-          );
-        });
-    return completer.future;
-  }
-
-  void _parseBackup(String passPhrase) async {
-    String json = await BackUpRestoreChannel()
-        .parseBackUp(backupEditingController.text, passPhrase);
-    AnonBackupModel model = AnonBackupModel.fromJson(jsonDecode(json));
-    setState(() {
-      walletBackUpModel = model;
-    });
-    pageController.animateToPage(1,
-        curve: Curves.easeInOutQuad,
-        duration: const Duration(milliseconds: 500));
-  }
-}
-
-class SetUpPin extends HookConsumerWidget {
-  final Function(String pin) onPinSet;
-
-  const SetUpPin({Key? key, required this.onPinSet}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final value = useState<String?>(null);
-    final pageController = usePageController();
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Set Wallet PIN"),
-      ),
-      body: SizedBox.expand(
-        child: Column(
-          children: [
-            Hero(
-              tag: "anon_logo",
-              child: SizedBox(
-                  width: 180, child: Image.asset("assets/anon_logo.png")),
-            ),
-            Expanded(
-              child: PageView(
-                controller: pageController,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 48, horizontal: 12),
-                    child: NumberPadWidget(
-                        maxPinSize: maxPinSize,
-                        value: null,
-                        minPinSize: minPinSize,
-                        onSubmit: (String pin) {
-                          value.value = pin;
-                          pageController.animateToPage(1,
-                              curve: Curves.easeInOutQuad,
-                              duration: const Duration(milliseconds: 500));
-                        }),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 48, horizontal: 12),
-                    child: NumberPadWidget(
-                        maxPinSize: maxPinSize,
-                        value: value.value,
-                        minPinSize: minPinSize,
-                        onSubmit: (String pin) {
-                          if (pin == value.value) {
-                            onPinSet(pin);
-                          }
-                        }),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

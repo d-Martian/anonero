@@ -1,8 +1,15 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
+import 'package:anon_wallet/models/backup.dart';
 import 'package:anon_wallet/screens/onboard/onboard_screen.dart';
 import 'package:anon_wallet/screens/onboard/onboard_state.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_from_backup.dart';
 import 'package:anon_wallet/state/node_state.dart';
+import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class LandingScreen extends StatefulWidget {
@@ -117,80 +124,7 @@ class _LandingScreenState extends State<LandingScreen> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(primary: Colors.white),
                       onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            backgroundColor: Colors.transparent,
-                            builder: (context) {
-                              return SizedBox(
-                                height: 200,
-                                child: Card(
-                                  color: Colors.black,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                      side: BorderSide(
-                                          color: Theme.of(context)
-                                              .primaryColor
-                                              .withOpacity(0.5),
-                                          width: 1)),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 12, horizontal: 16),
-                                        child: Text("Restore Options",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium
-                                                ?.copyWith(fontSize: 16)),
-                                      ),
-                                      Expanded(
-                                          child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          ListTile(
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        RestoreFromBackup(),
-                                                  ));
-                                            },
-                                            title: Text(
-                                              "Restore from anon backup",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium
-                                                  ?.copyWith(
-                                                      color: Colors.grey[200]),
-                                            ),
-                                          ),
-                                          ListTile(
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                            },
-                                            title: Text(
-                                              "Restore from seed",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium
-                                                  ?.copyWith(
-                                                      color: Colors.grey[200]),
-                                            ),
-                                          ),
-                                        ],
-                                      ))
-                                    ],
-                                  ),
-                                ),
-                              );
-                            });
+                        showRestoreOptions(context);
                       },
                       child: Text("RESTORE WALLET",
                           style: Theme.of(context)
@@ -208,5 +142,347 @@ class _LandingScreenState extends State<LandingScreen> {
         ],
       ),
     ));
+  }
+
+  void showRestoreOptions(BuildContext context) {
+    TextEditingController controller = TextEditingController();
+    FocusNode focusNode = FocusNode();
+
+    showDialog(
+      context: context,
+      builder: (_) {
+        return HookBuilder(
+          builder: ((context) {
+            ValueNotifier<bool> loadingFile = useState(false);
+            ValueNotifier<String?> backupContent = useState(null);
+            PageController pageController = usePageController();
+            return PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: pageController,
+              children: [
+                AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Hero(
+                          tag: "anon_logo",
+                          child: SizedBox(
+                              width: 84,
+                              child: Image.asset("assets/anon_logo.png"))),
+                      Text("Restore"),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                        onPressed: () async {
+                          try {
+                            loadingFile.value = true;
+                            String value =
+                                await BackUpRestoreChannel().openBackUpFile();
+                            backupContent.value = value;
+                            loadingFile.value = false;
+                            pageController.animateToPage(1,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInSine);
+                          } catch (e) {
+                            loadingFile.value = false;
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            loadingFile.value
+                                ? const SizedBox(
+                                    child: Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
+                                    child: SizedBox.square(
+                                      dimension: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1,
+                                      ),
+                                    ),
+                                  ))
+                                : const SizedBox.shrink(),
+                            Text(!loadingFile.value
+                                ? "Restore from anon backup"
+                                : "Reading file..."),
+                          ],
+                        )),
+                    Divider(),
+                    TextButton(
+                        onPressed: () {}, child: Text("Restore from seed")),
+                    Padding(padding: EdgeInsets.all(12))
+                  ],
+                  actionsOverflowDirection: VerticalDirection.down,
+                  actionsAlignment: MainAxisAlignment.spaceBetween,
+                  actionsOverflowAlignment: OverflowBarAlignment.center,
+                ),
+                HookBuilder(
+                  builder: (context) {
+                    const inputBorder = UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent));
+                    var error = useState<String?>(null);
+                    var loading = useState<bool>(false);
+                    useEffect(() {
+                      Future.delayed(const Duration(milliseconds: 300), () {
+                        focusNode.requestFocus();
+                      });
+                      return null;
+                    }, []);
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 28),
+                      content: SizedBox(
+                        width: MediaQuery.of(context).size.width / 1.3,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Enter Passphrase",
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const Padding(padding: EdgeInsets.all(12)),
+                            TextField(
+                                focusNode: focusNode,
+                                controller: controller,
+                                textAlign: TextAlign.center,
+                                textInputAction: TextInputAction.next,
+                                keyboardType: TextInputType.text,
+                                obscureText: true,
+                                obscuringCharacter: "*",
+                                decoration: InputDecoration(
+                                    errorText: error.value,
+                                    fillColor: Colors.grey[900],
+                                    filled: true,
+                                    focusedBorder: inputBorder,
+                                    border: inputBorder,
+                                    errorBorder: inputBorder)),
+                            loading.value
+                                ? const LinearProgressIndicator(
+                                    minHeight: 1,
+                                  )
+                                : const SizedBox()
+                          ],
+                        ),
+                      ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Hero(
+                              tag: "anon_logo",
+                              child: SizedBox(
+                                  width: 84,
+                                  child: Image.asset("assets/anon_logo.png"))),
+                          const Text("Restore"),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Cancel")),
+                        TextButton(
+                            onPressed: () async {
+                              if (!controller.text.isEmpty &&
+                                  backupContent.value != null) {
+                                String decrypted = await BackUpRestoreChannel()
+                                    .parseBackUp(
+                                        backupContent.value!, controller.text);
+                                AnonBackupModel model =
+                                    AnonBackupModel.fromJson(
+                                        jsonDecode(decrypted));
+                                Navigator.pop(context);
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (c) => RestoreFromBackup(
+                                            anonBackupModel: model)));
+                              } else {
+                                Navigator.pop(context);
+                                return;
+                              }
+                            },
+                            child: const Text("Confirm"))
+                      ],
+                    );
+                  },
+                )
+              ],
+            );
+          }),
+        );
+      },
+      barrierDismissible: true,
+      barrierColor: const Color(0xab1e1e1e),
+    );
+    return;
+    showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          return SizedBox(
+            height: 200,
+            child: Card(
+              color: Theme.of(context).primaryColorDark,
+              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 18),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  side: BorderSide(
+                      color: Theme.of(context).primaryColor.withOpacity(0.5),
+                      width: 1)),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                    child: Text("Restore",
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontSize: 14,
+                                )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(Icons.restore, size: 42),
+                  ),
+                  Expanded(
+                      child: Row(
+                    children: [
+                      // ListTile(
+                      //   onTap: () {
+                      //     Navigator.pop(context);
+                      //     Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //           builder: (context) =>
+                      //               const RestoreFromBackup(),
+                      //         ));
+                      //   },
+                      //   title: Text(
+                      //     "Restore from anon backup",
+                      //     style: Theme.of(context)
+                      //         .textTheme
+                      //         .bodyMedium
+                      //         ?.copyWith(
+                      //         color: Colors.grey[200]),
+                      //   ),
+                      // ),
+                      ListTile(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        title: Text(
+                          "Restore from seed",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: Colors.grey[200]),
+                        ),
+                      ),
+                    ],
+                  ))
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<String?> showPassphraseDialog(BuildContext context) {
+    TextEditingController controller = TextEditingController();
+    FocusNode focusNode = FocusNode();
+    Completer<String?> completer = Completer();
+    showDialog(
+        context: context,
+        barrierColor: barrierColor,
+        barrierDismissible: false,
+        builder: (context) {
+          return HookBuilder(
+            builder: (context) {
+              const inputBorder = UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.transparent));
+              var error = useState<String?>(null);
+              var loading = useState<bool>(false);
+              useEffect(() {
+                focusNode.requestFocus();
+                return null;
+              }, []);
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+                content: SizedBox(
+                  width: MediaQuery.of(context).size.width / 1.3,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Enter Passphrase",
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const Padding(padding: EdgeInsets.all(12)),
+                      TextField(
+                          focusNode: focusNode,
+                          controller: controller,
+                          textAlign: TextAlign.center,
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.text,
+                          obscureText: true,
+                          obscuringCharacter: "*",
+                          decoration: InputDecoration(
+                              errorText: error.value,
+                              fillColor: Colors.grey[900],
+                              filled: true,
+                              focusedBorder: inputBorder,
+                              border: inputBorder,
+                              errorBorder: inputBorder)),
+                      loading.value
+                          ? const LinearProgressIndicator(
+                              minHeight: 1,
+                            )
+                          : const SizedBox()
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        completer.complete(null);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Cancel")),
+                  TextButton(
+                      onPressed: () async {
+                        completer.complete(controller.text);
+                      },
+                      child: const Text("Confirm"))
+                ],
+              );
+            },
+          );
+        });
+    return completer.future;
   }
 }

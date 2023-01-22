@@ -1,13 +1,12 @@
-import 'package:anon_wallet/channel/node_channel.dart';
-import 'package:anon_wallet/screens/home/settings/export_wallet_backup.dart';
-import 'package:anon_wallet/screens/home/settings/nodes/nodes_settings.dart';
+import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/home/settings/view_wallet_private.dart';
-import 'package:anon_wallet/screens/onboard/remote_node_setup.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -33,7 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text("Settings"),
             centerTitle: true,
           ),
-          SliverPadding(padding: EdgeInsets.all(12)),
+          const SliverPadding(padding: EdgeInsets.all(12)),
           SliverFillRemaining(
             hasScrollBody: false,
             child: Column(
@@ -130,11 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 34),
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const ExportWalletBackUpScreen()));
+                    showBackUpDialog(context);
                   },
                   title: const Text("Export Wallet"),
                 ),
@@ -153,6 +148,180 @@ class _SettingsScreenState extends State<SettingsScreen> {
           )
         ],
       ),
+    );
+  }
+
+  void showBackUpDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        barrierColor: barrierColor,
+        barrierDismissible: false,
+        builder: (context) {
+          return const BackupDialog();
+        });
+  }
+}
+
+class BackupDialog extends HookWidget {
+  const BackupDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    PageController pageController = usePageController();
+    TextEditingController controller = useTextEditingController();
+    FocusNode focusNode = useFocusNode();
+
+    const inputBorder =
+        UnderlineInputBorder(borderSide: BorderSide(color: Colors.transparent));
+    var error = useState<String?>(null);
+    var loading = useState<bool>(false);
+    useEffect(() {
+      focusNode.requestFocus();
+      return null;
+    }, []);
+    return PageView(
+      controller: pageController,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width / 1.3,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Enter Passphrase",
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const Padding(padding: EdgeInsets.all(12)),
+                TextField(
+                    focusNode: focusNode,
+                    controller: controller,
+                    textAlign: TextAlign.center,
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.text,
+                    obscureText: true,
+                    obscuringCharacter: "*",
+                    decoration: InputDecoration(
+                        errorText: error.value,
+                        fillColor: Colors.grey[900],
+                        filled: true,
+                        focusedBorder: inputBorder,
+                        border: inputBorder,
+                        errorBorder: inputBorder)),
+                loading.value
+                    ? const LinearProgressIndicator(
+                        minHeight: 1,
+                      )
+                    : const SizedBox()
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Cancel")),
+            TextButton(
+                onPressed: () async {
+                  try {
+                    loading.value = true;
+                    focusNode.unfocus();
+                    await Future.delayed(const Duration(milliseconds: 310));
+                    await pageController.animateToPage(1,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInSine);
+                    bool isSuccess = await BackUpRestoreChannel()
+                        .makeBackup(controller.text);
+                    AppHaptics.lightImpact();
+                    if (!isSuccess) {
+                      Navigator.pop(context);
+                    }
+                    loading.value = false;
+                  } on PlatformException catch (e, s) {
+                    debugPrintStack(stackTrace: s);
+                    await pageController.animateToPage(0,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInSine);
+                    error.value = e.message;
+                    loading.value = false;
+                  } catch (e, s) {
+                    pageController.animateToPage(0,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInSine);
+                    loading.value = false;
+                    error.value = "Error $e";
+                  }
+                },
+                child: const Text("Confirm"))
+          ],
+        ),
+        AlertDialog(
+          actionsAlignment: MainAxisAlignment.center,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width / 1.3,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Creating Backup",
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                loading.value
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 34),
+                        child: const Center(
+                          child: SizedBox.square(
+                            dimension: 62,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 34, bottom: 12),
+                            child: Center(
+                                child: Icon(
+                              Icons.check_circle,
+                              size: 60,
+                            )),
+                          ),
+                          Text(
+                            "Backup Created",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      )
+              ],
+            ),
+          ),
+          actions: [
+            !loading.value
+                ? TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Ok"))
+                : Container(),
+          ],
+        ),
+      ],
     );
   }
 }
