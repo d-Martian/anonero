@@ -218,8 +218,11 @@ class _LandingScreenState extends State<LandingScreen> {
                           ],
                         )),
                     Divider(),
-                    TextButton(
-                        onPressed: () {}, child: Text("Restore from seed")),
+                    Opacity(
+                      opacity: 0.5,
+                      child: TextButton(
+                          onPressed: () {}, child: Text("Restore from seed")),
+                    ),
                     Padding(padding: EdgeInsets.all(12))
                   ],
                   actionsOverflowDirection: VerticalDirection.down,
@@ -333,77 +336,6 @@ class _LandingScreenState extends State<LandingScreen> {
       barrierColor: const Color(0xab1e1e1e),
     );
     return;
-    showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.transparent,
-        builder: (context) {
-          return SizedBox(
-            height: 200,
-            child: Card(
-              color: Theme.of(context).primaryColorDark,
-              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 18),
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                  side: BorderSide(
-                      color: Theme.of(context).primaryColor.withOpacity(0.5),
-                      width: 1)),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
-                    child: Text("Restore",
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontSize: 14,
-                                )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Icon(Icons.restore, size: 42),
-                  ),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      // ListTile(
-                      //   onTap: () {
-                      //     Navigator.pop(context);
-                      //     Navigator.push(
-                      //         context,
-                      //         MaterialPageRoute(
-                      //           builder: (context) =>
-                      //               const RestoreFromBackup(),
-                      //         ));
-                      //   },
-                      //   title: Text(
-                      //     "Restore from anon backup",
-                      //     style: Theme.of(context)
-                      //         .textTheme
-                      //         .bodyMedium
-                      //         ?.copyWith(
-                      //         color: Colors.grey[200]),
-                      //   ),
-                      // ),
-                      ListTile(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        title: Text(
-                          "Restore from seed",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: Colors.grey[200]),
-                        ),
-                      ),
-                    ],
-                  ))
-                ],
-              ),
-            ),
-          );
-        });
   }
 
   Future<String?> showPassphraseDialog(BuildContext context) {

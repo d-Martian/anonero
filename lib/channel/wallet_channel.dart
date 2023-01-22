@@ -75,4 +75,9 @@ class WalletChannel {
     dynamic value =
         await platform.invokeMethod("wipeWallet", {"seedPassphrase": seedPassphrase});
   }
+
+  Future lock() async {
+    dynamic value =
+        await platform.invokeMethod("lock");
+  }
 }

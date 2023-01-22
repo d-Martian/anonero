@@ -135,15 +135,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text("Export Wallet"),
                 ),
                 Divider(color: dividerColor, height: 2),
-                Opacity(
-                  opacity: 0.4,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                    onTap: () {
-                      showWipeDialog(context);
-                    },
-                    title: const Text("Wallet Wipe"),
-                  ),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 34),
+                  onTap: () {
+                    showWipeDialog(context);
+                  },
+                  title: const Text("Wallet Wipe"),
                 ),
                 Divider(color: dividerColor, height: 2),
               ],
