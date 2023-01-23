@@ -1,3 +1,4 @@
+@file:Suppress("UNCHECKED_CAST")
 package xmr.anon_wallet.wallet.utils
 
 import android.content.Context
@@ -136,7 +137,6 @@ class AnonPreferences(context: Context) : Preferences(context,"AnonPreferences")
     var passPhraseHash by stringPref()
     var serverUserName by stringPref()
     var serverPassword by stringPref()
-    var isRestoredFromBackup by booleanPref(defaultValue = false)
 }
 
 

@@ -61,7 +61,6 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     }
                 }
                 AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), mnemonicPassphrase)
-                AnonPreferences(context = AnonWallet.getAppContext()).isRestoredFromBackup = true
                 //wait for preferences to be saved
                 delay(800)
                 result.success(true)

@@ -218,12 +218,8 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
                             if (WalletEventsChannel.initialized) {
-                                if (AnonPreferences(AnonWallet.getAppContext()).isRestoredFromBackup == true) {
-                                    wallet.rescanBlockchainAsync()
-                                }
                                 wallet.refreshHistory()
                                 wallet.refresh()
-                                AnonPreferences(AnonWallet.getAppContext()).isRestoredFromBackup = false
                             }
                             sendEvent(wallet.walletToHashMap())
                         }
