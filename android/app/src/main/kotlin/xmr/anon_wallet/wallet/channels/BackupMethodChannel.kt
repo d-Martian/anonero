@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.Lifecycle
+import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -35,6 +37,26 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "openBackupFile" -> openBackupFile(call, result)
             "parseBackup" -> parseBackup(call, result)
             "restore" -> restore(call, result)
+            "restoreFromSeed" -> restoreFromSeed(call, result)
+        }
+    }
+
+    private fun restoreFromSeed(call: MethodCall, result: Result) {
+        val seed = call.argument<String>("seed")
+        val height = call.argument<Int>("height") ?: 1
+        val pin = call.argument<String>("pin")
+        val passPhrase = call.argument<String?>("passPhrase")
+        val walletFileName = "default"
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                val walletFile = File(AnonWallet.walletDir, walletFileName)
+                WalletManager.getInstance().recoveryWallet(walletFile, pin, seed, passPhrase ?: "", height.toLong());
+                AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), passPhrase)
+                //wait for preferences to be saved
+                delay(800)
+                result.success(true)
+                activity.restart()
+            }
         }
     }
 
@@ -81,11 +103,11 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         when (requestCode) {
             BACKUP_EXPORT_CODE -> {
                 if (resultCode == Activity.RESULT_OK) {
-                   scope.launch {
-                       withContext(Dispatchers.IO){
-                           writeExportFile(data?.data)
-                       }
-                   }
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            writeExportFile(data?.data)
+                        }
+                    }
                 }
                 if (resultCode == Activity.RESULT_CANCELED) {
                     currentResult?.success(false)
@@ -152,7 +174,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                     type = "*/*"
                                     putExtra(Intent.EXTRA_TITLE, "anon_backup_${timeStamp}.zip")
                                 }
-                                currentResult  = result
+                                currentResult = result
                                 activity.startActivityForResult(intent, BACKUP_EXPORT_CODE)
                             }
                         }
@@ -209,12 +231,12 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     file.inputStream().copyTo(it)
                 }
                 os?.close()
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     currentResult?.success(true)
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     currentResult?.error("0", "io exception", e.message)
                 }
             } finally {

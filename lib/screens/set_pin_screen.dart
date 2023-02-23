@@ -4,7 +4,10 @@ import 'package:anon_wallet/widgets/number_pad.dart';
 import 'package:flutter/material.dart';
 
 class SetPinScreen extends StatefulWidget {
-  const SetPinScreen({Key? key}) : super(key: key);
+  final String title;
+
+  const SetPinScreen({Key? key, this.title = "Enter your PIN"})
+      : super(key: key);
 
   @override
   State<SetPinScreen> createState() => _SetPinScreenState();
@@ -37,7 +40,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                 child: SizedBox(
                     width: 180, child: Image.asset("assets/anon_logo.png")),
               ),
-              const Text("Enter your PIN"),
+              Text(widget.title),
               Expanded(
                 child: PageView(
                   controller: controller,

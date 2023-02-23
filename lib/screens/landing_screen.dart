@@ -6,6 +6,7 @@ import 'package:anon_wallet/models/backup.dart';
 import 'package:anon_wallet/screens/onboard/onboard_screen.dart';
 import 'package:anon_wallet/screens/onboard/onboard_state.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_from_backup.dart';
+import 'package:anon_wallet/screens/onboard/restore/restore_from_seed.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
@@ -179,51 +180,60 @@ class _LandingScreenState extends State<LandingScreen> {
                     ],
                   ),
                   actions: [
-                    TextButton(
-                        onPressed: () async {
-                          try {
-                            loadingFile.value = true;
-                            String value =
-                                await BackUpRestoreChannel().openBackUpFile();
-                            backupContent.value = value;
-                            loadingFile.value = false;
-                            pageController.animateToPage(1,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInSine);
-                          } catch (e) {
-                            loadingFile.value = false;
-                            Navigator.pop(context);
-                          }
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            loadingFile.value
-                                ? const SizedBox(
-                                    child: Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 12),
-                                    child: SizedBox.square(
-                                      dimension: 12,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 1,
-                                      ),
-                                    ),
-                                  ))
-                                : const SizedBox.shrink(),
-                            Text(!loadingFile.value
-                                ? "Restore from anon backup"
-                                : "Reading file..."),
-                          ],
-                        )),
-                    Divider(),
                     Opacity(
                       opacity: 0.5,
                       child: TextButton(
-                          onPressed: () {}, child: Text("Restore from seed")),
+                          onPressed: () async {
+                            try {
+                              //TODO: fix restore from zip
+                              return;
+                              loadingFile.value = true;
+                              String value =
+                                  await BackUpRestoreChannel().openBackUpFile();
+                              backupContent.value = value;
+                              loadingFile.value = false;
+                              pageController.animateToPage(1,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInSine);
+                            } catch (e) {
+                              loadingFile.value = false;
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              loadingFile.value
+                                  ? const SizedBox(
+                                      child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 12),
+                                      child: SizedBox.square(
+                                        dimension: 12,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1,
+                                        ),
+                                      ),
+                                    ))
+                                  : const SizedBox.shrink(),
+                              Text(!loadingFile.value
+                                  ? "Restore from anon backup"
+                                  : "Reading file..."),
+                            ],
+                          )),
                     ),
-                    Padding(padding: EdgeInsets.all(12))
+                    Divider(),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const RestoreFromSeed()));
+                        },
+                        child: const Text("Restore from seed")),
+                    const Padding(padding: EdgeInsets.all(12))
                   ],
                   actionsOverflowDirection: VerticalDirection.down,
                   actionsAlignment: MainAxisAlignment.spaceBetween,

@@ -33,4 +33,14 @@ class BackUpRestoreChannel {
     );
     return value;
   }
+
+  Future restoreFromSeed(
+      String seed, int height, String passPhrase, String pin) async {
+    return platform.invokeMethod("restoreFromSeed", {
+      "seed": seed,
+      "height": height,
+      "pin": pin,
+      "passPhrase": passPhrase
+    });
+  }
 }
