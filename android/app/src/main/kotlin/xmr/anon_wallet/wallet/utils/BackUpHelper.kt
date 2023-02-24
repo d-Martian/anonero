@@ -52,11 +52,10 @@ object BackUpHelper {
             put("meta", metaPayload)
         }
 
-        val encryptedPayload = EncryptUtil.encrypt(seedPassphrase, backUpPayload.toString())
 
         val json = JSONObject().apply {
             put("version", BACKUP_VERSION)
-            put("backup", encryptedPayload)
+            put("backup", backUpPayload)
         }.toString()
 
         context.cacheDir.deleteRecursively();
@@ -76,16 +75,19 @@ object BackUpHelper {
         walletDir.copyRecursively(tmpBackupDir, true)
         val list = tmpBackupDir.listFiles()
         val files = list?.map { it.absolutePath }?.toTypedArray()
+        val backupFileEncrypted = File(context.cacheDir, "anon_backup_$timeStamp.anon")
 
         if (files != null) {
             zip(files, backupFile.absolutePath)
+            EncryptUtil.encryptFile(seedPassphrase, backupFile, backupFileEncrypted)
+            backupFile.delete()
         }
-        return backupFile.absolutePath
+        return backupFileEncrypted.absolutePath
     }
 
     fun testBackUP(destinationDir: File): Boolean {
         val items = destinationDir.listFiles().toList().filter {
-            ( it.name.endsWith(".keys") ||  it.name.endsWith(".address.txt"))
+            (it.name.endsWith(".keys") || it.name.endsWith(".address.txt"))
         }
         return items.size == 2
     }
