@@ -43,9 +43,11 @@ class _TransactionsListState extends State<TransactionsList> {
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             expandedHeight: 180,
             actions: [
-              IconButton(onPressed: () {
-                WalletChannel().lock();
-              }, icon: const Icon(Icons.lock)),
+              IconButton(
+                  onPressed: () {
+                    WalletChannel().lock();
+                  },
+                  icon: const Icon(Icons.lock)),
               IconButton(
                   onPressed: () {
                     widget.onScanClick?.call();

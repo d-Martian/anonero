@@ -1,4 +1,3 @@
-
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
@@ -12,10 +11,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class RestoreNodeSetup extends ConsumerWidget {
   final Function() onButtonPressed;
   final PageController pageController;
-  final bool skipAppBar ;
+  final bool skipAppBar;
 
   const RestoreNodeSetup(
-      {Key? key, required this.onButtonPressed, this.skipAppBar = false, required this.pageController})
+      {Key? key,
+      required this.onButtonPressed,
+      this.skipAppBar = false,
+      required this.pageController})
       : super(key: key);
 
   @override
@@ -28,17 +30,19 @@ class RestoreNodeSetup extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          !skipAppBar ? SliverAppBar(
-            title: Text("Node Setup"),
-            leading: IconButton(
-              onPressed: () {
-                pageController.animateToPage(1,
-                    curve: Curves.easeInOutQuad,
-                    duration: const Duration(milliseconds: 500));
-              },
-              icon: Icon(Icons.close),
-            ),
-          ): SliverToBoxAdapter(),
+          !skipAppBar
+              ? SliverAppBar(
+                  title: Text("Node Setup"),
+                  leading: IconButton(
+                    onPressed: () {
+                      pageController.animateToPage(1,
+                          curve: Curves.easeInOutQuad,
+                          duration: const Duration(milliseconds: 500));
+                    },
+                    icon: Icon(Icons.close),
+                  ),
+                )
+              : SliverToBoxAdapter(),
           SliverToBoxAdapter(
             child: ListTile(
               title: Padding(
@@ -71,7 +75,7 @@ class RestoreNodeSetup extends ConsumerWidget {
                   ),
                   Consumer(builder: (context, ref, c) {
                     bool isConnecting =
-                    ref.watch(connectingToNodeStateProvider);
+                        ref.watch(connectingToNodeStateProvider);
                     if (isConnecting) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(

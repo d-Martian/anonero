@@ -117,7 +117,6 @@ class _RestoreFromBackupState extends State<RestoreFromBackup> {
   }
 }
 
-
 class BackupPreviewScreen extends StatelessWidget {
   final PageController pageController;
   final Function() onButtonPressed;

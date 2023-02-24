@@ -159,7 +159,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         builder: (context) {
           return const BackupDialog();
         });
-
   }
 
   void showWipeDialog(BuildContext context) {

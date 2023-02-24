@@ -17,9 +17,9 @@ class BackUpRestoreChannel {
     return value;
   }
 
-  Future<String> parseBackUp(String backup, String passPhrase) async {
-    String value = await platform.invokeMethod(
-        "parseBackup", {"backup": backup, "passphrase": passPhrase});
+  Future<String> parseBackUp(String backupFileUri, String passPhrase) async {
+    String value = await platform.invokeMethod("parseBackup",
+        {"backupFileUri": backupFileUri, "passphrase": passPhrase});
     return value;
   }
 
@@ -36,11 +36,7 @@ class BackUpRestoreChannel {
 
   Future restoreFromSeed(
       String seed, int height, String passPhrase, String pin) async {
-    return platform.invokeMethod("restoreFromSeed", {
-      "seed": seed,
-      "height": height,
-      "pin": pin,
-      "passPhrase": passPhrase
-    });
+    return platform.invokeMethod("restoreFromSeed",
+        {"seed": seed, "height": height, "pin": pin, "passPhrase": passPhrase});
   }
 }

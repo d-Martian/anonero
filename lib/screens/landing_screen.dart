@@ -155,10 +155,10 @@ class _LandingScreenState extends State<LandingScreen> {
         return HookBuilder(
           builder: ((context) {
             ValueNotifier<bool> loadingFile = useState(false);
-            ValueNotifier<String?> backupContent = useState(null);
+            ValueNotifier<String?> backupFileUri = useState(null);
             PageController pageController = usePageController();
             return PageView(
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               controller: pageController,
               children: [
                 AlertDialog(
@@ -180,49 +180,47 @@ class _LandingScreenState extends State<LandingScreen> {
                     ],
                   ),
                   actions: [
-                    Opacity(
-                      opacity: 0.5,
-                      child: TextButton(
-                          onPressed: () async {
-                            try {
-                              //TODO: fix restore from zip
-                              return;
-                              loadingFile.value = true;
-                              String value =
-                                  await BackUpRestoreChannel().openBackUpFile();
-                              backupContent.value = value;
-                              loadingFile.value = false;
-                              pageController.animateToPage(1,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInSine);
-                            } catch (e) {
-                              loadingFile.value = false;
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              loadingFile.value
-                                  ? const SizedBox(
-                                      child: Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 12),
-                                      child: SizedBox.square(
-                                        dimension: 12,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1,
-                                        ),
+                    TextButton(
+                        onPressed: () async {
+                          try {
+                            loadingFile.value = true;
+                            String value =
+                                await BackUpRestoreChannel().openBackUpFile();
+                            pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInSine);
+                            backupFileUri.value = value;
+                            loadingFile.value = false;
+                            pageController.animateToPage(1,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInSine);
+                          } catch (e) {
+                            loadingFile.value = false;
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            loadingFile.value
+                                ? const SizedBox(
+                                    child: Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
+                                    child: SizedBox.square(
+                                      dimension: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1,
                                       ),
-                                    ))
-                                  : const SizedBox.shrink(),
-                              Text(!loadingFile.value
-                                  ? "Restore from anon backup"
-                                  : "Reading file..."),
-                            ],
-                          )),
-                    ),
+                                    ),
+                                  ))
+                                : const SizedBox.shrink(),
+                            Text(!loadingFile.value
+                                ? "Restore from anon backup"
+                                : "Reading file..."),
+                          ],
+                        )),
                     Divider(),
                     TextButton(
                         onPressed: () {
@@ -314,10 +312,10 @@ class _LandingScreenState extends State<LandingScreen> {
                         TextButton(
                             onPressed: () async {
                               if (!controller.text.isEmpty &&
-                                  backupContent.value != null) {
+                                  backupFileUri.value != null) {
                                 String decrypted = await BackUpRestoreChannel()
                                     .parseBackUp(
-                                        backupContent.value!, controller.text);
+                                        backupFileUri.value!, controller.text);
                                 AnonBackupModel model =
                                     AnonBackupModel.fromJson(
                                         jsonDecode(decrypted));

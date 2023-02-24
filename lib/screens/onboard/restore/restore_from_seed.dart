@@ -1,4 +1,3 @@
-
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_node_setup.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
@@ -20,7 +19,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: PageView(
-          physics: const NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       controller: _pageController,
       children: [
         Expanded(
@@ -73,7 +72,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
                     Container(
                       width: 280,
                       height: 280,
-                      child:  CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                     Hero(
                         tag: "anon_logo",
@@ -97,17 +96,18 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
   onSeedEntered(List<String> seed, int height, BuildContext context) async {
     FocusScope.of(context).requestFocus(FocusNode());
     final navigator = Navigator.of(context);
-    String? passPhrase = await showPassPhraseDialog(context,title: "Enter seed passphrase",);
+    String? passPhrase = await showPassPhraseDialog(
+      context,
+      title: "Enter seed passphrase",
+    );
     if (passPhrase != null) {
-      String pin = await navigator.push(
-          MaterialPageRoute(
-            builder: (context) => const SetPinScreen(
-              title: "Set up pin",
-            ),
-          ));
+      String pin = await navigator.push(MaterialPageRoute(
+        builder: (context) => const SetPinScreen(
+          title: "Set up pin",
+        ),
+      ));
       _pageController.nextPage(
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.ease);
+          duration: const Duration(milliseconds: 500), curve: Curves.ease);
       await Future.delayed(const Duration(milliseconds: 600));
       BackUpRestoreChannel()
           .restoreFromSeed(seed.join(" "), height, passPhrase, pin);

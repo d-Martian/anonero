@@ -71,7 +71,6 @@ Future<String?> showPassPhraseDialog(BuildContext context,
                     child: const Text("Cancel")),
                 TextButton(
                     onPressed: () async {
-
                       Navigator.of(context).pop();
                       if (validate != null) {
                         if (!validate(seedPassphraseController.text)) {
