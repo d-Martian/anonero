@@ -117,6 +117,7 @@ android {
             applicationIdSuffix ".staging"
         }
     }
+    namespace 'anon.xmr.app.anon_wallet'
 
 
 }
