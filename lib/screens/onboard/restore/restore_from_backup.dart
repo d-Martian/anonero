@@ -1,22 +1,9 @@
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/models/backup.dart';
-import 'package:anon_wallet/models/node.dart';
-import 'package:anon_wallet/models/wallet.dart';
-import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
-import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/onboard/onboard_state.dart';
-import 'package:anon_wallet/screens/onboard/remote_node_setup.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_node_setup.dart';
-import 'package:anon_wallet/screens/set_pin_screen.dart';
-import 'package:anon_wallet/state/node_state.dart';
-import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -73,7 +60,7 @@ class _RestoreFromBackupState extends State<RestoreFromBackup> {
         RestoreNodeSetup(
           pageController: pageController,
           onButtonPressed: () async {
-            pageController.animateToPage(3,
+            pageController.nextPage(
                 curve: Curves.easeInOutQuad,
                 duration: const Duration(milliseconds: 500));
             await BackUpRestoreChannel().initiateRestore();
@@ -140,9 +127,7 @@ class BackupPreviewScreen extends StatelessWidget {
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
-              pageController.animateToPage(0,
-                  curve: Curves.easeInOut,
-                  duration: const Duration(milliseconds: 500));
+              Navigator.pop(context);
             },
           ),
         ),
@@ -173,7 +158,7 @@ class BackupPreviewScreen extends StatelessWidget {
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                      side: BorderSide(width: 1.0, color: Colors.white),
+                      side: const BorderSide(width: 1.0, color: Colors.white),
                       primary: Colors.white,
                       shape: RoundedRectangleBorder(
                           side: BorderSide(width: 12, color: Colors.white),

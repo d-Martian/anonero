@@ -35,14 +35,14 @@ class RestoreNodeSetup extends ConsumerWidget {
                   title: Text("Node Setup"),
                   leading: IconButton(
                     onPressed: () {
-                      pageController.animateToPage(1,
+                      pageController.previousPage(
                           curve: Curves.easeInOutQuad,
                           duration: const Duration(milliseconds: 500));
                     },
                     icon: Icon(Icons.close),
                   ),
                 )
-              : SliverToBoxAdapter(),
+              : const SliverToBoxAdapter(),
           SliverToBoxAdapter(
             child: ListTile(
               title: Padding(

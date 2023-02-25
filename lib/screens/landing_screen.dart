@@ -10,6 +10,7 @@ import 'package:anon_wallet/screens/onboard/restore/restore_from_seed.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -151,6 +152,8 @@ class _LandingScreenState extends State<LandingScreen> {
 
     showDialog(
       context: context,
+      useRootNavigator: true,
+      useSafeArea: true,
       builder: (_) {
         return HookBuilder(
           builder: ((context) {
@@ -221,14 +224,15 @@ class _LandingScreenState extends State<LandingScreen> {
                                 : "Reading file..."),
                           ],
                         )),
-                    Divider(),
+                    const Divider(),
                     TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RestoreFromSeed()));
+                        onPressed: () async {
+                          final navigator = Navigator.of(context);
+                          navigator.pop();
+                          await Future.delayed(
+                              const Duration(milliseconds: 150));
+                          navigator.push(MaterialPageRoute(
+                              builder: (context) => const RestoreFromSeed()));
                         },
                         child: const Text("Restore from seed")),
                     const Padding(padding: EdgeInsets.all(12))
@@ -311,20 +315,31 @@ class _LandingScreenState extends State<LandingScreen> {
                             child: const Text("Cancel")),
                         TextButton(
                             onPressed: () async {
-                              if (!controller.text.isEmpty &&
+                              final navigator = Navigator.of(context);
+                              if (controller.text.isNotEmpty &&
                                   backupFileUri.value != null) {
-                                String decrypted = await BackUpRestoreChannel()
-                                    .parseBackUp(
-                                        backupFileUri.value!, controller.text);
-                                AnonBackupModel model =
-                                    AnonBackupModel.fromJson(
-                                        jsonDecode(decrypted));
-                                Navigator.pop(context);
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (c) => RestoreFromBackup(
-                                            anonBackupModel: model)));
+                                loading.value = true;
+                                error.value = null;
+                                try {
+                                  String decrypted =
+                                      await BackUpRestoreChannel().parseBackUp(
+                                          backupFileUri.value!,
+                                          controller.text);
+                                  AnonBackupModel model =
+                                      AnonBackupModel.fromJson(
+                                          jsonDecode(decrypted));
+                                  loading.value = false;
+                                  navigator.pop();
+                                  navigator.push(MaterialPageRoute(
+                                      builder: (c) => RestoreFromBackup(
+                                          anonBackupModel: model)));
+                                } on PlatformException catch (exception) {
+                                  error.value = exception.message;
+                                  loading.value = false;
+                                } catch (e) {
+                                  error.value = "Unable to process backup file";
+                                  loading.value = false;
+                                }
                               } else {
                                 Navigator.pop(context);
                                 return;

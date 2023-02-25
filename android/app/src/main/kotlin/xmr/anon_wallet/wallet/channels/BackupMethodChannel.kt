@@ -241,34 +241,39 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                 } catch (fnfe: FileNotFoundException) {
                     fnfe.printStackTrace()
                     result.error("1", "file not found", fnfe.message)
+                    return@withContext
                 } catch (ioe: IOException) {
-                    ioe.printStackTrace()
-                    result.error("1", "io exception", ioe.message)
+                    result.error("1", "Unable to decrypt file ", ioe.message)
+                    return@withContext
                 } catch (ioe: java.lang.Exception) {
-                    ioe.printStackTrace()
                     result.error("1", "Unable to decrypt file", ioe.message)
+                    return@withContext
                 }
-                val backUpPayloadObj = JSONObject(backupMeta.toString())
-                if (backUpPayloadObj.has("backup")) {
-                    try {
-                        val backUpPayload = backUpPayloadObj.getString("backup")
-                        payloadParsed = JSONObject(backUpPayload)
-                        mnemonicPassphrase = passphrase
-                        if (payloadParsed == null) {
-                            result.error("0", "Unable to parse backup", "");
-                            return@withContext
-                        } else {
-                            val meta = payloadParsed!!.getJSONObject("meta")
-                            if (meta.getString("network") != AnonWallet.getNetworkType().toString()) {
-                                result.error("1", "Incompatible network", "");
+                try {
+                    val backUpPayloadObj = JSONObject(backupMeta.toString())
+                    if (backUpPayloadObj.has("backup")) {
+                        try {
+                            val backUpPayload = backUpPayloadObj.getString("backup")
+                            payloadParsed = JSONObject(backUpPayload)
+                            mnemonicPassphrase = passphrase
+                            if (payloadParsed == null) {
+                                result.error("0", "Unable to parse backup", "");
                                 return@withContext
+                            } else {
+                                val meta = payloadParsed!!.getJSONObject("meta")
+                                if (meta.getString("network") != AnonWallet.getNetworkType().toString()) {
+                                    result.error("1", "Incompatible network", "");
+                                    return@withContext
+                                }
+                                result.success(payloadParsed.toString())
+                                return@withContext;
                             }
-                            result.success(payloadParsed.toString())
-                            return@withContext;
+                        } catch (e: Exception) {
+                            result.error("2", e.message, "")
                         }
-                    } catch (e: Exception) {
-                        result.error("2", e.message, "")
                     }
+                } catch (e: Exception) {
+                    result.error("0","Unable to load backup data",null);
                 }
             }
         }

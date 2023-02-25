@@ -22,29 +22,21 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
       physics: const NeverScrollableScrollPhysics(),
       controller: _pageController,
       children: [
-        Expanded(
-            child: CustomScrollView(
-          slivers: [
-            const SliverAppBar(
+        Column(
+          children: [
+            AppBar(
               title: Text(""),
             ),
-            SliverToBoxAdapter(
-              child: Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Hero(
-                        tag: "anon_logo",
-                        child: SizedBox(
-                            width: 180,
-                            child: Image.asset("assets/anon_logo.png"))),
-                  ],
-                ),
+            Container(
+              child: Center(
+                child: Hero(
+                    tag: "anon_logo",
+                    child: SizedBox(
+                        width: 180,
+                        child: Image.asset("assets/anon_logo.png"))),
               ),
             ),
-            SliverFillRemaining(
-              hasScrollBody: false,
+            Expanded(
               child: RestoreNodeSetup(
                   onButtonPressed: () {
                     _pageController.nextPage(
@@ -55,7 +47,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
                   pageController: _pageController),
             )
           ],
-        )),
+        ),
         SeedEntry(
           onSeedEntered: (List<String> seed, int height) {
             onSeedEntered(seed, height, context);
