@@ -1,10 +1,8 @@
-import 'dart:ffi';
-import 'dart:math';
-
 import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/transaction.dart';
+import 'package:anon_wallet/screens/home/transactions/sticky_progress.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_details.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
 import 'package:anon_wallet/state/node_state.dart';
@@ -13,6 +11,7 @@ import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -39,7 +38,7 @@ class _TransactionsListState extends State<TransactionsList> {
             automaticallyImplyLeading: false,
             pinned: false,
             centerTitle: false,
-            floating: true,
+            floating: false,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             expandedHeight: 180,
             actions: [
@@ -85,64 +84,7 @@ class _TransactionsListState extends State<TransactionsList> {
             ),
             title: const Text("[ΛИ0И]"),
           ),
-          Consumer(builder: (context, ref, c) {
-            bool isConnecting = ref.watch(connectingToNodeStateProvider);
-            bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
-            bool connected = ref.watch(connectionStatus) ?? false;
-            Map<String, num>? sync = ref.watch(syncProgressStateProvider);
-            if (sync != null && sync['remaining'] != 0) {
-              return SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  pinned: true,
-                  toolbarHeight: 10,
-                  collapsedHeight: 10,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  flexibleSpace: Column(
-                    children: [
-                      LinearProgressIndicator(
-                        value: sync['progress']?.toDouble() ?? 0.0,
-                      ),
-                      const Padding(padding: EdgeInsets.all(6)),
-                      Text(
-                        "Syncing blocks : ${sync['remaining']} blocks remaining",
-                        style: Theme.of(context).textTheme.caption,
-                      )
-                    ],
-                  ));
-            } else if (isConnecting || isWalletOpening) {
-              return SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  pinned: true,
-                  toolbarHeight: 8,
-                  collapsedHeight: 8,
-                  floating: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  flexibleSpace: const LinearProgressIndicator(
-                    minHeight: 1,
-                  ));
-            } else {
-              if (!connected) {
-                return SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    pinned: true,
-                    toolbarHeight: 10,
-                    collapsedHeight: 10,
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    flexibleSpace: Column(
-                      children: [
-                        const LinearProgressIndicator(),
-                        const Padding(padding: EdgeInsets.all(6)),
-                        Text(
-                          "Disconnected",
-                          style: Theme.of(context).textTheme.caption,
-                        )
-                      ],
-                    ));
-              } else {
-                return const SliverToBoxAdapter();
-              }
-            }
-          }),
+          const SyncProgressSliver(),
           Consumer(
             builder: (context, ref, child) {
               List<Transaction> transactions = ref.watch(walletTransactions);

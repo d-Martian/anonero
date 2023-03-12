@@ -49,7 +49,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
           ],
         ),
         SeedEntry(
-          onSeedEntered: (List<String> seed, int height) {
+          onSeedEntered: (List<String> seed, num height) {
             onSeedEntered(seed, height, context);
           },
         ),
@@ -85,7 +85,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
     ));
   }
 
-  onSeedEntered(List<String> seed, int height, BuildContext context) async {
+  onSeedEntered(List<String> seed, num height, BuildContext context) async {
     FocusScope.of(context).requestFocus(FocusNode());
     final navigator = Navigator.of(context);
     String? passPhrase = await showPassPhraseDialog(
@@ -108,7 +108,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
 }
 
 class SeedEntry extends StatefulWidget {
-  final Function(List<String> seed, int height) onSeedEntered;
+  final Function(List<String> seed, num height) onSeedEntered;
 
   const SeedEntry({Key? key, required this.onSeedEntered}) : super(key: key);
 
@@ -119,8 +119,8 @@ class SeedEntry extends StatefulWidget {
 class _SeedEntryState extends State<SeedEntry> {
   List<String> seed = [];
   String? seedPassphrase;
-  int restoreHeight = 0;
-
+  final TextEditingController _restoreHeightController =
+      TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,12 +189,8 @@ class _SeedEntryState extends State<SeedEntry> {
                           color: colorScheme.primary)),
                 ),
                 subtitle: TextField(
-                  onChanged: (value) {
-                    try {
-                      restoreHeight = int.parse(value);
-                    } catch (e) {}
-                  },
                   maxLines: 1,
+                  controller: _restoreHeightController,
                   textInputAction: TextInputAction.done,
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
@@ -236,6 +232,8 @@ class _SeedEntryState extends State<SeedEntry> {
                           padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 6)),
                       onPressed: () async {
+                        var restoreHeight =
+                            num.parse(_restoreHeightController.text);
                         widget.onSeedEntered(seed, restoreHeight);
                       },
                       child: const Text("Next"),

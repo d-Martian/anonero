@@ -90,17 +90,25 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
 
     private fun restoreFromSeed(call: MethodCall, result: Result) {
         val seed = call.argument<String>("seed")
-        val height = call.argument<Int>("height") ?: 1
+        val height = call.argument<Int>("restoreHeight") ?: 1
         val pin = call.argument<String>("pin")
         val passPhrase = call.argument<String?>("passPhrase")
         val walletFileName = "default"
         scope.launch {
             withContext(Dispatchers.IO) {
                 val walletFile = File(AnonWallet.walletDir, walletFileName)
-                WalletManager.getInstance().recoveryWallet(walletFile, pin, seed, passPhrase ?: "", height.toLong());
+                val wallet = WalletManager.getInstance().recoveryWallet(walletFile, pin, seed, passPhrase ?: "", height.toLong())
+                wallet.restoreHeight = height.toLong()
                 AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), passPhrase)
                 //wait for preferences to be saved
-                delay(800)
+                val isOk = wallet.status.isOk
+                wallet.close()
+                if (!isOk) {
+                    result.error("0", "Unable to restore wallet", null)
+                    return@withContext
+                }
+                //wait for preferences to be saved
+                delay(2000)
                 result.success(true)
                 activity.restart()
             }
@@ -273,7 +281,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         }
                     }
                 } catch (e: Exception) {
-                    result.error("0","Unable to load backup data",null);
+                    result.error("0", "Unable to load backup data", null);
                 }
             }
         }

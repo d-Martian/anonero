@@ -50,7 +50,10 @@ final syncProgressStateProvider = Provider<Map<String, num>?>((ref) {
       if (progress >= 1 || remaining < 10) {
         return null;
       }
-      return {"remaining": remaining, "progress": progress};
+      return {
+        "remaining": connectionState.remainingBlocks,
+        "progress": connectionState.syncPercentage
+      };
     } else {
       return null;
     }

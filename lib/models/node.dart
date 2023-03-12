@@ -12,13 +12,18 @@ class Node {
   int? majorVersion;
   int? levinPort;
   bool? favourite;
-  num syncBlock = 0;
+
   String? username;
   String? password;
   String? proxyServer;
   String? proxyPort;
   String status = "disconnected";
   String connectionError = "";
+
+  //Sync
+  num syncBlock = 0;
+  num remainingBlocks = 0;
+  num syncPercentage = 0;
 
   Node(
       {required this.height,
@@ -43,6 +48,8 @@ class Node {
       majorVersion = json['majorVersion'];
       levinPort = json['levinPort'];
       syncBlock = json['syncBlock'] ?? 0;
+      remainingBlocks = json['remainingBlocks'] ?? 0;
+      syncPercentage = json['syncPercentage'] ?? 0;
       favourite = json['favourite'];
       username = json['username'];
       password = json['password'];
