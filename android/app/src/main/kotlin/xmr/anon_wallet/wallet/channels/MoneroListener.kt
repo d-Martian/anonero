@@ -110,7 +110,7 @@ class MoneroHandlerThread : WalletListener {
 
         val wallet = WalletManager.getInstance().wallet;
         val currentNode = NodeManager.getNode()
-        if (currentNode != null) {
+        if (currentNode != null && !wallet.isSynchronized ) {
             sendEvent(currentNode.toHashMap().apply {
                 put("syncBlock", wallet.blockChainHeight)
             })

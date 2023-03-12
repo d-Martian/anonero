@@ -23,6 +23,7 @@ import xmr.anon_wallet.wallet.restart
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 import xmr.anon_wallet.wallet.utils.BackUpHelper
 import xmr.anon_wallet.wallet.utils.EncryptUtil
+import xmr.anon_wallet.wallet.utils.Prefs
 import java.io.*
 import java.util.*
 
@@ -99,16 +100,17 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                 val walletFile = File(AnonWallet.walletDir, walletFileName)
                 val wallet = WalletManager.getInstance().recoveryWallet(walletFile, pin, seed, passPhrase ?: "", height.toLong())
                 wallet.restoreHeight = height.toLong()
-                AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), passPhrase)
-                //wait for preferences to be saved
+                Prefs.passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), passPhrase)
+                Prefs.restoreHeight = wallet.restoreHeight
                 val isOk = wallet.status.isOk
+                wallet.store()
                 wallet.close()
                 if (!isOk) {
                     result.error("0", "Unable to restore wallet", null)
                     return@withContext
                 }
                 //wait for preferences to be saved
-                delay(2000)
+                delay(600)
                 result.success(true)
                 activity.restart()
             }

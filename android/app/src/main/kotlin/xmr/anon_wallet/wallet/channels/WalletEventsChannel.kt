@@ -65,7 +65,6 @@ object WalletEventsChannel : EventChannel.StreamHandler {
         this.scope.launch {
             withContext(dispatcher) {
                 WalletManager.getInstance().wallet?.setListener(moneroHandlerThread)
-                WalletManager.getInstance().wallet?.refresh()
                 WalletManager.getInstance().wallet?.startRefresh()
             }
         }

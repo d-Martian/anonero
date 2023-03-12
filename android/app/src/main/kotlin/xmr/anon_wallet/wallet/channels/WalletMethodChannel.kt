@@ -21,6 +21,7 @@ import xmr.anon_wallet.wallet.restart
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 import xmr.anon_wallet.wallet.utils.BackUpHelper
+import xmr.anon_wallet.wallet.utils.Prefs
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -73,14 +74,14 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         try {
             if (hashedPass == hash) {
                 scope.launch {
-                    withContext(Dispatchers.IO){
+                    withContext(Dispatchers.IO) {
                         WalletManager.getInstance().wallet.close()
                         AnonPreferences(activity).clearPreferences()
                         //wait for preferences to clear
                         delay(600)
                         AnonWallet.walletDir.deleteRecursively()
                         activity.cacheDir.deleteRecursively()
-                        withContext(Dispatchers.Main){
+                        withContext(Dispatchers.Main) {
                             activity.restart()
                         }
                     }
@@ -208,23 +209,23 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
                         result.success(wallet.walletToHashMap())
                         sendEvent(wallet.walletToHashMap())
-                        wallet.refreshHistory()
-                        sendEvent(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletListeners()
                         if (WalletManager.getInstance().daemonAddress == null) {
                             NodeManager.setNode()
                         }
                         WalletManager.getInstance().daemonAddress?.let {
                             WalletEventsChannel.initialized = wallet.init(0)
+                            Prefs.restoreHeight?.let {
+                                if (it != 0L)
+                                    wallet.restoreHeight = it
+                                Prefs.restoreHeight = 0L
+                            }
                             wallet.setProxy(getProxy())
                             if (WalletEventsChannel.initialized) {
                                 wallet.refreshHistory()
-                                wallet.refresh()
                             }
                             sendEvent(wallet.walletToHashMap())
                         }
-                        sendEvent(wallet.walletToHashMap())
-                        wallet.refreshHistory()
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().setProxy(getProxy())
                         sendEvent(
