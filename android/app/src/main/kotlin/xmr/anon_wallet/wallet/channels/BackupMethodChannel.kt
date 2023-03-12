@@ -240,10 +240,10 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     BackUpHelper.unZip(decryptedDestFile, extractDestination)
                     if (BackUpHelper.testBackUP(extractDestination)) {
                         File(extractDestination, "anon.json").inputStream().bufferedReader().useLines { lines -> lines.forEach { backupMeta.append(it) } }
-
                     } else {
                         result.error("0", "Invalid backup", null)
                         BackUpHelper.cleanCacheDir()
+                        return@withContext
                     }
 
                 } catch (fnfe: FileNotFoundException) {

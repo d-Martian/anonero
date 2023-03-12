@@ -87,7 +87,7 @@ object BackUpHelper {
 
     fun testBackUP(destinationDir: File): Boolean {
         val items = destinationDir.listFiles().toList().filter {
-            (it.name.endsWith(".keys") || it.name.endsWith(".address.txt"))
+            (it.name.endsWith(".keys") || it.name.endsWith(".json"))
         }
         return items.size == 2
     }
