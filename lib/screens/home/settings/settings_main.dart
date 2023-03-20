@@ -3,6 +3,7 @@ import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/home/settings/view_wallet_private.dart';
+import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
@@ -135,12 +136,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text("Export Wallet"),
                 ),
                 Divider(color: dividerColor, height: 2),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                  onTap: () {
-                    showWipeDialog(context);
+                Consumer(
+                  builder: (context, ref, child) {
+                    bool isConnecting = ref.watch(connectingToNodeStateProvider);
+                    bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
+                    bool  isLoading = isConnecting || isWalletOpening;
+
+                    return  Opacity(
+                      opacity: isLoading ? 0.4 : 1,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 34),
+                        onTap: !isLoading ? () {
+                          showWipeDialog(context);
+                        } : null,
+                        title: const Text("Wallet Wipe"),
+                      ),
+                    );
                   },
-                  title: const Text("Wallet Wipe"),
+
                 ),
                 Divider(color: dividerColor, height: 2),
               ],

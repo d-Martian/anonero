@@ -29,7 +29,7 @@ class ProgressSliverWidget extends ConsumerWidget {
 
     return AnimatedContainer(
       color: Theme.of(context).scaffoldBackgroundColor,
-      duration: const Duration(milliseconds: 450),
+      duration: const Duration(milliseconds: 400),
       padding: const EdgeInsets.symmetric(horizontal: 20),
       height: isActive ? height : 0,
       child: SingleChildScrollView(

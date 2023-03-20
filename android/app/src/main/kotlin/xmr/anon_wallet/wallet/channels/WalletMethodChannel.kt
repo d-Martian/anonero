@@ -1,8 +1,5 @@
 package xmr.anon_wallet.wallet.channels
 
-import android.content.Intent
-import android.icu.text.SimpleDateFormat
-import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.model.NetworkType
@@ -20,12 +17,8 @@ import xmr.anon_wallet.wallet.model.walletToHashMap
 import xmr.anon_wallet.wallet.restart
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
-import xmr.anon_wallet.wallet.utils.BackUpHelper
 import xmr.anon_wallet.wallet.utils.Prefs
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
 import java.net.SocketException
 import java.util.*
 
@@ -63,8 +56,26 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
     }
 
     private fun lock(call: MethodCall, result: Result) {
-        WalletManager.getInstance().wallet.close()
-        activity.restart()
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    if (WalletManager.getInstance().wallet != null) {
+                        if (!WalletEventsChannel.initialized) {
+                            throw Exception("Unable to lock, wallet is not initialized")
+                        }
+                        WalletManager.getInstance().wallet.pauseRefresh()
+                        delay(1000)
+                        WalletManager.getInstance().wallet.store()
+                        delay(850)
+                        WalletManager.getInstance().wallet.close()
+                        result.success(true)
+                        activity.restart()
+                    }
+                } catch (e: Exception) {
+                    result.error("0", "Unable to lock ${e.message}", null);
+                }
+            }
+        }
     }
 
     private fun wipeWallet(call: MethodCall, result: Result) {
@@ -73,9 +84,14 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         val hashedPass = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPassphrase)
         try {
             if (hashedPass == hash) {
+                if (WalletManager.getInstance().wallet == null) {
+                    result.error("1", "Wallet not initialized", "")
+                    return
+                }
                 scope.launch {
                     withContext(Dispatchers.IO) {
-                        WalletManager.getInstance().wallet.close()
+                        WalletManager.getInstance().wallet.pauseRefresh()
+                        WalletManager.getInstance().wallet?.close()
                         AnonPreferences(activity).clearPreferences()
                         //wait for preferences to clear
                         delay(600)
@@ -90,6 +106,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                 result.error("1", "Invalid passphrase", "")
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             result.error("1", "Error ${e.message}", e.message)
         }
     }
@@ -209,6 +226,8 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
                         result.success(wallet.walletToHashMap())
                         sendEvent(wallet.walletToHashMap())
+                        wallet.refreshHistory()
+                        sendEvent(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletListeners()
                         if (WalletManager.getInstance().daemonAddress == null) {
                             NodeManager.setNode()
@@ -221,20 +240,24 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                 Prefs.restoreHeight = 0L
                             }
                             wallet.setProxy(getProxy())
-                            if (WalletEventsChannel.initialized) {
-                                wallet.refreshHistory()
-                            }
+//                            if (WalletEventsChannel.initialized) {
+//                                wallet.refreshHistory()
+//                            }
                             sendEvent(wallet.walletToHashMap())
+                            sendEvent(
+                                hashMapOf(
+                                    "EVENT_TYPE" to "OPEN_WALLET",
+                                    "state" to false
+                                )
+                            )
                         }
                         sendEvent(wallet.walletToHashMap())
-                        WalletManager.getInstance().setProxy(getProxy())
                         sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "OPEN_WALLET",
                                 "state" to false
                             )
                         )
-                        sendEvent(wallet.walletToHashMap())
                     } catch (e: Exception) {
                         e.printStackTrace()
                         result.error("WALLET_OPEN_ERROR", e.message, e.localizedMessage)
