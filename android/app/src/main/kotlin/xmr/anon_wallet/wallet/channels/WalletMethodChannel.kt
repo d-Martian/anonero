@@ -64,10 +64,9 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             throw Exception("Unable to lock, wallet is not initialized")
                         }
                         WalletManager.getInstance().wallet.pauseRefresh()
-                        delay(1000)
+                        delay(200)
                         WalletManager.getInstance().wallet.store()
-                        delay(850)
-                        WalletManager.getInstance().wallet.close()
+                        delay(600)
                         result.success(true)
                         activity.restart()
                     }
@@ -89,11 +88,9 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     return
                 }
                 scope.launch {
-                    withContext(Dispatchers.IO) {
-                        WalletManager.getInstance().wallet.pauseRefresh()
-                        WalletManager.getInstance().wallet?.close()
+                    withContext(Dispatchers.Default) {
                         AnonPreferences(activity).clearPreferences()
-                        //wait for preferences to clear
+                        //wait for preferences to be cleared
                         delay(600)
                         AnonWallet.walletDir.deleteRecursively()
                         activity.cacheDir.deleteRecursively()
