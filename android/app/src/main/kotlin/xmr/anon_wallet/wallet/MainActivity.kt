@@ -1,14 +1,15 @@
 package xmr.anon_wallet.wallet
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import android.os.PowerManager.WakeLock
 import android.os.Process
-import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.NonNull
 import com.m2049r.xmrwallet.model.WalletManager
@@ -31,7 +32,8 @@ class MainActivity : FlutterActivity() {
 
     private var wakeLock: WakeLock? = null
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private  var cameraPlugin : AnonQRCameraPlugin? = null
+    private var cameraPlugin: AnonQRCameraPlugin? = null
+    private lateinit var backupMethodChannel: BackupMethodChannel
 
     @SuppressLint("WakelockTimeout")
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
@@ -51,11 +53,19 @@ class MainActivity : FlutterActivity() {
         cameraPlugin?.let {
             flutterEngine.plugins.add(it)
         }
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        cameraPlugin?.onRequestPermissionsResult()
+        if (requestCode == AnonQRCameraPlugin.REQUEST_CODE) {
+            cameraPlugin?.onRequestPermissionsResult()
+        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        backupMethodChannel.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun initializeProxySettings() {
@@ -116,7 +126,7 @@ class MainActivity : FlutterActivity() {
         /**
          * Wallet specific Methods
          */
-        WalletMethodChannel(binaryMessenger, lifecycle)
+        WalletMethodChannel(binaryMessenger, lifecycle, this)
         /**
          * Wallet specific Methods
          */
@@ -129,8 +139,19 @@ class MainActivity : FlutterActivity() {
          * Spend specific Methods
          */
         SpendMethodChannel(binaryMessenger, lifecycle)
+        /**
+         * Spend specific Methods
+         */
+        backupMethodChannel = BackupMethodChannel(binaryMessenger, lifecycle, this)
 
 
     }
 
+}
+
+fun Activity.restart() {
+    val intent = this.application.packageManager.getLaunchIntentForPackage(this.application.packageName)
+    intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    startActivity(intent)
+    Runtime.getRuntime().exit(0)
 }

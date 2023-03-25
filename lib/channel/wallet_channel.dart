@@ -70,4 +70,13 @@ class WalletChannel {
         .invokeMethod("viewWalletInfo", {"seedPassphrase": seedPassphrase});
     return Wallet.fromJson(value);
   }
+
+  Future wipe(String seedPassphrase) async {
+    dynamic value = await platform
+        .invokeMethod("wipeWallet", {"seedPassphrase": seedPassphrase});
+  }
+
+  Future lock() async {
+    dynamic value = await platform.invokeMethod("lock");
+  }
 }

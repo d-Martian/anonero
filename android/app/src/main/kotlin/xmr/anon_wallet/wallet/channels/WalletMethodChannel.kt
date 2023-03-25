@@ -3,7 +3,6 @@ package xmr.anon_wallet.wallet.channels
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.model.NetworkType
-import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import com.m2049r.xmrwallet.utils.RestoreHeight
@@ -12,16 +11,19 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.AnonWallet
+import xmr.anon_wallet.wallet.MainActivity
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel.sendEvent
 import xmr.anon_wallet.wallet.model.walletToHashMap
+import xmr.anon_wallet.wallet.restart
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
+import xmr.anon_wallet.wallet.utils.Prefs
 import java.io.File
 import java.net.SocketException
 import java.util.*
 
 
-class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
+class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, private val activity: MainActivity) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
 
     init {
         scope.launch {
@@ -48,6 +50,61 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
             "startSync" -> startSync(call, result)
             "getTxKey" -> getTxKey(call, result)
             "setTxUserNotes" -> setTxUserNotes(call, result)
+            "wipeWallet" -> wipeWallet(call, result)
+            "lock" -> lock(call, result)
+        }
+    }
+
+    private fun lock(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    if (WalletManager.getInstance().wallet != null) {
+                        if (!WalletEventsChannel.initialized) {
+                            throw Exception("Unable to lock, wallet is not initialized")
+                        }
+                        WalletManager.getInstance().wallet.pauseRefresh()
+                        delay(200)
+                        WalletManager.getInstance().wallet.store()
+                        delay(600)
+                        result.success(true)
+                        activity.restart()
+                    }
+                } catch (e: Exception) {
+                    result.error("0", "Unable to lock ${e.message}", null);
+                }
+            }
+        }
+    }
+
+    private fun wipeWallet(call: MethodCall, result: Result) {
+        val seedPassphrase = call.argument<String?>("seedPassphrase")
+        val hash = AnonPreferences(AnonWallet.getAppContext()).passPhraseHash
+        val hashedPass = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPassphrase)
+        try {
+            if (hashedPass == hash) {
+                if (WalletManager.getInstance().wallet == null) {
+                    result.error("1", "Wallet not initialized", "")
+                    return
+                }
+                scope.launch {
+                    withContext(Dispatchers.Default) {
+                        AnonPreferences(activity).clearPreferences()
+                        //wait for preferences to be cleared
+                        delay(600)
+                        AnonWallet.walletDir.deleteRecursively()
+                        activity.cacheDir.deleteRecursively()
+                        withContext(Dispatchers.Main) {
+                            activity.restart()
+                        }
+                    }
+                }
+            } else {
+                result.error("1", "Invalid passphrase", "")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            result.error("1", "Error ${e.message}", e.message)
         }
     }
 
@@ -99,7 +156,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                                 "connection_error" to "${e.message}"
                             )
                         )
-                        throw  CancellationException()
+                        throw CancellationException()
                     }
                 } else {
                     result.success(false)
@@ -169,33 +226,35 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         wallet.refreshHistory()
                         sendEvent(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletListeners()
-                        if (wallet.isSynchronized) {
-                            wallet.startRefresh()
-                        }
                         if (WalletManager.getInstance().daemonAddress == null) {
                             NodeManager.setNode()
                         }
-
                         WalletManager.getInstance().daemonAddress?.let {
                             WalletEventsChannel.initialized = wallet.init(0)
-                            wallet.setProxy(getProxy())
-                            if (WalletEventsChannel.initialized) {
-                                wallet.refreshHistory()
-                                wallet.refresh()
+                            Prefs.restoreHeight?.let {
+                                if (it != 0L)
+                                    wallet.restoreHeight = it
+                                Prefs.restoreHeight = 0L
                             }
+                            wallet.setProxy(getProxy())
+//                            if (WalletEventsChannel.initialized) {
+//                                wallet.refreshHistory()
+//                            }
                             sendEvent(wallet.walletToHashMap())
+                            sendEvent(
+                                hashMapOf(
+                                    "EVENT_TYPE" to "OPEN_WALLET",
+                                    "state" to false
+                                )
+                            )
                         }
                         sendEvent(wallet.walletToHashMap())
-                        wallet.refreshHistory()
-                        sendEvent(wallet.walletToHashMap())
-                        WalletManager.getInstance().setProxy(getProxy())
                         sendEvent(
                             hashMapOf(
                                 "EVENT_TYPE" to "OPEN_WALLET",
                                 "state" to false
                             )
                         )
-                        sendEvent(wallet.walletToHashMap())
                     } catch (e: Exception) {
                         e.printStackTrace()
                         result.error("WALLET_OPEN_ERROR", e.message, e.localizedMessage)
@@ -288,11 +347,9 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         wallet.refresh()
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
-
                             WalletEventsChannel.initialized = wallet.init(0)
                             wallet.setProxy(getProxy())
                             sendEvent(wallet.walletToHashMap())
-                            Log.i(TAG, "openWallet: ${wallet.fullStatus}")
                         }
                         wallet.refreshHistory()
                         sendEvent(
@@ -320,11 +377,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
         }
     }
 
-    ///TODO: Restore
-    private fun restoreWallet(call: MethodCall, result: Result) {
-
-    }
-
     private fun getProxy(): String {
         val prefs = AnonPreferences(AnonWallet.getAppContext());
         return if (prefs.proxyPort.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
@@ -344,7 +396,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         result.success(txKey)
                     } catch (e: Exception) {
                         result.error("1", e.message, "")
-                        throw  CancellationException(e.message)
+                        throw CancellationException(e.message)
                     }
                 } else {
                     result.error("0", "invalid params", null)
@@ -367,7 +419,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
                         result.success(success)
                     } catch (e: Exception) {
                         result.error("1", e.message, "")
-                        throw  CancellationException(e.message)
+                        throw CancellationException(e.message)
                     }
                 } else {
                     result.error("0", "invalid params", null)
@@ -380,6 +432,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : An
         private const val TAG = "WalletMethodChannel"
         const val CHANNEL_NAME = "wallet.channel"
         const val WALLET_EVENT_CHANNEL = "wallet.events"
+        var backupPath: String? = null
     }
 
 }

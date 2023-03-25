@@ -100,7 +100,7 @@ class LockScreen extends HookWidget {
           const Padding(padding: EdgeInsets.symmetric(vertical: 6)),
           AnimatedOpacity(
             opacity: error.value == null ? 0 : 1,
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             child: Text(
               error.value ?? "",
               style: Theme.of(context)

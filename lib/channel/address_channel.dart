@@ -1,5 +1,3 @@
-import 'package:anon_wallet/models/sub_address.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AddressChannel {
@@ -14,6 +12,10 @@ class AddressChannel {
 
   Future getSubAddresses() async {
     await platform.invokeMethod("getSubAddresses");
+  }
+
+  Future openBackupFile() async {
+    await platform.invokeMethod("openBackupFile");
   }
 
   Future setSubAddressLabel(

@@ -1,7 +1,6 @@
 package xmr.anon_wallet.wallet.channels
 
 import android.app.NotificationManager
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import anon.xmr.app.anon_wallet.R
 import com.m2049r.xmrwallet.model.Wallet
@@ -18,13 +17,14 @@ import xmr.anon_wallet.wallet.model.walletToHashMap
 import xmr.anon_wallet.wallet.services.NodeManager
 import java.text.NumberFormat
 
-// from src/cryptonote_config.h
-val THREAD_STACK_SIZE = (5 * 1024 * 1024).toLong()
+//
+//// from src/cryptonote_config.h
+//val THREAD_STACK_SIZE = (5 * 1024 * 1024).toLong()
 
 class MoneroHandlerThread : WalletListener {
     private var lastBlockTime = 0L
     private var lastTxCount = 0
-
+    private var walletFirstBlock: Long? = null
 
     private var lastDaemonStatusUpdate: Long = 0
     private var daemonHeight: Long = 0
@@ -53,13 +53,13 @@ class MoneroHandlerThread : WalletListener {
         }
     }
 
+    @Synchronized
     override fun newBlock(height: Long) {
         val wallet = WalletManager.getInstance().wallet;
         if (wallet != null) {
             // we want to see our transactions as they come in
             updateDaemonState(wallet, if (wallet.isSynchronized) height else 0)
             if (lastBlockTime < System.currentTimeMillis() - 2000) {
-                Log.i(TAG, "newBlock: ${height}")
                 lastBlockTime = System.currentTimeMillis()
                 val currentNode = NodeManager.getNode()
                 if (!wallet.isSynchronized) {
@@ -70,10 +70,26 @@ class MoneroHandlerThread : WalletListener {
                         lastTxCount = txCount
                     }
                 }
-                if (currentNode != null) {
+                if (currentNode != null && !wallet.isSynchronized) {
+                    val daemonHeight: Long = WalletManager.getInstance().blockchainHeight
+                    val walletHeight = wallet.blockChainHeight
+                    val n = daemonHeight - walletHeight
+                    if (walletFirstBlock == null) {
+                        walletFirstBlock = walletHeight
+                    }
+                    val progress = 1 - (n / (1f * daemonHeight - walletFirstBlock!!))
+                    val percentage = if (progress < 0.1f) {
+                        0.1f
+                    } else {
+                        progress
+                    }
                     sendEvent(currentNode.toHashMap().apply {
                         put("syncBlock", height)
+                        put("remainingBlocks", daemonHeight - height)
+                        put("syncPercentage", percentage)
                     })
+                } else {
+                    walletFirstBlock = null
                 }
             }
 
@@ -82,30 +98,33 @@ class MoneroHandlerThread : WalletListener {
     }
 
     override fun updated() {
-        Log.i(TAG, "updated:")
         val wallet = WalletManager.getInstance().wallet
+        wallet.refreshHistory()
         if (wallet != null) {
             sendEvent(wallet.walletToHashMap())
         }
         updated = true
-
     }
 
     override fun refreshed() {
 
         val wallet = WalletManager.getInstance().wallet;
-        wallet.setSynchronized()
-        wallet.store()
         val currentNode = NodeManager.getNode()
-        if (currentNode != null) {
+        if(wallet == null){
+            return
+        }
+        if (currentNode != null && !wallet.isSynchronized ) {
             sendEvent(currentNode.toHashMap().apply {
                 put("syncBlock", wallet.blockChainHeight)
             })
         }
+        walletFirstBlock = null
         wallet.refreshHistory()
         sendEvent(wallet.walletToHashMap())
         sendEvent(AddressMethodChannel.getSubAddressesEvent())
         updateDaemonState(wallet, wallet.blockChainHeight)
+        wallet.setSynchronized()
+        wallet.store()
     }
 
     private fun updateDaemonState(wallet: Wallet, height: Long) {
@@ -119,11 +138,11 @@ class MoneroHandlerThread : WalletListener {
                 lastDaemonStatusUpdate = t
                 // these calls really connect to the daemon - wasting time
                 daemonHeight = wallet.daemonBlockChainHeight
-                if (daemonHeight > 0) {
+                connectionStatus = if (daemonHeight > 0) {
                     // if we get a valid height, then obviously we are connected
-                    connectionStatus = Wallet.ConnectionStatus.ConnectionStatus_Connected
+                    Wallet.ConnectionStatus.ConnectionStatus_Connected
                 } else {
-                    connectionStatus = Wallet.ConnectionStatus.ConnectionStatus_Disconnected
+                    Wallet.ConnectionStatus.ConnectionStatus_Disconnected
                 }
             }
         }
@@ -141,7 +160,7 @@ class MoneroHandlerThread : WalletListener {
         nf.minimumFractionDigits = 4
         val amountText = nf.format((amount / 1e12));
         GlobalScope.launch {
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 try {
                     val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(AnonWallet.getAppContext(), AnonWallet.NOTIFICATION_CHANNEL_ID)
                     val notification = notificationBuilder.setAutoCancel(false)
