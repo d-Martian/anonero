@@ -24,16 +24,14 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
       children: [
         Column(
           children: [
-            AppBar(
-              title: Text(""),
-            ),
             Container(
               child: Center(
                 child: Hero(
                     tag: "anon_logo",
+                    child: SafeArea(
                     child: SizedBox(
                         width: 180,
-                        child: Image.asset("assets/anon_logo.png"))),
+                        child: Image.asset("assets/anon_logo.png")))),
               ),
             ),
             Expanded(
@@ -126,15 +124,15 @@ class _SeedEntryState extends State<SeedEntry> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(),
           SliverToBoxAdapter(
             child: Column(
               children: [
                 Hero(
                     tag: "anon_logo",
+                    child: SafeArea(
                     child: SizedBox(
                         width: 180,
-                        child: Image.asset("assets/anon_logo.png"))),
+                        child: Image.asset("assets/anon_logo.png")))),
                 Text(
                   "MNEMONIC SEED",
                   style: Theme.of(context)
@@ -172,7 +170,6 @@ class _SeedEntryState extends State<SeedEntry> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  hintText: 'Enter your seed with spaces',
                 ),
               ),
             ),
