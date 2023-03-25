@@ -133,7 +133,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     showBackUpDialog(context);
                   },
-                  title: const Text("Export Wallet"),
+                  title: const Text("Export Backup"),
                 ),
                 Divider(color: dividerColor, height: 2),
                 Consumer(
@@ -149,7 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: !isLoading ? () {
                           showWipeDialog(context);
                         } : null,
-                        title: const Text("Wallet Wipe"),
+                        title: const Text("Secure Wipe"),
                       ),
                     );
                   },
