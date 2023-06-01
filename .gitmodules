@@ -1,0 +1,4 @@
+[submodule "monero"]
+	path = android/external-libs/monero
+	url = "git@github.com:monero-project/monero.git"
+	branch = "master"
